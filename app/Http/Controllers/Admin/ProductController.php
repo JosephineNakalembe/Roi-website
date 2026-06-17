@@ -1,0 +1,277 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductImage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class ProductController extends Controller
+{
+    public function index()
+    {
+        $products = Product::with('category')->latest()->paginate(15);
+        return view('admin.products.index', compact('products'));
+    }
+
+    public function create()
+    {
+        $categories = Category::orderBy('name')->get();
+        return view('admin.products.create', compact('categories'));
+    }
+
+        public function store(Request $request)
+        {
+            $data = $request->validate([
+                'product_id' => ['required', 'string', 'max:255', 'unique:products,product_id'],
+                'name' => ['required', 'string', 'max:255'],
+                'category_id' => ['required', 'exists:categories,id'],
+                'description' => ['nullable', 'string'],
+                'price' => ['required', 'numeric', 'min:0'],
+                'cost_price' => ['nullable', 'numeric', 'min:0'],
+                'stock' => ['required', 'integer', 'min:0'],
+                'size_guide' => ['nullable', 'string'],
+                'colors' => ['nullable', 'string'],
+                'sizes' => ['nullable', 'string'],
+                'is_active' => ['nullable', 'boolean'],
+                'images.*' => ['nullable', 'image', 'max:5120'],
+                'video' => ['nullable', 'mimes:mp4,mov,avi,wmv', 'max:51200'],
+            ]);
+
+            // Convert comma-separated strings to arrays
+            $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
+        
+            // Process color-size-quantity combinations and auto-collect sizes
+            $colorStock = [];
+            $totalStock = 0;
+            $collectedSizes = [];
+            $collectedColors = [];
+            $colorPrices = [];
+            for ($i = 0; $i < 100; $i++) {
+                $color = $request->input("color_$i");
+                $size = $request->input("size_$i");
+                $quantity = $request->input("quantity_$i");
+                $colorPrice = $request->input("price_$i");
+                if ($color && $quantity) {
+                    $color = trim($color);
+                    $key = $size ? "$color ($size)" : $color;
+                    $colorStock[$key] = (int)$quantity;
+                    $totalStock += (int)$quantity;
+                    // Collect unique sizes
+                    if ($size && !in_array($size, $collectedSizes)) {
+                        $collectedSizes[] = $size;
+                    }
+                    // Collect unique colors
+                    if (!in_array($color, $collectedColors)) {
+                        $collectedColors[] = $color;
+                    }
+                    // Collect per-color price (first non-empty wins for a given color)
+                    if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$color])) {
+                        $colorPrices[$color] = (float)$colorPrice;
+                    }
+                }
+            }
+            $data['color_stock'] = !empty($colorStock) ? $colorStock : null;
+            $data['stock'] = $totalStock > 0 ? $totalStock : $data['stock'];
+            $data['sizes'] = !empty($collectedSizes) ? $collectedSizes : null;
+            $data['colors'] = !empty($collectedColors) ? $collectedColors : $data['colors'];
+            $data['color_prices'] = !empty($colorPrices) ? $colorPrices : null;
+
+        $data['slug'] = Str::slug($data['name']);
+        $suffix = 1;
+        $originalSlug = $data['slug'];
+        while (Product::where('slug', $data['slug'])->exists()) {
+            $data['slug'] = $originalSlug . '-' . $suffix++;
+        }
+
+                $product = Product::create(array_merge($data, ['is_active' => $request->boolean('is_active')]));
+
+        // Handle multiple images (general / no specific color)
+        $globalImageIndex = 0;
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('products', 'public');
+                $product->images()->create([
+                    'path' => $path,
+                    'media_type' => 'image',
+                    'is_primary' => $globalImageIndex === 0,
+                    'order' => $globalImageIndex,
+                ]);
+                $globalImageIndex++;
+            }
+        }
+
+        // Handle per-color images
+        for ($i = 0; $i < 100; $i++) {
+            $color = $request->input("color_$i");
+            if (!$color) {
+                continue;
+            }
+            $color = trim($color);
+            if ($request->hasFile("color_images_$i")) {
+                foreach ($request->file("color_images_$i") as $image) {
+                    $path = $image->store('products', 'public');
+                    $product->images()->create([
+                        'path' => $path,
+                        'media_type' => 'image',
+                        'color' => $color,
+                        'is_primary' => $globalImageIndex === 0,
+                        'order' => $globalImageIndex,
+                    ]);
+                    $globalImageIndex++;
+                }
+            }
+        }
+
+
+        // Handle video upload
+        if ($request->hasFile('video')) {
+            $video = $request->file('video');
+            $path = $video->store('products/videos', 'public');
+            $product->images()->create([
+                'path' => $path,
+                'media_type' => 'video',
+                'is_primary' => false,
+                'order' => 999, // Videos appear last in slideshow
+            ]);
+        }
+
+        return redirect()->route('admin.products.index')->with('success', 'Product created.');
+    }
+
+    public function edit(Product $product)
+    {
+        $categories = Category::orderBy('name')->get();
+        $product->load('images');
+        return view('admin.products.edit', compact('product', 'categories'));
+    }
+
+        public function update(Request $request, Product $product)
+        {
+            $data = $request->validate([
+                'product_id' => ['required', 'string', 'max:255', 'unique:products,product_id,' . $product->id],
+                'name' => ['required', 'string', 'max:255'],
+                'category_id' => ['required', 'exists:categories,id'],
+                'description' => ['nullable', 'string'],
+                'price' => ['required', 'numeric', 'min:0'],
+                'cost_price' => ['nullable', 'numeric', 'min:0'],
+                'stock' => ['required', 'integer', 'min:0'],
+                'size_guide' => ['nullable', 'string'],
+                'colors' => ['nullable', 'string'],
+                'sizes' => ['nullable', 'string'],
+                'is_active' => ['nullable', 'boolean'],
+                'images.*' => ['nullable', 'image', 'max:5120'],
+                'video' => ['nullable', 'mimes:mp4,mov,avi,wmv', 'max:51200'],
+            ]);
+
+            // Convert comma-separated strings to arrays
+            $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
+        
+            // Process color-size-quantity combinations and auto-collect sizes
+            $colorStock = [];
+            $totalStock = 0;
+            $collectedSizes = [];
+            $collectedColors = [];
+            $colorPrices = [];
+            for ($i = 0; $i < 100; $i++) {
+                $color = $request->input("color_$i");
+                $size = $request->input("size_$i");
+                $quantity = $request->input("quantity_$i");
+                $colorPrice = $request->input("price_$i");
+                if ($color && $quantity) {
+                    $color = trim($color);
+                    $key = $size ? "$color ($size)" : $color;
+                    $colorStock[$key] = (int)$quantity;
+                    $totalStock += (int)$quantity;
+                    // Collect unique sizes
+                    if ($size && !in_array($size, $collectedSizes)) {
+                        $collectedSizes[] = $size;
+                    }
+                    // Collect unique colors
+                    if (!in_array($color, $collectedColors)) {
+                        $collectedColors[] = $color;
+                    }
+                    // Collect per-color price (first non-empty wins for a given color)
+                    if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$color])) {
+                        $colorPrices[$color] = (float)$colorPrice;
+                    }
+                }
+            }
+            $data['color_stock'] = !empty($colorStock) ? $colorStock : null;
+            $data['stock'] = $totalStock > 0 ? $totalStock : $data['stock'];
+            $data['sizes'] = !empty($collectedSizes) ? $collectedSizes : null;
+            $data['colors'] = !empty($collectedColors) ? $collectedColors : $data['colors'];
+            $data['color_prices'] = !empty($colorPrices) ? $colorPrices : null;
+
+        $data['slug'] = Str::slug($data['name']);
+        $suffix = 1;
+        $originalSlug = $data['slug'];
+        while (Product::where('slug', $data['slug'])->where('id', '!=', $product->id)->exists()) {
+            $data['slug'] = $originalSlug . '-' . $suffix++;
+        }
+
+                $product->update(array_merge($data, ['is_active' => $request->boolean('is_active')]));
+
+        // Handle multiple images (general / no specific color)
+        $existingImageCount = $product->images()->where('media_type', 'image')->count();
+        $orderCounter = $existingImageCount;
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('products', 'public');
+                $product->images()->create([
+                    'path' => $path,
+                    'media_type' => 'image',
+                    'is_primary' => $orderCounter === 0,
+                    'order' => $orderCounter,
+                ]);
+                $orderCounter++;
+            }
+        }
+
+        // Handle per-color images
+        for ($i = 0; $i < 100; $i++) {
+            $color = $request->input("color_$i");
+            if (!$color) {
+                continue;
+            }
+            $color = trim($color);
+            if ($request->hasFile("color_images_$i")) {
+                foreach ($request->file("color_images_$i") as $image) {
+                    $path = $image->store('products', 'public');
+                    $product->images()->create([
+                        'path' => $path,
+                        'media_type' => 'image',
+                        'color' => $color,
+                        'is_primary' => $orderCounter === 0,
+                        'order' => $orderCounter,
+                    ]);
+                    $orderCounter++;
+                }
+            }
+        }
+
+
+        // Handle video upload
+        if ($request->hasFile('video')) {
+            $video = $request->file('video');
+            $path = $video->store('products/videos', 'public');
+            $product->images()->create([
+                'path' => $path,
+                'media_type' => 'video',
+                'is_primary' => false,
+                'order' => 999,
+            ]);
+        }
+
+        return back()->with('success', 'Product updated.');
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->delete();
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted.');
+    }
+}
