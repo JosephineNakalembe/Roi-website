@@ -13,7 +13,7 @@ services:
       - key: APP_KEY
         generateValue: true
       - key: APP_URL
-        value: https://roi-website.onrender.com
+        value: https://roi-website-1.onrender.com
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
