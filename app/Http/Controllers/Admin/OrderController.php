@@ -60,7 +60,14 @@ class OrderController extends Controller
             'note' => ['nullable', 'string'],
         ]);
 
-        $order->update(['status' => $data['status']]);
+        $updates = ['status' => $data['status']];
+
+        // Set delivered_at when order is marked as delivered
+        if ($data['status'] === 'delivered' && !$order->delivered_at) {
+            $updates['delivered_at'] = now();
+        }
+
+        $order->update($updates);
 
         OrderUpdate::create([
             'order_id' => $order->id,

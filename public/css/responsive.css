@@ -1,0 +1,438 @@
+/* ============================================
+   RESPONSIVE STYLES - Mobile First Approach
+   ============================================ */
+
+/* Base styles are already in app.blade.php */
+
+/* Mobile Devices (up to 640px) */
+@media (max-width: 640px) {
+    /* Container adjustments */
+    .container {
+        padding: 12px 16px;
+    }
+
+    /* Header & Navigation */
+    header .container {
+        padding: 12px 16px;
+    }
+
+    header > div:first-child {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    header a[href="{{ url('/') }}"] {
+        font-size: 1.2rem;
+    }
+
+    /* Mobile Navigation Menu */
+    nav {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    nav a, nav .nav-link {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+    }
+
+    nav form button {
+        width: 100%;
+        text-align: left;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+    }
+
+    /* Hide floating elements on very small screens or adjust position */
+    .cart-float {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+        bottom: 16px;
+        right: 16px;
+    }
+
+    .unread-help-badge {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        text-align: center;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+
+    /* Product Grid - Shop Page */
+    #productGrid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        gap: 12px !important;
+    }
+
+    /* Product Cards */
+    .product-card h2, .product-card h3 {
+        font-size: 0.9rem !important;
+    }
+
+    .product-card p {
+        font-size: 0.85rem !important;
+    }
+
+    /* Search & Filter Form */
+    form[method="GET"][action*="shop.index"] {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    form[method="GET"][action*="shop.index"] input,
+    form[method="GET"][action*="shop.index"] select {
+        width: 100% !important;
+    }
+
+    form[method="GET"][action*="shop.index"] button {
+        width: 100%;
+    }
+
+    /* Category Pills */
+    div[style*="flex-wrap:wrap"][style*="gap:6px"] {
+        gap: 8px;
+    }
+
+    /* Product Detail Page */
+    .card > div[style*="grid-template-columns: 1.1fr 0.9fr"],
+    .card > div[style*="grid-template-columns: 1.2fr 0.8fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    /* Slideshow arrows */
+    button[onclick*="changeSlide"] {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 1rem !important;
+    }
+
+    button[onclick*="changeSlide"][id="prevBtn"] {
+        left: 8px !important;
+    }
+
+    button[onclick*="changeSlide"][id="nextBtn"] {
+        right: 8px !important;
+    }
+
+    /* Thumbnails */
+    #thumbnailStrip div[style*="width:80px"] {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    /* Cart Items */
+    div[style*="display:flex"][style*="align-items:center"] {
+        flex-wrap: wrap;
+    }
+
+    div[style*="display:flex"][style*="align-items:center"] > div:first-child {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    /* Admin Product List */
+    div[style*="display:flex"][style*="align-items:center"][style*="gap:12px"][style*="padding:12px 16px"] {
+        flex-wrap: wrap;
+    }
+
+    div[style*="display:flex"][style*="align-items:center"][style*="gap:12px"][style*="padding:12px 16px"] > div:first-child {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    /* Buttons in admin list */
+    div[style*="display:flex"][style*="gap:10px"][style*="flex-wrap:wrap"] {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    /* Search form in admin */
+    form[method="GET"][action*="admin.products.index"] {
+        flex-direction: column;
+    }
+
+    form[method="GET"][action*="admin.products.index"] > div {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Tables */
+    table {
+        font-size: 0.8rem;
+    }
+
+    th, td {
+        padding: 8px 10px !important;
+    }
+
+    /* Modals */
+    .card[style*="max-width:500px"] {
+        width: 95% !important;
+        padding: 20px 16px !important;
+    }
+
+    /* Price displays */
+    p[style*="font-size:1.6rem"], p[id="productPrice"] {
+        font-size: 1.3rem !important;
+    }
+
+    /* Headings */
+    h1 {
+        font-size: 1.3rem !important;
+    }
+
+    h2 {
+        font-size: 1.1rem !important;
+    }
+
+    h3 {
+        font-size: 1rem !important;
+    }
+
+    /* Subtotal section in cart */
+    div[style*="justify-content:space-between"][style*="align-items:center"][style*="flex-wrap:wrap"] {
+        flex-direction: column;
+        align-items: stretch !important;
+        text-align: center;
+    }
+
+    div[style*="justify-content:space-between"][style*="align-items:center"][style*="flex-wrap:wrap"] > div:last-child {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    div[style*="justify-content:space-between"][style*="align-items:center"][style*="flex-wrap:wrap"] > div:last-child a,
+    div[style*="justify-content:space-between"][style*="align-items:center"][style*="flex-wrap:wrap"] > div:last-child button {
+        width: 100%;
+    }
+
+    /* Color pills */
+    button[class*="color-pill"] {
+        padding: 6px 14px !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Suggested products grid */
+    .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        gap: 12px !important;
+    }
+
+    /* Review cards */
+    div[style*="display:flex"][style*="justify-content:space-between"][style*="align-items:center"][style*="gap:8px"][style*="flex-wrap:wrap"] {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    /* Size guide tables */
+    div[style*="overflow-x:auto"] {
+        margin: 0 -16px;
+        padding: 0 16px;
+    }
+
+    /* Back button */
+    button[onclick*="history.back()"] {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Tagline */
+    div[style*="margin-top:6px"] p {
+        font-size: 1rem !important;
+    }
+}
+
+/* Tablets (641px to 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .container {
+        padding: 14px 20px;
+    }
+
+    /* Product Grid */
+    #productGrid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    /* Product Detail - Stack on smaller tablets */
+    .card > div[style*="grid-template-columns: 1.1fr 0.9fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+
+    /* Navigation */
+    nav {
+        gap: 10px;
+    }
+
+    nav a, nav .nav-link {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    /* Cart items */
+    div[style*="display:flex"][style*="align-items:center"][style*="gap:14px"][style*="padding:14px"] {
+        gap: 12px;
+    }
+
+    /* Admin product list */
+    div[style*="display:flex"][style*="align-items:center"][style*="gap:12px"][style*="padding:12px 16px"] {
+        gap: 10px;
+    }
+
+    /* Suggested products */
+    .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    }
+}
+
+/* Small Laptops (1025px to 1280px) */
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .container {
+        max-width: 1000px;
+    }
+
+    #productGrid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+    }
+}
+
+/* Large Screens (min-width: 1536px) */
+@media (min-width: 1536px) {
+    .container {
+        max-width: 1400px;
+    }
+
+    #productGrid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    }
+}
+
+/* Landscape Mode on Mobile */
+@media (max-width: 640px) and (orientation: landscape) {
+    .container {
+        padding: 10px 16px;
+    }
+
+    header > div:first-child {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    nav a, nav .nav-link {
+        width: auto;
+        white-space: nowrap;
+    }
+
+    .unread-help-badge {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        left: auto;
+        width: auto;
+    }
+}
+
+/* Very Small Screens (up to 360px) */
+@media (max-width: 360px) {
+    .container {
+        padding: 10px 12px;
+    }
+
+    #productGrid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .product-card h2, .product-card h3 {
+        font-size: 0.85rem !important;
+    }
+
+    button[class*="color-pill"] {
+        padding: 5px 12px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Ensure images are responsive */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Prevent horizontal overflow */
+body {
+    overflow-x: hidden;
+    min-width: 320px;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+    a, button, input[type="checkbox"], input[type="radio"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    input[type="checkbox"], input[type="radio"] {
+        min-height: 18px;
+        min-width: 18px;
+    }
+
+    /* Better spacing for touch */
+    button, .btn, a.btn {
+        padding: 12px 20px;
+    }
+
+    /* Improve form inputs */
+    input[type="text"],
+    input[type="search"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 14px 16px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .cart-float,
+    .unread-help-badge,
+    nav,
+    button {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    .card {
+        border: 1px solid #ccc;
+        box-shadow: none;
+    }
+}

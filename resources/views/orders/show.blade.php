@@ -121,10 +121,19 @@
                 </div>
             @endif
 
-            @if($order->status === 'delivered' && $order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
-                <div style="display:flex;justify-content:flex-end;">
-                    <a href="{{ route('orders.return.create', $order) }}" class="btn" style="background:#f97316;padding:12px 24px;font-size:1rem;">Request Return</a>
-                </div>
+            @if($order->status === 'delivered')
+                @if($order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
+                    <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
+                        <a href="{{ route('returns.index') }}" class="btn btn-secondary" style="padding:12px 24px;font-size:1rem;">View My Returns</a>
+                        <a href="{{ route('orders.return.create', $order) }}" class="btn" style="background:#f97316;padding:12px 24px;font-size:1rem;">Request Return</a>
+                    </div>
+                @else
+                    <div style="padding:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;margin-top:12px;">
+                        <p style="margin:0;color:#991b1b;font-size:0.9rem;">
+                            ⏰ The <strong>7-day return period</strong> for this order has expired.
+                        </p>
+                    </div>
+                @endif
             @endif
 
             <!-- Return Requests -->

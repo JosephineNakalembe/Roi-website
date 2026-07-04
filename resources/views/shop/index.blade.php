@@ -16,7 +16,7 @@
     </div>
 
     @php
-        $defaults = ['women' => 'Women', 'men' => 'Men', 'kids' => 'Kids', 'electronics' => 'Electronics', 'make-up' => 'Make-up'];
+        $defaults = ['women-s-clothing' => 'Women\'s Clothing', 'men-s-clothing' => 'Men\'s Clothing', 'kids-baby' => 'Kids & Baby', 'electronics-gadgets' => 'Electronics', 'beauty-personal-care' => 'Beauty'];
         $otherCategories = $categories->filter(fn($c) => !in_array($c->slug, array_keys($defaults)));
         $hasMore = $otherCategories->isNotEmpty();
     @endphp
@@ -39,10 +39,22 @@
     </div>
     @endif
 
+    <!-- Frequently Searched / Suggested Categories -->
+    @if($suggestedCategories->isNotEmpty() && !$search && !$categorySlug)
+        <div style="margin-bottom:16px;padding:12px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;">
+            <p style="font-size:0.85rem;font-weight:600;color:#166534;margin:0 0 8px 0;">🔥 Popular categories</p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                @foreach($suggestedCategories as $sCat)
+                    <a href="{{ route('shop.index', ['category' => $sCat->slug]) }}" style="padding:4px 12px;border-radius:999px;font-size:0.8rem;text-decoration:none;background:#dcfce7;color:#166534;font-weight:500;">{{ $sCat->name }}</a>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <div id="productGrid" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));">
         @forelse($products as $product)
             <a href="{{ route('shop.show', $product->slug) }}" class="product-card" style="display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9ecef;border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s, transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)';this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='';this.style.transform='';">
-                <img src="{{ optional($product->primaryImage)->path ? asset('storage/' . $product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $product->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;">
+                <img src="{{ optional($product->primaryImage)->path ? asset('storage/' . $product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $product->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
                 <div style="padding:12px 14px 14px;">
                     <h2 style="font-size:0.95rem;font-weight:600;margin-bottom:2px;">{{ $product->name }}</h2>
                     <p style="font-size:0.8rem;color:#6c757d;margin-bottom:4px;">{{ $product->category?->name ?? 'Uncategorized' }}</p>
@@ -59,8 +71,15 @@
         @endforelse
     </div>
 
-    <div id="loadingState" style="display:none;text-align:center;margin-top:20px;">Loading more products…</div>
-    <div id="endState" style="display:none;text-align:center;margin-top:20px;color:#6b7280;">No more products to show.</div>
+    <div id="loadingState" style="display:none;text-align:center;margin-top:20px;padding:20px;">
+        <div style="display:inline-block;width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#1a1a2e;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        <p style="margin-top:8px;color:#6b7280;">Loading more products…</p>
+    </div>
+    <div id="endState" style="display:none;text-align:center;margin-top:20px;color:#6b7280;padding:20px;">No more products to show.</div>
+
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 
     <script>
         function toggleCategories() {
@@ -68,7 +87,6 @@
             const btn = document.getElementById('catToggle');
             if (extra.style.display === 'flex') {
                 extra.style.display = 'none';
-                btn.textContent = btn.textContent.replace('less', 'more');
                 btn.textContent = '+{{ $otherCategories->count() }} more';
             } else {
                 extra.style.display = 'flex';
@@ -78,29 +96,68 @@
 
         let nextPageUrl = @json($products->nextPageUrl());
         let isLoading = false;
+        let hasMore = true;
 
         async function loadMoreProducts() {
-            if (!nextPageUrl || isLoading) return;
+            if (!nextPageUrl || isLoading || !hasMore) return;
             isLoading = true;
             document.getElementById('loadingState').style.display = 'block';
 
-            const response = await fetch(nextPageUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newCards = doc.querySelectorAll('.product-card');
-            newCards.forEach(card => document.getElementById('productGrid').appendChild(card));
-            nextPageUrl = doc.querySelector('.pagination .page-item .page-link[rel="next"]')?.href || null;
+            try {
+                const response = await fetch(nextPageUrl, { 
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    } 
+                });
+                
+                if (!response.ok) {
+                    hasMore = false;
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('endState').style.display = 'block';
+                    isLoading = false;
+                    return;
+                }
 
-            document.getElementById('loadingState').style.display = 'none';
-            if (!nextPageUrl) {
+                const data = await response.json();
+                
+                if (data.html) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = data.html;
+                    const cards = temp.querySelectorAll('.product-card');
+                    cards.forEach(card => document.getElementById('productGrid').appendChild(card));
+                }
+                
+                nextPageUrl = data.next_page_url || null;
+                
+                if (!nextPageUrl) {
+                    hasMore = false;
+                    document.getElementById('endState').style.display = 'block';
+                }
+            } catch (e) {
+                hasMore = false;
+                document.getElementById('endState').textContent = 'Error loading products.';
                 document.getElementById('endState').style.display = 'block';
             }
+
+            document.getElementById('loadingState').style.display = 'none';
             isLoading = false;
         }
 
+        // Infinite scroll with debounce
+        let scrollTimeout;
         window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 700) {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+                    loadMoreProducts();
+                }
+            }, 100);
+        });
+
+        // Also load more when page is near bottom on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
                 loadMoreProducts();
             }
         });

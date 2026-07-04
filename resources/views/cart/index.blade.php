@@ -109,6 +109,18 @@
                 </div>
             @endif
 
+            @if($suggestedCategories->isNotEmpty())
+                <div style="margin-top:32px;padding:16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;">
+                    <h2 style="font-size:1.1rem;margin-bottom:10px;color:#166534;">You may also like</h2>
+                    <p style="font-size:0.85rem;color:#15803d;margin-bottom:10px;">Popular categories based on what customers are searching for</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+                        @foreach($suggestedCategories as $sCat)
+                            <a href="{{ route('shop.index', ['category' => $sCat->slug]) }}" style="padding:4px 12px;border-radius:999px;font-size:0.8rem;text-decoration:none;background:#dcfce7;color:#166534;font-weight:500;transition:all 0.2s;">{{ $sCat->name }}</a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             @if($suggestions->isNotEmpty())
                 <div style="margin-top:32px;">
                     <h2>You might also like</h2>

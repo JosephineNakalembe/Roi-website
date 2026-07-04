@@ -57,6 +57,26 @@ class OrderReturnController extends Controller
         'Bulindo' => 15000,
     ];
 
+    public function myReturns()
+    {
+        $returns = OrderReturn::with('order', 'statusUpdates')
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->paginate(10);
+
+        return view('returns.index', compact('returns'));
+    }
+
+    public function track(OrderReturn $orderReturn)
+    {
+        if ($orderReturn->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $orderReturn->load('order', 'items.orderItem.product', 'statusUpdates');
+        return view('returns.track', compact('orderReturn'));
+    }
+
     public function create(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
@@ -73,7 +93,16 @@ class OrderReturnController extends Controller
 
         $order->load('items.product');
         $deliveryAreas = self::DELIVERY_AREAS;
-        $reasons = ['Wrong items received', 'Item Arrived Damaged', 'Defective/Faulty', 'Wrong Size'];
+        $reasons = [
+            'Wrong items received',
+            'Item Arrived Damaged',
+            'Defective/Faulty',
+            'Wrong Size',
+            'Not as described',
+            'Changed my mind',
+            'Quality not satisfactory',
+            'Color/style different from picture',
+        ];
         
         return view('returns.create', compact('order', 'deliveryAreas', 'reasons'));
     }
@@ -95,7 +124,7 @@ class OrderReturnController extends Controller
         $data = $request->validate([
             'items' => ['required', 'array', 'min:1'],
             'items.*' => ['exists:order_items,id'],
-            'reason' => ['required', 'string', 'in:Wrong items received,Item Arrived Damaged,Defective/Faulty,Wrong Size'],
+            'reason' => ['required', 'string', 'max:255'],
             'notes' => ['required', 'string', 'max:2000'],
             'refund_number' => ['required', 'string', 'max:20'],
             'refund_network' => ['required', 'in:Airtel Money,MTN Mobile Money'],
@@ -131,6 +160,8 @@ class OrderReturnController extends Controller
         $nextId = $lastReturn ? $lastReturn->id + 1 : 1;
         $returnNumber = 'RET' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
+        $pickupFee = self::DELIVERY_AREAS[$data['pickup_area']];
+
         $return = OrderReturn::create([
             'return_number' => $returnNumber,
             'order_id' => $order->id,
@@ -143,7 +174,7 @@ class OrderReturnController extends Controller
             'pickup_address' => $data['pickup_address'],
             'pickup_contact' => $data['pickup_contact'],
             'pickup_area' => $data['pickup_area'],
-            'pickup_fee' => self::DELIVERY_AREAS[$data['pickup_area']],
+            'pickup_fee' => $pickupFee,
             'images' => implode(',', $imagePaths),
             'status' => 'pending',
         ]);
@@ -156,10 +187,10 @@ class OrderReturnController extends Controller
         // Create initial status update
         $return->statusUpdates()->create([
             'status' => 'pending',
-            'note' => 'Return request submitted. Awaiting admin review.',
+            'note' => 'Return request submitted. Awaiting admin review. You will be notified once your request is processed.',
         ]);
 
-        return redirect()->route('orders.show', $order)
-            ->with('success', "Return request {$returnNumber} has been submitted successfully. We will review it shortly.");
+        return redirect()->route('returns.track', $return)
+            ->with('success', "Return request {$returnNumber} has been submitted successfully. You can track the progress below.");
     }
 }

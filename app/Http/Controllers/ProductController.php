@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -14,17 +15,70 @@ class ProductController extends Controller
         $search = $request->query('search');
         $categorySlug = $request->query('category');
 
-        $products = Product::with('primaryImage', 'category')
-            ->where('is_active', true)
-            ->when($search, fn ($query) => $query->where('name', 'like', "%{$search}%"))
-            ->when($categorySlug, fn ($query) => $query->whereHas('category', fn ($q) => $q->where('slug', $categorySlug)))
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
+        // Track frequently searched terms (store in cache, max 100)
+        if ($search) {
+            $frequentSearches = Cache::get('frequent_searches', []);
+            $term = strtolower(trim($search));
+            if (!isset($frequentSearches[$term])) {
+                $frequentSearches[$term] = 0;
+            }
+            $frequentSearches[$term]++;
+            // Keep only top 100
+            arsort($frequentSearches);
+            $frequentSearches = array_slice($frequentSearches, 0, 100);
+            Cache::forever('frequent_searches', $frequentSearches);
+        }
 
+        // Track frequently viewed categories
+        if ($categorySlug) {
+            $frequentCategories = Cache::get('frequent_categories', []);
+            if (!isset($frequentCategories[$categorySlug])) {
+                $frequentCategories[$categorySlug] = 0;
+            }
+            $frequentCategories[$categorySlug]++;
+            arsort($frequentCategories);
+            $frequentCategories = array_slice($frequentCategories, 0, 20);
+            Cache::forever('frequent_categories', $frequentCategories);
+        }
+
+        $query = Product::with('primaryImage', 'category')
+            ->where('is_active', true)
+            ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
+            ->when($categorySlug, fn ($q) => $q->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug)));
+
+        // Randomize order for non-filtered views, stable for filtered
+        if (!$search && !$categorySlug) {
+            $query->inRandomOrder();
+        } else {
+            $query->latest();
+        }
+
+        // If AJAX request, return only the product cards HTML + next page URL
+        if ($request->ajax()) {
+            $products = $query->paginate(12)->withQueryString();
+            $html = view('shop.partials.product_cards', compact('products'))->render();
+            return response()->json([
+                'html' => $html,
+                'next_page_url' => $products->nextPageUrl(),
+            ]);
+        }
+
+        $products = $query->paginate(12)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
-        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug'));
+        // Get frequently searched categories for suggestions
+        $frequentCategorySlugs = Cache::get('frequent_categories', []);
+        $frequentSlugs = array_keys($frequentCategorySlugs);
+        $suggestedCategories = collect();
+        if (!empty($frequentSlugs)) {
+            $orderBy = implode(',', array_map(fn($s) => "'" . str_replace("'", "''", $s) . "'", $frequentSlugs));
+            $suggestedCategories = Category::whereIn('slug', $frequentSlugs)
+                ->orderByRaw("FIELD(slug, {$orderBy})")
+                ->take(5)
+                ->get();
+        }
+
+        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories'));
     }
 
     public function show($slug)
@@ -47,6 +101,19 @@ class ProductController extends Controller
         $avgRating = $reviews->avg('rating');
         $reviewCount = $reviews->count();
 
-        return view('shop.show', compact('product', 'inWishlist', 'reviews', 'avgRating', 'reviewCount'));
+        // Get suggested products from same category
+        $suggestedProducts = Product::with('primaryImage')
+            ->where('is_active', true)
+            ->where('id', '!=', $product->id)
+            ->where(function ($q) use ($product) {
+                if ($product->category_id) {
+                    $q->where('category_id', $product->category_id);
+                }
+            })
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        return view('shop.show', compact('product', 'inWishlist', 'reviews', 'avgRating', 'reviewCount', 'suggestedProducts'));
     }
 }

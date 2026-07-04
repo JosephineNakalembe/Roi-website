@@ -9,7 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-        protected $fillable = [
+    protected $fillable = [
         'product_id',
         'category_id',
         'name',
@@ -19,6 +19,7 @@ class Product extends Model
         'cost_price',
         'stock',
         'size_guide',
+        'size_guide_type',
         'colors',
         'sizes',
         'color_stock',
@@ -36,6 +37,11 @@ class Product extends Model
         'color_prices' => 'array',
         'size_guide' => 'array',
     ];
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
 
     public function category()
     {

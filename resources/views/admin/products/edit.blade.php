@@ -7,18 +7,34 @@
             @csrf
                         @method('PATCH')
             <label>Product ID</label>
-            <input class="input" name="product_id" value="{{ old('product_id', $product->product_id) }}" placeholder="e.g., SKU-001, PROD-123" required>
+            <input class="input" name="product_id_display" value="{{ $product->product_id }}" readonly style="background:#f3f4f6;cursor:not-allowed;">
+            <input type="hidden" name="product_id" value="{{ $product->product_id }}">
             
             <label>Name</label>
             <input class="input" name="name" value="{{ old('name', $product->name) }}" required>
             
-            <label>Category</label>
-            <select class="input" name="category_id" required>
-                <option value="">Select a category</option>
+            <label>Primary Category</label>
+            <select class="input" name="category_id">
+                <option value="">No primary category</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                 @endforeach
             </select>
+            
+            <label>Additional Categories <span class="text-muted" style="font-weight:400;font-size:0.85rem;">— a product can belong to multiple categories</span></label>
+            <div id="additionalCategories" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+                @php
+                    $selectedCategoryIds = $product->categories->pluck('id')->toArray();
+                @endphp
+                @foreach($categories as $category)
+                    <label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:0.9rem;">
+                        <input type="checkbox" name="categories[]" value="{{ $category->id }}" {{ in_array($category->id, old('categories', $selectedCategoryIds)) ? 'checked' : '' }}>
+                        {{ $category->name }}
+                    </label>
+                @endforeach
+            </div>
+
+            <button type="button" class="btn btn-secondary" onclick="showAddCategoryModal()" style="margin-bottom:8px;">+ Add New Category</button>
             
             <label>Description</label>
             <textarea class="input" name="description" rows="4">{{ old('description', $product->description) }}</textarea>
@@ -30,13 +46,13 @@
             <input class="input" name="cost_price" type="number" step="0.01" value="{{ old('cost_price', $product->cost_price ?? '0.00') }}" placeholder="What you paid per unit">
             
             <label style="font-weight:700;">Color, Size, Quantity, Price & Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Each color can have its own price and its own set of images.</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Each color can have its own price and its own set of images. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
             <div id="colorQuantityContainer" style="display:grid;gap:10px;margin-bottom:10px;"></div>
             <button type="button" class="btn btn-secondary" onclick="addColorQuantityRow()">+ Add Color</button>
 
             
             <label style="font-weight:700;margin-top:12px;">Size Guide (Optional)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Enter measurements for each size</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Enter measurements for each size. Only filled fields will be displayed on the product page.</p>
             <div style="overflow-x:auto;">
                 <table id="sizeGuideTable" style="width:100%;border-collapse:collapse;font-size:0.9rem;">
                     <thead>
@@ -55,28 +71,88 @@
                     </thead>
                     <tbody id="sizeGuideBody">
                         <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Chest (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_xxs" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_xs" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_s" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_m" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_l" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_xl" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_2xl" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_3xl" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_chest_4xl" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Waist (inches)</td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xxs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_s" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_m" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_l" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_2xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_3xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_4xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
                         </tr>
                         <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Waist (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xxs" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xs" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_s" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_m" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_l" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xl" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_2xl" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_3xl" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_4xl" class="input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Hip (inches)</td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_xxs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_xs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_s" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_m" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_l" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_2xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_3xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_4xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Length (inches)</td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_xxs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_xs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_s" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_m" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_l" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_2xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_3xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_4xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Inseam (inches)</td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_xxs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_xs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_s" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_m" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_l" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_2xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_3xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_4xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Thigh (inches)</td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_xxs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_xs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_s" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_m" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_l" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_2xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_3xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_4xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Burst (inches)</td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_xxs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_xs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_s" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_m" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_l" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_2xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_3xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_4xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Shoulder (inches)</td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_xxs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_xs" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_s" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_m" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_l" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_2xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_3xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
+                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_4xl" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -120,11 +196,21 @@
         @endif
     </div>
 
+    <!-- Add Category Modal -->
+    <div id="addCategoryModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:16px;padding:24px;max-width:400px;width:90%;margin:auto;">
+            <h2 style="margin:0 0 16px 0;">Add New Category</h2>
+            <input type="text" id="newCategoryName" class="input" placeholder="Category name" style="margin-bottom:12px;">
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeAddCategoryModal()">Cancel</button>
+                <button type="button" class="btn" onclick="saveNewCategory()">Add Category</button>
+            </div>
+            <p id="addCategoryError" style="color:#ef4444;font-size:0.9rem;display:none;margin:8px 0 0 0;"></p>
+        </div>
+    </div>
+
     <script>
         let colorQuantityCount = 0;
-
-                // All available sizes from One-Size to 4XL
-                const allSizes = ['One-Size', 'XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
 
         const existingColorPrices = @json($product->color_prices ?? []);
         const existingColorImages = @json(
@@ -133,10 +219,9 @@
                 ->whereNotNull('color')
                 ->groupBy('color')
                 ->map(function ($imgs) {
-                    return $imgs->map(fn($img) => [
-                        'id' => $img->id,
-                        'url' => asset('storage/' . $img->path),
-                    ])->values();
+                    return $imgs->map(function($img) {
+                        return ['id' => $img->id, 'url' => asset('storage/' . $img->path)];
+                    })->values();
                 })
         );
 
@@ -150,11 +235,6 @@
             row.style.display = 'grid';
             row.style.gap = '10px';
             row.style.background = '#fafafa';
-
-            let sizeOptions = allSizes.map(s => `<option value="${s}"${s === size ? ' selected' : ''}>${s}</option>`).join('');
-
-            // Check if size is One-Size for selection
-            const oneSizeSelected = size === 'One-Size' ? ' selected' : '';
 
             // Prefill price for this color if it exists
             const priceVal = (color && existingColorPrices[color] != null) ? existingColorPrices[color] : '';
@@ -170,11 +250,7 @@
             row.innerHTML = `
                 <div style="display:grid;grid-template-columns:repeat(2, 1fr) 80px auto;gap:8px;align-items:center;">
                     <input type="text" class="input" name="color_${index}" placeholder="Color (e.g., Red)" value="${color}" style="padding:6px;font-size:0.9rem;">
-                    <select class="input" name="size_${index}" style="padding:6px;font-size:0.9rem;">
-                        <option value="">Select Size</option>
-                        <option value="One-Size"${oneSizeSelected}>One-Size</option>
-                        ${sizeOptions}
-                    </select>
+                    <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" value="${size}" style="padding:6px;font-size:0.9rem;">
                     <input type="number" class="input" name="quantity_${index}" placeholder="Qty" min="1" value="${quantity}" style="padding:6px;font-size:0.9rem;">
                     <button type="button" class="btn btn-secondary" onclick="this.closest('div[style*=border]').remove(); updateColors();" style="padding:4px 8px;font-size:0.85rem;">Remove</button>
                 </div>
@@ -257,7 +333,7 @@
                     try {
                         const sizeData = typeof existingSizeGuide === 'string' ? JSON.parse(existingSizeGuide) : existingSizeGuide;
                         const sizes = ['xxs', 'xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl'];
-                        const measurements = ['chest', 'waist'];
+                        const measurements = ['waist', 'hip', 'length', 'inseam', 'thigh', 'burst', 'shoulder'];
                 
                         measurements.forEach(measurement => {
                             if (sizeData[measurement]) {
@@ -282,7 +358,7 @@
                 document.querySelector('form').addEventListener('submit', function(e) {
                     const sizeGuideData = {};
                     const sizes = ['xxs', 'xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl'];
-                    const measurements = ['chest', 'waist'];
+                    const measurements = ['waist', 'hip', 'length', 'inseam', 'thigh', 'burst', 'shoulder'];
             
                     measurements.forEach(measurement => {
                         sizeGuideData[measurement] = {};
@@ -341,5 +417,73 @@
                 reader.readAsDataURL(file);
             }
         }
+
+        // Add Category Modal functions
+        function showAddCategoryModal() {
+            document.getElementById('addCategoryModal').style.display = 'flex';
+            document.getElementById('newCategoryName').value = '';
+            document.getElementById('addCategoryError').style.display = 'none';
+        }
+
+        function closeAddCategoryModal() {
+            document.getElementById('addCategoryModal').style.display = 'none';
+        }
+
+        function saveNewCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!name) {
+                document.getElementById('addCategoryError').textContent = 'Please enter a category name.';
+                document.getElementById('addCategoryError').style.display = 'block';
+                return;
+            }
+
+            fetch('{{ route("admin.categories.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ name: name }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Add to primary category dropdown
+                    const primarySelect = document.querySelector('select[name="category_id"]');
+                    const option = document.createElement('option');
+                    option.value = data.category.id;
+                    option.textContent = data.category.name;
+                    primarySelect.appendChild(option);
+
+                    // Add to additional categories checkboxes
+                    const additionalDiv = document.getElementById('additionalCategories');
+                    const label = document.createElement('label');
+                    label.style.cssText = 'display:flex;align-items:center;gap:4px;font-weight:400;font-size:0.9rem;';
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.name = 'categories[]';
+                    cb.value = data.category.id;
+                    cb.checked = true;
+                    label.appendChild(cb);
+                    label.appendChild(document.createTextNode(' ' + data.category.name));
+                    additionalDiv.appendChild(label);
+
+                    closeAddCategoryModal();
+                } else {
+                    document.getElementById('addCategoryError').textContent = data.message || 'Failed to create category.';
+                    document.getElementById('addCategoryError').style.display = 'block';
+                }
+            })
+            .catch(err => {
+                document.getElementById('addCategoryError').textContent = 'An error occurred. Please try again.';
+                document.getElementById('addCategoryError').style.display = 'block';
+            });
+        }
+
+        // Close modal on outside click
+        document.getElementById('addCategoryModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddCategoryModal();
+        });
     </script>
 @endsection

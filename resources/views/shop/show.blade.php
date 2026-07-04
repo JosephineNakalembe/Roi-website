@@ -158,84 +158,197 @@
             </div>
                         @if($product->size_guide)
                 <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e5e7eb;">
-                    <h3>Size Guide</h3>
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                        <h3 style="margin:0;">Size Guide</h3>
+                        <button id="unitToggle" onclick="toggleUnit()" style="padding:6px 14px;border-radius:999px;font-size:0.8rem;border:2px solid #1a1a2e;background:#fff;color:#1a1a2e;cursor:pointer;font-weight:600;transition:all 0.2s;">Switch to cm</button>
+                    </div>
                     @php
                         $sizeGuide = null;
                         if (is_string($product->size_guide)) {
                             $decoded = json_decode($product->size_guide, true);
                             $sizeGuide = $decoded ? $decoded : null;
                         }
+                        $guideType = $product->size_guide_type ?? 'clothing';
+                        
+                        // Clothing measurements
+                        $measurementLabels = [
+                            'waist' => 'Waist',
+                            'hip' => 'Hip',
+                            'length' => 'Length',
+                            'inseam' => 'Inseam',
+                            'thigh' => 'Thigh',
+                            'burst' => 'Burst',
+                            'shoulder' => 'Shoulder',
+                        ];
+                        $allSizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
+                        
+                        // Shoe column labels
+                        $shoeLabels = [
+                            'baby' => 'US Baby',
+                            'toddler' => 'US Toddler',
+                            'kids' => 'US Kids',
+                            'youth' => 'US Youth',
+                            'mens' => "US Men's",
+                            'womens' => "US Women's",
+                            'uk' => 'UK',
+                            'eu' => 'EU',
+                            'cm' => 'CM',
+                        ];
                     @endphp
-                    @if($sizeGuide && isset($sizeGuide['chest']) || isset($sizeGuide['waist']))
-                        <div style="overflow-x:auto;">
-                            <table style="width:100%;border-collapse:collapse;font-size:0.9rem;margin-top:12px;">
-                                <thead>
-                                    <tr style="background:#f3f4f6;">
-                                        <th style="padding:12px;border:1px solid #e5e7eb;text-align:left;font-weight:600;">Measurement</th>
-                                        @foreach(['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'] as $size)
+
+                    @if($guideType === 'clothing' && is_array($sizeGuide))
+                        @php
+                            $sizesWithData = [];
+                            foreach ($allSizes as $size) {
+                                foreach (array_keys($measurementLabels) as $measurement) {
+                                    if (isset($sizeGuide[$measurement][$size]) && $sizeGuide[$measurement][$size] !== '') {
+                                        $sizesWithData[] = $size;
+                                        break;
+                                    }
+                                }
+                            }
+                        @endphp
+                        @if(!empty($sizesWithData))
+                            <div style="overflow-x:auto;">
+                                <table id="clothingSizeTable" style="width:100%;border-collapse:collapse;font-size:0.9rem;margin-top:12px;">
+                                    <thead>
+                                        <tr style="background:#f3f4f6;">
+                                            <th style="padding:12px;border:1px solid #e5e7eb;text-align:left;font-weight:600;">Measurement</th>
+                                            @foreach($sizesWithData as $size)
+                                                <th style="padding:12px;border:1px solid #e5e7eb;text-align:center;font-weight:600;">{{ $size }}</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($measurementLabels as $key => $label)
                                             @php
                                                 $hasData = false;
-                                                foreach(['chest', 'waist'] as $measurement) {
-                                                    if (isset($sizeGuide[$measurement][$size])) {
+                                                foreach ($sizesWithData as $size) {
+                                                    if (isset($sizeGuide[$key][$size]) && $sizeGuide[$key][$size] !== '') {
                                                         $hasData = true;
                                                         break;
                                                     }
                                                 }
                                             @endphp
                                             @if($hasData)
-                                                <th style="padding:12px;border:1px solid #e5e7eb;text-align:center;font-weight:600;">{{ $size }}</th>
+                                                <tr class="size-row" data-measurement="{{ $key }}">
+                                                    <td style="padding:12px;border:1px solid #e5e7eb;font-weight:500;" class="measurement-label">{{ $label }} (<span class="unit-label">inches</span>)</td>
+                                                    @foreach($sizesWithData as $size)
+                                                        <td style="padding:12px;border:1px solid #e5e7eb;text-align:center;" class="size-value" data-value="{{ $sizeGuide[$key][$size] ?? '' }}">{{ $sizeGuide[$key][$size] ?? '-' }}</td>
+                                                    @endforeach
+                                                </tr>
                                             @endif
                                         @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if(isset($sizeGuide['chest']) && count(array_filter($sizeGuide['chest'])) > 0)
-                                        <tr>
-                                            <td style="padding:12px;border:1px solid #e5e7eb;font-weight:500;">Chest (inches)</td>
-                                            @foreach(['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'] as $size)
-                                                @php
-                                                    $hasData = false;
-                                                    foreach(['chest', 'waist'] as $measurement) {
-                                                        if (isset($sizeGuide[$measurement][$size])) {
-                                                            $hasData = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                @endphp
-                                                @if($hasData)
-                                                    <td style="padding:12px;border:1px solid #e5e7eb;text-align:center;">{{ $sizeGuide['chest'][$size] ?? '-' }}</td>
-                                                @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <p style="white-space:pre-line;line-height:1.8;margin-top:12px;">{{ is_string($sizeGuide) ? $sizeGuide : '' }}</p>
+                        @endif
+                    @elseif($guideType === 'shoes' && is_array($sizeGuide) && isset($sizeGuide['shoes']))
+                        @php
+                            $shoeData = $sizeGuide['shoes'];
+                            $colsWithData = [];
+                            foreach ($shoeLabels as $col => $label) {
+                                foreach ($shoeData as $row) {
+                                    if (isset($row[$col]) && $row[$col] !== '') {
+                                        $colsWithData[] = $col;
+                                        break;
+                                    }
+                                }
+                            }
+                        @endphp
+                        @if(!empty($shoeData) && !empty($colsWithData))
+                            <div style="overflow-x:auto;">
+                                <table id="shoeSizeTable" style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:12px;">
+                                    <thead>
+                                        <tr style="background:#f3f4f6;">
+                                            @foreach($colsWithData as $col)
+                                                <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;font-weight:600;">{{ $shoeLabels[$col] }}</th>
                                             @endforeach
                                         </tr>
-                                    @endif
-                                    @if(isset($sizeGuide['waist']) && count(array_filter($sizeGuide['waist'])) > 0)
-                                        <tr>
-                                            <td style="padding:12px;border:1px solid #e5e7eb;font-weight:500;">Waist (inches)</td>
-                                            @foreach(['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'] as $size)
-                                                @php
-                                                    $hasData = false;
-                                                    foreach(['chest', 'waist'] as $measurement) {
-                                                        if (isset($sizeGuide[$measurement][$size])) {
-                                                            $hasData = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                @endphp
-                                                @if($hasData)
-                                                    <td style="padding:12px;border:1px solid #e5e7eb;text-align:center;">{{ $sizeGuide['waist'][$size] ?? '-' }}</td>
-                                                @endif
-                                            @endforeach
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($shoeData as $row)
+                                            @php
+                                                $hasAny = false;
+                                                foreach ($colsWithData as $col) {
+                                                    if (isset($row[$col]) && $row[$col] !== '') { $hasAny = true; break; }
+                                                }
+                                            @endphp
+                                            @if($hasAny)
+                                                <tr>
+                                                    @foreach($colsWithData as $col)
+                                                        <td style="padding:6px;border:1px solid #e5e7eb;text-align:center;" class="{{ $col === 'cm' ? 'size-value' : '' }}" data-value="{{ $row[$col] ?? '' }}">{{ $row[$col] ?? '-' }}</td>
+                                                    @endforeach
+                                                </tr>
+                                            @endif
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <p style="white-space:pre-line;line-height:1.8;margin-top:12px;">{{ is_string($sizeGuide) ? $sizeGuide : '' }}</p>
+                        @endif
                     @else
-                        <p style="white-space:pre-line;line-height:1.8;margin-top:12px;">{{ $product->size_guide }}</p>
+                        <p style="white-space:pre-line;line-height:1.8;margin-top:12px;">{{ is_string($sizeGuide) ? $sizeGuide : '' }}</p>
                     @endif
                 </div>
             @endif
+
+            <script>
+            let usingInches = true;
+            function toggleUnit() {
+                const btn = document.getElementById('unitToggle');
+                usingInches = !usingInches;
+                btn.textContent = usingInches ? 'Switch to cm' : 'Switch to inches';
+                
+                // Update clothing table
+                document.querySelectorAll('#clothingSizeTable .size-row').forEach(row => {
+                    const unitLabel = row.querySelector('.unit-label');
+                    if (unitLabel) unitLabel.textContent = usingInches ? 'inches' : 'cm';
+                    
+                    row.querySelectorAll('.size-value').forEach(td => {
+                        const val = td.dataset.value;
+                        if (val && !isNaN(parseFloat(val))) {
+                            td.textContent = usingInches ? val : (parseFloat(val) * 2.54).toFixed(1);
+                        }
+                    });
+                });
+                
+                // Update shoe table (CM column toggles to inches)
+                document.querySelectorAll('#shoeSizeTable .size-value').forEach(td => {
+                    const val = td.dataset.value;
+                    if (val && !isNaN(parseFloat(val))) {
+                        td.textContent = usingInches ? val : (parseFloat(val) * 2.54).toFixed(1);
+                    }
+                });
+                
+                // Update measurement labels unit
+                document.querySelectorAll('.measurement-label .unit-label').forEach(el => {
+                    el.textContent = usingInches ? 'inches' : 'cm';
+                });
+            }
+            </script>
         </div>
+
+        <!-- Suggested Products -->
+        @if($suggestedProducts->isNotEmpty())
+            <div style="margin-top:32px;">
+                <h2>You may also like</h2>
+                <div class="grid-3">
+                    @foreach($suggestedProducts as $sProduct)
+                        <a href="{{ route('shop.show', $sProduct->slug) }}" class="product-card" style="display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9ecef;border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s, transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)';this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='';this.style.transform='';">
+                            <img src="{{ optional($sProduct->primaryImage)->path ? asset('storage/' . $sProduct->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $sProduct->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
+                            <div style="padding:12px 14px 14px;">
+                                <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:2px;">{{ $sProduct->name }}</h3>
+                                <p style="font-weight:700;font-size:1rem;">UGX{{ number_format($sProduct->price, 0) }}</p>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
     </div>
 

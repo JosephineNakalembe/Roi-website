@@ -59,6 +59,8 @@ Route::middleware(['auth', PreventAdminAccess::class])->group(function () {
     Route::post('/orders/{order}/items/{item}/review', [OrderController::class, 'review'])->name('orders.items.review');
     Route::get('/orders/{order}/return', [OrderReturnController::class, 'create'])->name('orders.return.create');
     Route::post('/orders/{order}/return', [OrderReturnController::class, 'store'])->name('orders.return.store');
+    Route::get('/returns/{orderReturn}/track', [OrderReturnController::class, 'track'])->name('returns.track');
+    Route::get('/returns', [OrderReturnController::class, 'myReturns'])->name('returns.index');
 
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
@@ -73,6 +75,8 @@ Route::middleware(['auth', PreventAdminAccess::class])->group(function () {
 Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::post('categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
+    Route::get('products/next-id', [AdminProductController::class, 'nextId'])->name('admin.products.next-id');
+    Route::post('products/{product}/add-stock', [AdminProductController::class, 'addStock'])->name('admin.products.add-stock');
     Route::resource('products', AdminProductController::class)->names('admin.products')->except(['show']);
     Route::get('orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');

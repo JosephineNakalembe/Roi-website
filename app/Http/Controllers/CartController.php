@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\CartItem;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class CartController extends Controller
 {
@@ -36,13 +38,26 @@ class CartController extends Controller
         $selectedItems = $availableItems->filter(fn($item) => $item['selected']);
         $subtotal = $selectedItems->sum('total');
 
-        $suggestions = Product::where('is_active', true)
+        // Get suggestions based on popular categories
+        $frequentCategorySlugs = Cache::get('frequent_categories', []);
+        $popularCategoryIds = Category::whereIn('slug', array_keys($frequentCategorySlugs))->pluck('id');
+
+        $suggestions = Product::with('primaryImage')
+            ->where('is_active', true)
             ->whereNotIn('id', $items->pluck('product.id')->filter()->values())
-            ->latest()
+            ->when($popularCategoryIds->isNotEmpty(), function ($q) use ($popularCategoryIds) {
+                $q->whereIn('category_id', $popularCategoryIds);
+            })
+            ->inRandomOrder()
             ->take(4)
             ->get();
 
-        return view('cart.index', compact('availableItems', 'outOfStockItems', 'subtotal', 'suggestions'));
+        // Also get suggested categories shown as tags
+        $suggestedCategories = Category::whereIn('slug', array_keys($frequentCategorySlugs))
+            ->take(5)
+            ->get();
+
+        return view('cart.index', compact('availableItems', 'outOfStockItems', 'subtotal', 'suggestions', 'suggestedCategories'));
     }
 
     public function add(Request $request, Product $product)

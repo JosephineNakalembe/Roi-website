@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Design Test - ROI Store</title>
+    <link rel="stylesheet" href="public/css/responsive.css">
+    <style>
+        .test-section {
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            background: #fff;
+        }
+        .test-section h2 {
+            color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+        .breakpoint-info {
+            background: #f0fdf4;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Responsive Design Test Page</h1>
+        
+        <div class="breakpoint-info">
+            <strong>Current Viewport:</strong> <span id="viewport">Loading...</span><br>
+            <strong>Device Type:</strong> <span id="deviceType">Loading...</span>
+        </div>
+
+        <div class="test-section">
+            <h2>📱 Mobile Devices (up to 640px)</h2>
+            <p>Navigation stacks vertically, product grid shows 2 columns, touch targets are 44px minimum</p>
+            <ul>
+                <li>✓ Stacked navigation menu</li>
+                <li>✓ 2-column product grid</li>
+                <li>✓ Full-width buttons and forms</li>
+                <li>✓ Adjusted floating cart button</li>
+                <li>✓ Larger touch targets</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>📱 Tablets (641px to 1024px)</h2>
+            <p>Product detail pages stack, navigation adjusts, grids show 2-3 columns</p>
+            <ul>
+                <li>✓ Stacked product detail layout</li>
+                <li>✓ Adjusted navigation spacing</li>
+                <li>✓ 2-3 column product grids</li>
+                <li>✓ Optimized cart item layout</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>💻 Laptops (1025px to 1280px)</h2>
+            <p>Standard desktop layout with optimized container width</p>
+            <ul>
+                <li>✓ Container max-width: 1000px</li>
+                <li>✓ 3-4 column product grid</li>
+                <li>✓ Full navigation display</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🖥️ Large Screens (1536px+)</h2>
+            <p>Expanded layout for large monitors</p>
+            <ul>
+                <li>✓ Container max-width: 1400px</li>
+                <li>✓ 4+ column product grid</li>
+                <li>✓ Optimal reading width</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>✨ Key Features</h2>
+            <ul>
+                <li><strong>Mobile-First:</strong> Base styles for mobile, enhanced for larger screens</li>
+                <li><strong>Fluid Grids:</strong> Product grids adapt from 2 to 4+ columns</li>
+                <li><strong>Flexible Navigation:</strong> Stacks on mobile, horizontal on desktop</li>
+                <li><strong>Touch-Friendly:</strong> Minimum 44px touch targets on mobile</li>
+                <li><strong>Responsive Images:</strong> All images scale properly</li>
+                <li><strong>No Horizontal Scroll:</strong> Prevents overflow on all devices</li>
+                <li><strong>Landscape Support:</strong> Special handling for mobile landscape</li>
+                <li><strong>Print Styles:</strong> Optimized for printing</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 How to Test</h2>
+            <ol>
+                <li>Open browser DevTools (F12)</li>
+                <li>Click the device toolbar icon (or Ctrl+Shift+M)</li>
+                <li>Select different devices or set custom dimensions</li>
+                <li>Test these breakpoints:
+                    <ul>
+                        <li>320px - Very small phones</li>
+                        <li>375px - iPhone SE/12 mini</li>
+                        <li>414px - iPhone 12/13 Pro Max</li>
+                        <li>768px - iPad</li>
+                        <li>1024px - iPad Pro/Small laptop</li>
+                        <li>1280px - Standard laptop</li>
+                        <li>1536px - Large monitor</li>
+                    </ul>
+                </li>
+                <li>Test both portrait and landscape orientations</li>
+                <li>Resize browser window to test fluid responsiveness</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function updateViewportInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const orientation = window.innerWidth > window.innerHeight ? 'Landscape' : 'Portrait';
+            
+            document.getElementById('viewport').textContent = `${width}px × ${height}px (${orientation})`;
+            
+            let deviceType = '';
+            if (width <= 360) {
+                deviceType = 'Very Small Phone';
+            } else if (width <= 640) {
+                deviceType = 'Mobile Phone';
+            } else if (width <= 1024) {
+                deviceType = 'Tablet';
+            } else if (width <= 1280) {
+                deviceType = 'Small Laptop';
+            } else if (width <= 1536) {
+                deviceType = 'Laptop/Desktop';
+            } else {
+                deviceType = 'Large Monitor';
+            }
+            
+            document.getElementById('deviceType').textContent = deviceType;
+        }
+
+        window.addEventListener('resize', updateViewportInfo);
+        window.addEventListener('orientationchange', updateViewportInfo);
+        updateViewportInfo();
+    </script>
+</body>
+</html>

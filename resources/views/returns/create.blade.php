@@ -3,7 +3,18 @@
 @section('content')
     <div class="card" style="max-width:900px;margin:0 auto;">
         <h1>Return Items - {{ $order->order_number }}</h1>
-        <p class="text-muted">You have <strong>7 days from delivery</strong> to initiate a return. You are responsible for the pickup transport fee.</p>
+        
+        <!-- Important Notices Box -->
+        <div style="padding:16px;background:#fef2f2;border:2px solid #fecaca;border-radius:14px;margin-bottom:18px;">
+            <h2 style="color:#b91c1c;font-size:1rem;margin:0 0 8px 0;">⚠️ Important: Please Read Before Proceeding</h2>
+            <ul style="margin:0;padding-left:20px;font-size:0.9rem;color:#991b1b;display:grid;gap:6px;">
+                <li>You have <strong>7 days from delivery</strong> to initiate a return.</li>
+                <li>You are responsible for the <strong>pickup transport fee</strong> of UGX 2,000 - 15,000 depending on your area.</li>
+                <li>Returned items will be <strong>inspected</strong> upon pickup before processing your refund.</li>
+                <li>Refunds are processed via <strong>MTN Mobile Money or Airtel Money</strong> within 24-72 hours after inspection.</li>
+                <li>Items must be in their <strong>original condition</strong> with tags attached.</li>
+            </ul>
+        </div>
 
         <form method="POST" action="{{ route('orders.return.store', $order) }}" enctype="multipart/form-data">
             @csrf
@@ -32,6 +43,7 @@
                 <!-- Reason for Return -->
                 <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                     <h2>Reason for Return</h2>
+                    <p class="text-muted" style="font-size:0.85rem;margin-bottom:8px;">Why are you returning these items?</p>
                     <select class="input" name="reason" required>
                         <option value="">Select a reason...</option>
                         @foreach($reasons as $reason)
@@ -50,7 +62,7 @@
                     @error('images')<p style="color:#dc2626;font-size:0.85rem;">{{ $message }}</p>@enderror
                 </div>
 
-                <!-- Written Notes -->
+                <!-- Written Explanation -->
                 <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                     <h2>Written Explanation</h2>
                     <p class="text-muted" style="font-size:0.85rem;">Please explain in detail why you want to return these items.</p>
@@ -59,12 +71,12 @@
                 </div>
 
                 <!-- Refund Details -->
-                <div style="padding:16px;background:#f9fafb;border-radius:14px;">
-                    <h2>Refund Details</h2>
-                    <p class="text-muted" style="font-size:0.85rem;">Where should we send your refund?</p>
+                <div style="padding:16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;">
+                    <h2 style="color:#166534;">💳 Refund Details</h2>
+                    <p class="text-muted" style="font-size:0.85rem;">Your refund will be sent to:</p>
                     <div style="display:grid;gap:12px;">
                         <div>
-                            <label>Network</label>
+                            <label>Network <span style="color:#dc2626;">*</span></label>
                             <select class="input" name="refund_network" required>
                                 <option value="">Select network...</option>
                                 <option value="Airtel Money" {{ old('refund_network') === 'Airtel Money' ? 'selected' : '' }}>Airtel Money</option>
@@ -73,12 +85,12 @@
                             @error('refund_network')<p style="color:#dc2626;font-size:0.85rem;">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label>Registered Name</label>
+                            <label>Registered Name <span style="color:#dc2626;">*</span></label>
                             <input class="input" name="refund_name" value="{{ old('refund_name') }}" placeholder="Full name as registered on mobile money" required>
                             @error('refund_name')<p style="color:#dc2626;font-size:0.85rem;">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label>Phone Number</label>
+                            <label>Phone Number <span style="color:#dc2626;">*</span></label>
                             <input class="input" name="refund_number" value="{{ old('refund_number') }}" placeholder="e.g. 0777123456" required>
                             @error('refund_number')<p style="color:#dc2626;font-size:0.85rem;">{{ $message }}</p>@enderror
                         </div>
@@ -87,11 +99,19 @@
 
                 <!-- Pickup Details -->
                 <div style="padding:16px;background:#f9fafb;border-radius:14px;">
-                    <h2>Pickup Details</h2>
-                    <p class="text-muted" style="font-size:0.85rem;">We will arrange pickup of the items from your location. You will pay the transport fee.</p>
+                    <h2>🚚 Pickup Details</h2>
+                    <p class="text-muted" style="font-size:0.85rem;">We will arrange pickup of the items from your location. <strong>You will pay the pickup fee.</strong> The fee is deducted from your refund or paid to the rider.</p>
+                    
+                    <div style="padding:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;margin-bottom:16px;">
+                        <p style="margin:0;font-size:0.9rem;color:#92400e;">
+                            <strong>💰 Pickup fee:</strong> The cost depends on your area (UGX 2,000 - UGX 15,000). 
+                            This will be <strong>deducted from your refund</strong> or paid directly to the rider upon pickup.
+                        </p>
+                    </div>
+
                     <div style="display:grid;gap:12px;">
                         <div>
-                            <label>Pickup Area / Delivery Zone</label>
+                            <label>Pickup Area / Delivery Zone <span style="color:#dc2626;">*</span></label>
                             <select class="input" name="pickup_area" required>
                                 <option value="">Select your area...</option>
                                 @foreach($deliveryAreas as $area => $fee)
@@ -101,12 +121,12 @@
                             @error('pickup_area')<p style="color:#dc2626;font-size:0.85rem;">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label>Full Pickup Address</label>
+                            <label>Full Pickup Address <span style="color:#dc2626;">*</span></label>
                             <input class="input" name="pickup_address" value="{{ old('pickup_address') }}" placeholder="Street, building, landmark..." required>
                             @error('pickup_address')<p style="color:#dc2626;font-size:0.85rem;">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label>Contact Phone Number</label>
+                            <label>Contact Phone Number <span style="color:#dc2626;">*</span></label>
                             <input class="input" name="pickup_contact" value="{{ old('pickup_contact') }}" placeholder="Phone number for pickup coordination" required>
                             @error('pickup_contact')<p style="color:#dc2626;font-size:0.85rem;">{{ $message }}</p>@enderror
                         </div>

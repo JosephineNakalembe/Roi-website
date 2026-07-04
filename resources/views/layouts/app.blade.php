@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ROI Store</title>
     @if (class_exists(\Illuminate\Support\Facades\Vite::class) && file_exists(public_path('build/manifest.json')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/css/responsive.css', 'resources/js/app.js'])
+    @else
+        <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
     @endif
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
     <style>
@@ -46,6 +48,9 @@
         .nav-badge sup.badge-red{background:#dc2626;color:#fff;}
         .nav-badge sup.badge-orange{background:#f97316;color:#fff;}
         .unread-help-badge{position:fixed;bottom:20px;right:20px;z-index:999;animation:pulse 2s infinite;}
+        .cart-float{position:fixed;bottom:80px;right:20px;z-index:999;width:60px;height:60px;border-radius:50%;background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 16px rgba(26,26,46,0.5);transition:all 0.2s;font-size:1.6rem;}
+        .cart-float:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(26,26,46,0.6);}
+        .cart-float sup{position:absolute;top:-6px;right:-6px;min-width:24px;height:24px;border-radius:12px;background:#dc2626;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px;border:2px solid #1a1a2e;}
         @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,0.4);}70%{box-shadow:0 0 0 15px rgba(220,38,38,0);}100%{box-shadow:0 0 0 0 rgba(220,38,38,0);}}
     </style>
 </head>
@@ -121,5 +126,19 @@
         </div>
         @yield('content')
     </main>
+
+    @auth
+        @unless(auth()->user()->isAdmin())
+            @php
+                $floatCartCount = auth()->user()->cartItems()->count();
+            @endphp
+            <a href="{{ route('cart.index') }}" class="cart-float" title="View Cart">
+                🛒
+                @if($floatCartCount > 0)
+                    <sup>{{ $floatCartCount }}</sup>
+                @endif
+            </a>
+        @endunless
+    @endauth
 </body>
 </html>
