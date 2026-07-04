@@ -34,7 +34,6 @@ services:
         value: public
     startCommand: |
       touch database/database.sqlite
-      php artisan key:generate --force
       php artisan migrate --force
       php artisan config:cache
       php artisan route:cache
