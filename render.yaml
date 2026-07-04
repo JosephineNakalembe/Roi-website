@@ -1,16 +1,10 @@
 services:
   - type: web
     name: roi-website
-    runtime: php
+    runtime: docker
     plan: free
-    buildCommand: |
-      composer install --no-dev --optimize-autoloader
-      npm install
-      npm run build
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
-    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
       - key: APP_ENV
         value: production
