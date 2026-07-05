@@ -2,6 +2,7 @@ node_modules
 vendor
 .git
 .gitignore
+.env
 .env.backup
 .env.production
 .phpunit.result.cache
