@@ -1,31 +1,21 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm
 
 # Install system dependencies
-RUN apk update && apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
-    libjpeg-turbo-dev \
-    libwebp-dev \
-    libxpm-dev \
     libonig-dev \
     libxml2-dev \
-    sqlite-dev \
+    libsqlite3-dev \
     zip \
     unzip \
     nodejs \
     npm \
-    libpng \
-    libjpeg \
-    libwebp \
-    libxpm \
-    libonig \
-    libxml2 \
-    sqlite
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install pdo_sqlite mbstring gd exif
+RUN docker-php-ext-install pdo_sqlite mbstring gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -54,7 +44,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN mkdir -p storage/framework/{cache,sessions,views} \
     && mkdir -p storage/logs \
     && mkdir -p bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    && chown -R www-data:www-data storage bootstrap/cache
 
 # Expose port
 EXPOSE 8000
