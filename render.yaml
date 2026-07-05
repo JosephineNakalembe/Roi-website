@@ -19,11 +19,11 @@ services:
       - key: DB_DATABASE
         value: database/database.sqlite
       - key: SESSION_DRIVER
-        value: database
+        value: file
       - key: CACHE_STORE
-        value: database
+        value: file
       - key: QUEUE_CONNECTION
-        value: database
+        value: sync
       - key: LOG_CHANNEL
         value: errorlog
       - key: LOG_LEVEL
