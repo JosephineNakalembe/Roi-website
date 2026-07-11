@@ -29,15 +29,8 @@ class CustomerServiceController extends Controller
             'status' => ['nullable', 'in:open,answered,closed'],
         ]);
 
-        $replies = $message->replies ?? [];
-        $replies[] = [
-            'sender' => 'admin',
-            'message' => $data['message'],
-            'created_at' => now()->toDateTimeString(),
-        ];
-
         $message->update([
-            'replies' => $replies,
+            'replies' => $message->addReply('admin', $data['message']),
             'status' => $data['status'] ?? 'answered',
             'seen_by_user' => false,
         ]);

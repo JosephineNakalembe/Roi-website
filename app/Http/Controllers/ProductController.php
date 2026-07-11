@@ -15,30 +15,14 @@ class ProductController extends Controller
         $search = $request->query('search');
         $categorySlug = $request->query('category');
 
-        // Track frequently searched terms (store in cache, max 100)
+        // Track frequently searched terms (keep top 100)
         if ($search) {
-            $frequentSearches = Cache::get('frequent_searches', []);
-            $term = strtolower(trim($search));
-            if (!isset($frequentSearches[$term])) {
-                $frequentSearches[$term] = 0;
-            }
-            $frequentSearches[$term]++;
-            // Keep only top 100
-            arsort($frequentSearches);
-            $frequentSearches = array_slice($frequentSearches, 0, 100);
-            Cache::forever('frequent_searches', $frequentSearches);
+            $this->trackFrequency('frequent_searches', strtolower(trim($search)), 100);
         }
 
-        // Track frequently viewed categories
+        // Track frequently viewed categories (keep top 20)
         if ($categorySlug) {
-            $frequentCategories = Cache::get('frequent_categories', []);
-            if (!isset($frequentCategories[$categorySlug])) {
-                $frequentCategories[$categorySlug] = 0;
-            }
-            $frequentCategories[$categorySlug]++;
-            arsort($frequentCategories);
-            $frequentCategories = array_slice($frequentCategories, 0, 20);
-            Cache::forever('frequent_categories', $frequentCategories);
+            $this->trackFrequency('frequent_categories', $categorySlug, 20);
         }
 
         $query = Product::with('primaryImage', 'category')
@@ -115,5 +99,17 @@ class ProductController extends Controller
             ->get();
 
         return view('shop.show', compact('product', 'inWishlist', 'reviews', 'avgRating', 'reviewCount', 'suggestedProducts'));
+    }
+
+    /**
+     * Increment a hit counter for $key inside the given cache bucket, keeping
+     * only the $limit most frequent entries.
+     */
+    private function trackFrequency(string $cacheKey, string $key, int $limit): void
+    {
+        $counts = Cache::get($cacheKey, []);
+        $counts[$key] = ($counts[$key] ?? 0) + 1;
+        arsort($counts);
+        Cache::forever($cacheKey, array_slice($counts, 0, $limit));
     }
 }

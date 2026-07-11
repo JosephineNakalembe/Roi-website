@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesOwnership;
 use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Product;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Cache;
 
 class CartController extends Controller
 {
+    use AuthorizesOwnership;
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -174,9 +177,7 @@ class CartController extends Controller
         ]);
 
         $item = CartItem::findOrFail($data['cart_item_id']);
-        if ($item->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($item);
 
         $item->update(['selected' => $data['selected']]);
         return back();

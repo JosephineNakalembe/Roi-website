@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesOwnership;
 use App\Models\Order;
 use App\Models\OrderItemReturn;
 use Illuminate\Http\Request;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
+    use AuthorizesOwnership;
+
     public function index()
     {
         $user = Auth::user();
@@ -23,9 +26,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($order);
 
         $order->load('items.product', 'items.review', 'address', 'updates', 'returns.items.orderItem', 'returns.statusUpdates');
         return view('orders.show', compact('order'));
@@ -33,9 +34,7 @@ class OrderController extends Controller
 
     public function confirmReceived(Order $order)
     {
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($order);
 
         if ($order->status !== 'shipped') {
             return back()->withErrors(['Order can only be confirmed as received when it is shipped.']);
@@ -58,9 +57,7 @@ class OrderController extends Controller
 
     public function review(Request $request, Order $order, $itemId)
     {
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($order);
 
         if ($order->status !== 'delivered') {
             return back()->withErrors(['You can only review items after confirming delivery.']);

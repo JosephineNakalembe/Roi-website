@@ -2,60 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesOwnership;
 use App\Models\Order;
 use App\Models\OrderReturn;
 use App\Models\OrderReturnUpdate;
+use App\Support\DeliveryAreas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class OrderReturnController extends Controller
 {
-    const DELIVERY_AREAS = [
-        'Kampala Road' => 3500,
-        'Nakasero' => 4000,
-        'Old Kampala' => 3000,
-        'Kisenyi' => 3500,
-        'Wandegeya' => 3000,
-        'Makerere' => 2000,
-        'Ntinda' => 6000,
-        'Naguru' => 5000,
-        'Bugolobi' => 7000,
-        'Nakawa' => 6500,
-        'Kyambogo' => 7000,
-        'Banda' => 10000,
-        'Kiwatule' => 7000,
-        'Namugongo' => 14000,
-        'Kololo' => 5000,
-        'Bukoto' => 5000,
-        'Kamwokya' => 4000,
-        'Acacia Area' => 4500,
-        'Kisementi' => 3500,
-        'Muyenga' => 7000,
-        'Makindye' => 13000,
-        'Kansanga' => 7000,
-        'Ggaba' => 12500,
-        'Munyonyo' => 14000,
-        'Buziga' => 12000,
-        'Zana' => 8000,
-        'Bunamwaya' => 10000,
-        'Najjanankumbi' => 7000,
-        'Lubowa' => 7000,
-        'Seguku' => 9000,
-        'Kajjansi' => 14000,
-        'Rubaga' => 4400,
-        'Mengo' => 4000,
-        'Namirembe' => 5000,
-        'Kawempe' => 6000,
-        'Bwaise' => 5000,
-        'Kazo' => 5000,
-        'Kanyanya' => 5000,
-        'Maganjo' => 5500,
-        'Kyaliwajjala' => 13000,
-        'Kira' => 12500,
-        'Najjera' => 10000,
-        'Bulindo' => 15000,
-    ];
+    use AuthorizesOwnership;
 
     public function myReturns()
     {
@@ -69,9 +27,7 @@ class OrderReturnController extends Controller
 
     public function track(OrderReturn $orderReturn)
     {
-        if ($orderReturn->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($orderReturn);
 
         $orderReturn->load('order', 'items.orderItem.product', 'statusUpdates');
         return view('returns.track', compact('orderReturn'));
@@ -79,9 +35,7 @@ class OrderReturnController extends Controller
 
     public function create(Order $order)
     {
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($order);
 
         if ($order->status !== 'delivered') {
             return back()->withErrors(['You can only return items from delivered orders.']);
@@ -92,7 +46,7 @@ class OrderReturnController extends Controller
         }
 
         $order->load('items.product');
-        $deliveryAreas = self::DELIVERY_AREAS;
+        $deliveryAreas = DeliveryAreas::all();
         $reasons = [
             'Wrong items received',
             'Item Arrived Damaged',
@@ -109,9 +63,7 @@ class OrderReturnController extends Controller
 
     public function store(Request $request, Order $order)
     {
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($order);
 
         if ($order->status !== 'delivered') {
             return back()->withErrors(['You can only return items from delivered orders.']);
@@ -136,7 +88,7 @@ class OrderReturnController extends Controller
             'images.*' => ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
 
-        if (!isset(self::DELIVERY_AREAS[$data['pickup_area']])) {
+        if (!DeliveryAreas::has($data['pickup_area'])) {
             return back()->withErrors(['pickup_area' => 'Invalid pickup area selected.'])->withInput();
         }
 
@@ -160,7 +112,7 @@ class OrderReturnController extends Controller
         $nextId = $lastReturn ? $lastReturn->id + 1 : 1;
         $returnNumber = 'RET' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
-        $pickupFee = self::DELIVERY_AREAS[$data['pickup_area']];
+        $pickupFee = DeliveryAreas::fee($data['pickup_area']);
 
         $return = OrderReturn::create([
             'return_number' => $returnNumber,

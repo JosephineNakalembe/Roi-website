@@ -27,4 +27,21 @@ class CustomerMessage extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Append a reply to the conversation thread and return the updated list.
+     *
+     * @param  'user'|'admin'  $sender
+     */
+    public function addReply(string $sender, string $message): array
+    {
+        $replies = $this->replies ?? [];
+        $replies[] = [
+            'sender' => $sender,
+            'message' => $message,
+            'created_at' => now()->toDateTimeString(),
+        ];
+
+        return $replies;
+    }
 }

@@ -5,57 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\Product;
+use App\Support\DeliveryAreas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
-    const DELIVERY_AREAS = [
-        'Kampala Road' => 3500,
-        'Nakasero' => 4000,
-        'Old Kampala' => 3000,
-        'Kisenyi' => 3500,
-        'Wandegeya' => 3000,
-        'Makerere' => 2000,
-        'Ntinda' => 6000,
-        'Naguru' => 5000,
-        'Bugolobi' => 7000,
-        'Nakawa' => 6500,
-        'Kyambogo' => 7000,
-        'Banda' => 10000,
-        'Kiwatule' => 7000,
-        'Namugongo' => 14000,
-        'Kololo' => 5000,
-        'Bukoto' => 5000,
-        'Kamwokya' => 4000,
-        'Acacia Area' => 4500,
-        'Kisementi' => 3500,
-        'Muyenga' => 7000,
-        'Makindye' => 13000,
-        'Kansanga' => 7000,
-        'Ggaba' => 12500,
-        'Munyonyo' => 14000,
-        'Buziga' => 12000,
-        'Zana' => 8000,
-        'Bunamwaya' => 10000,
-        'Najjanankumbi' => 7000,
-        'Lubowa' => 7000,
-        'Seguku' => 9000,
-        'Kajjansi' => 14000,
-        'Rubaga' => 4400,
-        'Mengo' => 4000,
-        'Namirembe' => 5000,
-        'Kawempe' => 6000,
-        'Bwaise' => 5000,
-        'Kazo' => 5000,
-        'Kanyanya' => 5000,
-        'Maganjo' => 5500,
-        'Kyaliwajjala' => 13000,
-        'Kira' => 12500,
-        'Najjera' => 10000,
-        'Bulindo' => 15000,
-    ];
-
     public function show(Request $request)
     {
         $user = Auth::user();
@@ -78,7 +33,7 @@ class CheckoutController extends Controller
 
         $addresses = $user->addresses()->orderByDesc('is_default')->get();
         $subtotal = $items->sum('total');
-        $deliveryAreas = self::DELIVERY_AREAS;
+        $deliveryAreas = DeliveryAreas::all();
 
         return view('checkout.show', compact('items', 'subtotal', 'addresses', 'deliveryAreas'));
     }
@@ -97,12 +52,11 @@ class CheckoutController extends Controller
         ]);
 
         // Validate delivery area
-        $deliveryAreas = self::DELIVERY_AREAS;
-        if (!isset($deliveryAreas[$data['delivery_area']])) {
+        if (!DeliveryAreas::has($data['delivery_area'])) {
             return back()->withErrors(['delivery_area' => 'Area Out of Delivery Scope'])->withInput();
         }
 
-        $shipping = $deliveryAreas[$data['delivery_area']];
+        $shipping = DeliveryAreas::fee($data['delivery_area']);
 
         $cartItems = $user->cartItems()->with('product')->get();
 

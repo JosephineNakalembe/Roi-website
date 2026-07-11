@@ -65,44 +65,7 @@ class ProductController extends Controller
         // Auto-generate product_id
         $data['product_id'] = $this->generateNextProductId();
 
-        // Convert comma-separated strings to arrays
-        $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
-    
-        // Process color-size-quantity combinations and auto-collect sizes
-        $colorStock = [];
-        $totalStock = 0;
-        $collectedSizes = [];
-        $collectedColors = [];
-        $colorPrices = [];
-        for ($i = 0; $i < 100; $i++) {
-            $color = $request->input("color_$i");
-            $size = $request->input("size_$i");
-            $quantity = $request->input("quantity_$i");
-            $colorPrice = $request->input("price_$i");
-            if ($color && $quantity) {
-                $color = trim($color);
-                $key = $size ? "$color ($size)" : $color;
-                $colorStock[$key] = (int)$quantity;
-                $totalStock += (int)$quantity;
-                // Collect unique sizes
-                if ($size && !in_array($size, $collectedSizes)) {
-                    $collectedSizes[] = $size;
-                }
-                // Collect unique colors
-                if (!in_array($color, $collectedColors)) {
-                    $collectedColors[] = $color;
-                }
-                // Collect per-color price (first non-empty wins for a given color)
-                if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$color])) {
-                    $colorPrices[$color] = (float)$colorPrice;
-                }
-            }
-        }
-        $data['color_stock'] = !empty($colorStock) ? $colorStock : null;
-        $data['stock'] = $totalStock > 0 ? $totalStock : $data['stock'];
-        $data['sizes'] = !empty($collectedSizes) ? $collectedSizes : null;
-        $data['colors'] = !empty($collectedColors) ? $collectedColors : $data['colors'];
-        $data['color_prices'] = !empty($colorPrices) ? $colorPrices : null;
+        $data = $this->applyColorVariants($request, $data);
 
         $data['slug'] = Str::slug($data['name']);
         $suffix = 1;
@@ -122,55 +85,7 @@ class ProductController extends Controller
             $product->categories()->attach(array_unique($categoryIds));
         }
 
-        // Handle multiple images (general / no specific color)
-        $globalImageIndex = 0;
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('products', 'public');
-                $product->images()->create([
-                    'path' => $path,
-                    'media_type' => 'image',
-                    'is_primary' => $globalImageIndex === 0,
-                    'order' => $globalImageIndex,
-                ]);
-                $globalImageIndex++;
-            }
-        }
-
-        // Handle per-color images
-        for ($i = 0; $i < 100; $i++) {
-            $color = $request->input("color_$i");
-            if (!$color) {
-                continue;
-            }
-            $color = trim($color);
-            if ($request->hasFile("color_images_$i")) {
-                foreach ($request->file("color_images_$i") as $image) {
-                    $path = $image->store('products', 'public');
-                    $product->images()->create([
-                        'path' => $path,
-                        'media_type' => 'image',
-                        'color' => $color,
-                        'is_primary' => $globalImageIndex === 0,
-                        'order' => $globalImageIndex,
-                    ]);
-                    $globalImageIndex++;
-                }
-            }
-        }
-
-
-        // Handle video upload
-        if ($request->hasFile('video')) {
-            $video = $request->file('video');
-            $path = $video->store('products/videos', 'public');
-            $product->images()->create([
-                'path' => $path,
-                'media_type' => 'video',
-                'is_primary' => false,
-                'order' => 999, // Videos appear last in slideshow
-            ]);
-        }
+        $this->storeProductMedia($request, $product, 0);
 
         return redirect()->route('admin.products.index')->with('success', 'Product created.');
     }
@@ -204,44 +119,7 @@ class ProductController extends Controller
         // Keep existing product_id (don't change on update)
         $data['product_id'] = $product->product_id;
 
-        // Convert comma-separated strings to arrays
-        $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
-    
-        // Process color-size-quantity combinations and auto-collect sizes
-        $colorStock = [];
-        $totalStock = 0;
-        $collectedSizes = [];
-        $collectedColors = [];
-        $colorPrices = [];
-        for ($i = 0; $i < 100; $i++) {
-            $color = $request->input("color_$i");
-            $size = $request->input("size_$i");
-            $quantity = $request->input("quantity_$i");
-            $colorPrice = $request->input("price_$i");
-            if ($color && $quantity) {
-                $color = trim($color);
-                $key = $size ? "$color ($size)" : $color;
-                $colorStock[$key] = (int)$quantity;
-                $totalStock += (int)$quantity;
-                // Collect unique sizes
-                if ($size && !in_array($size, $collectedSizes)) {
-                    $collectedSizes[] = $size;
-                }
-                // Collect unique colors
-                if (!in_array($color, $collectedColors)) {
-                    $collectedColors[] = $color;
-                }
-                // Collect per-color price (first non-empty wins for a given color)
-                if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$color])) {
-                    $colorPrices[$color] = (float)$colorPrice;
-                }
-            }
-        }
-        $data['color_stock'] = !empty($colorStock) ? $colorStock : null;
-        $data['stock'] = $totalStock > 0 ? $totalStock : $data['stock'];
-        $data['sizes'] = !empty($collectedSizes) ? $collectedSizes : null;
-        $data['colors'] = !empty($collectedColors) ? $collectedColors : $data['colors'];
-        $data['color_prices'] = !empty($colorPrices) ? $colorPrices : null;
+        $data = $this->applyColorVariants($request, $data);
 
         $data['slug'] = Str::slug($data['name']);
         $suffix = 1;
@@ -259,56 +137,8 @@ class ProductController extends Controller
         }
         $product->categories()->sync(array_unique($categoryIds));
 
-        // Handle multiple images (general / no specific color)
         $existingImageCount = $product->images()->where('media_type', 'image')->count();
-        $orderCounter = $existingImageCount;
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('products', 'public');
-                $product->images()->create([
-                    'path' => $path,
-                    'media_type' => 'image',
-                    'is_primary' => $orderCounter === 0,
-                    'order' => $orderCounter,
-                ]);
-                $orderCounter++;
-            }
-        }
-
-        // Handle per-color images
-        for ($i = 0; $i < 100; $i++) {
-            $color = $request->input("color_$i");
-            if (!$color) {
-                continue;
-            }
-            $color = trim($color);
-            if ($request->hasFile("color_images_$i")) {
-                foreach ($request->file("color_images_$i") as $image) {
-                    $path = $image->store('products', 'public');
-                    $product->images()->create([
-                        'path' => $path,
-                        'media_type' => 'image',
-                        'color' => $color,
-                        'is_primary' => $orderCounter === 0,
-                        'order' => $orderCounter,
-                    ]);
-                    $orderCounter++;
-                }
-            }
-        }
-
-
-        // Handle video upload
-        if ($request->hasFile('video')) {
-            $video = $request->file('video');
-            $path = $video->store('products/videos', 'public');
-            $product->images()->create([
-                'path' => $path,
-                'media_type' => 'video',
-                'is_primary' => false,
-                'order' => 999,
-            ]);
-        }
+        $this->storeProductMedia($request, $product, $existingImageCount);
 
         return back()->with('success', 'Product updated.');
     }
@@ -354,6 +184,112 @@ class ProductController extends Controller
     {
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Product deleted.');
+    }
+
+    /**
+     * Parse the dynamic color/size/quantity/price inputs into structured
+     * product attributes (color_stock, stock, sizes, colors, color_prices).
+     */
+    private function applyColorVariants(Request $request, array $data): array
+    {
+        // Convert comma-separated strings to arrays
+        $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
+
+        // Process color-size-quantity combinations and auto-collect sizes
+        $colorStock = [];
+        $totalStock = 0;
+        $collectedSizes = [];
+        $collectedColors = [];
+        $colorPrices = [];
+        for ($i = 0; $i < 100; $i++) {
+            $color = $request->input("color_$i");
+            $size = $request->input("size_$i");
+            $quantity = $request->input("quantity_$i");
+            $colorPrice = $request->input("price_$i");
+            if ($color && $quantity) {
+                $color = trim($color);
+                $key = $size ? "$color ($size)" : $color;
+                $colorStock[$key] = (int)$quantity;
+                $totalStock += (int)$quantity;
+                // Collect unique sizes
+                if ($size && !in_array($size, $collectedSizes)) {
+                    $collectedSizes[] = $size;
+                }
+                // Collect unique colors
+                if (!in_array($color, $collectedColors)) {
+                    $collectedColors[] = $color;
+                }
+                // Collect per-color price (first non-empty wins for a given color)
+                if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$color])) {
+                    $colorPrices[$color] = (float)$colorPrice;
+                }
+            }
+        }
+        $data['color_stock'] = !empty($colorStock) ? $colorStock : null;
+        $data['stock'] = $totalStock > 0 ? $totalStock : $data['stock'];
+        $data['sizes'] = !empty($collectedSizes) ? $collectedSizes : null;
+        $data['colors'] = !empty($collectedColors) ? $collectedColors : $data['colors'];
+        $data['color_prices'] = !empty($colorPrices) ? $colorPrices : null;
+
+        return $data;
+    }
+
+    /**
+     * Persist uploaded general images, per-color images and an optional video.
+     * $startOrder seeds the running order/primary counter so existing media is
+     * preserved when updating an existing product.
+     */
+    private function storeProductMedia(Request $request, Product $product, int $startOrder): void
+    {
+        $orderCounter = $startOrder;
+
+        // General / no specific color images
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('products', 'public');
+                $product->images()->create([
+                    'path' => $path,
+                    'media_type' => 'image',
+                    'is_primary' => $orderCounter === 0,
+                    'order' => $orderCounter,
+                ]);
+                $orderCounter++;
+            }
+        }
+
+        // Per-color images
+        for ($i = 0; $i < 100; $i++) {
+            $color = $request->input("color_$i");
+            if (!$color) {
+                continue;
+            }
+            $color = trim($color);
+            if ($request->hasFile("color_images_$i")) {
+                foreach ($request->file("color_images_$i") as $image) {
+                    $path = $image->store('products', 'public');
+                    $product->images()->create([
+                        'path' => $path,
+                        'media_type' => 'image',
+                        'color' => $color,
+                        'is_primary' => $orderCounter === 0,
+                        'order' => $orderCounter,
+                    ]);
+                    $orderCounter++;
+                }
+            }
+        }
+
+        // Video (appears last in slideshow)
+        if ($request->hasFile('video')) {
+            $video = $request->file('video');
+            $path = $video->store('products/videos', 'public');
+            $product->images()->create([
+                'path' => $path,
+                'media_type' => 'video',
+                'is_primary' => false,
+                'order' => 999,
+            ]);
+        }
     }
 
     private function generateNextProductId(): string

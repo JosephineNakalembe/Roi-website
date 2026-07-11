@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesOwnership;
 use App\Models\CustomerMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CustomerServiceController extends Controller
 {
+    use AuthorizesOwnership;
+
     public function index()
     {
         $messages = Auth::user()->customerMessages()->latest()->get();
@@ -38,9 +41,7 @@ class CustomerServiceController extends Controller
 
     public function reply(Request $request, CustomerMessage $message)
     {
-        if ($message->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($message);
 
         if ($message->status === 'closed') {
             return back()->withErrors(['message' => 'This ticket is closed. Please open a new ticket.']);
@@ -50,15 +51,8 @@ class CustomerServiceController extends Controller
             'message' => ['required', 'string', 'max:1000'],
         ]);
 
-        $replies = $message->replies ?? [];
-        $replies[] = [
-            'sender' => 'user',
-            'message' => $data['message'],
-            'created_at' => now()->toDateTimeString(),
-        ];
-
         $message->update([
-            'replies' => $replies,
+            'replies' => $message->addReply('user', $data['message']),
             'status' => 'open',
         ]);
 
@@ -67,9 +61,7 @@ class CustomerServiceController extends Controller
 
     public function close(CustomerMessage $message)
     {
-        if ($message->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorizeOwnership($message);
 
         $message->update(['status' => 'closed']);
 
