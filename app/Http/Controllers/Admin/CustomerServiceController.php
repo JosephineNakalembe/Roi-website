@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CustomerMessage;
 use App\Mail\SupportReplyMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class CustomerServiceController extends Controller
@@ -42,9 +43,21 @@ class CustomerServiceController extends Controller
             'seen_by_user' => false,
         ]);
 
-        // Send email notification with the full chat history to the customer's signup email
-        Mail::to($message->user->email, $message->user->name)
-            ->send(new SupportReplyMail($message));
+        // Send email notification with the full chat history to the customer's signup email.
+        // The reply is already persisted above, so a mail failure must not fail the request or
+        // be reported as a success — log it and tell the admin the email did not go out.
+        try {
+            Mail::to($message->user->email, $message->user->name)
+                ->send(new SupportReplyMail($message));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send support reply email', [
+                'customer_message_id' => $message->id,
+                'recipient' => $message->user->email,
+                'exception' => $e->getMessage(),
+            ]);
+
+            return back()->with('warning', 'Reply saved, but the email notification to ' . $message->user->email . ' could not be sent.');
+        }
 
         return back()->with('success', 'Reply sent. Email notification sent to ' . $message->user->email);
     }

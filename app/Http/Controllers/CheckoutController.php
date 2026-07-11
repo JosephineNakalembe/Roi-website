@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
@@ -145,47 +146,52 @@ class CheckoutController extends Controller
         $subtotal = $items->sum(fn ($item) => $item['product']->price * $item['quantity']);
         $total = $subtotal + $shipping;
 
-        $order = Order::create([
-            'user_id' => $user->id,
-            'shipping_name' => $data['shipping_name'],
-            'shipping_phone' => $data['shipping_phone'],
-            'delivery_area' => $data['delivery_area'],
-            'subtotal' => $subtotal,
-            'shipping' => $shipping,
-            'total' => $total,
-            'status' => 'pending',
-            'notes' => 'Delivery Area: ' . $data['delivery_area'] . ' | Address: ' . $data['address_line'] . ($data['notes'] ? ' | ' . $data['notes'] : ''),
-            'placed_at' => now(),
-        ]);
-
-        foreach ($items as $item) {
-            $product = $item['product'];
-            $quantity = $item['quantity'];
-            $color = $item['color'] ?? null;
-            $size = $item['size'] ?? null;
-            $order->items()->create([
-                'product_id' => $product->id,
-                'product_name' => $product->name,
-                'unit_price' => $product->price,
-                'quantity' => $quantity,
-                'total_price' => $product->price * $quantity,
-                'color' => $color,
-                'size' => $size,
-            ]);
-            $product->decrement('stock', $quantity);
-        }
-
-        // Add initial order update with estimated delivery (1-3 day range)
+        // Placing an order, decrementing stock and clearing the cart must all succeed or all
+        // roll back together, otherwise a partial failure leaves inconsistent stock/order data.
         $estStart = now()->addDay()->format('d/m/Y');
         $estEnd = now()->addDays(3)->format('d/m/Y');
-        $order->updates()->create([
-            'order_id' => $order->id,
-            'status' => 'pending',
-            'note' => '📅 Estimated delivery: ' . $estStart . ' - ' . $estEnd,
-        ]);
 
-        // Clear the cart from database
-        $user->cartItems()->delete();
+        DB::transaction(function () use ($user, $data, $items, $subtotal, $shipping, $total, $estStart, $estEnd) {
+            $order = Order::create([
+                'user_id' => $user->id,
+                'shipping_name' => $data['shipping_name'],
+                'shipping_phone' => $data['shipping_phone'],
+                'delivery_area' => $data['delivery_area'],
+                'subtotal' => $subtotal,
+                'shipping' => $shipping,
+                'total' => $total,
+                'status' => 'pending',
+                'notes' => 'Delivery Area: ' . $data['delivery_area'] . ' | Address: ' . $data['address_line'] . ($data['notes'] ? ' | ' . $data['notes'] : ''),
+                'placed_at' => now(),
+            ]);
+
+            foreach ($items as $item) {
+                $product = $item['product'];
+                $quantity = $item['quantity'];
+                $color = $item['color'] ?? null;
+                $size = $item['size'] ?? null;
+                $order->items()->create([
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'unit_price' => $product->price,
+                    'quantity' => $quantity,
+                    'total_price' => $product->price * $quantity,
+                    'color' => $color,
+                    'size' => $size,
+                ]);
+                $product->decrement('stock', $quantity);
+            }
+
+            // Add initial order update with estimated delivery (1-3 day range)
+            $order->updates()->create([
+                'order_id' => $order->id,
+                'status' => 'pending',
+                'note' => '📅 Estimated delivery: ' . $estStart . ' - ' . $estEnd,
+            ]);
+
+            // Clear the cart from database
+            $user->cartItems()->delete();
+        });
 
         return redirect()->route('orders.index')->with('success', 'Your order has been placed successfully. Estimated delivery: ' . $estStart . ' - ' . $estEnd . '.');
     }

@@ -7,6 +7,7 @@ use App\Models\OrderReturn;
 use App\Models\OrderReturnUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class OrderReturnController extends Controller
@@ -162,33 +163,48 @@ class OrderReturnController extends Controller
 
         $pickupFee = self::DELIVERY_AREAS[$data['pickup_area']];
 
-        $return = OrderReturn::create([
-            'return_number' => $returnNumber,
-            'order_id' => $order->id,
-            'user_id' => Auth::id(),
-            'reason' => $data['reason'],
-            'notes' => $data['notes'],
-            'refund_number' => $data['refund_number'],
-            'refund_network' => $data['refund_network'],
-            'refund_name' => $data['refund_name'],
-            'pickup_address' => $data['pickup_address'],
-            'pickup_contact' => $data['pickup_contact'],
-            'pickup_area' => $data['pickup_area'],
-            'pickup_fee' => $pickupFee,
-            'images' => implode(',', $imagePaths),
-            'status' => 'pending',
-        ]);
+        // Creating the return, its items and the initial status update must be atomic. If any
+        // insert fails, roll everything back and remove the uploaded images so we don't leave
+        // orphaned records or files behind.
+        try {
+            $return = DB::transaction(function () use ($data, $order, $returnNumber, $pickupFee, $imagePaths) {
+                $return = OrderReturn::create([
+                    'return_number' => $returnNumber,
+                    'order_id' => $order->id,
+                    'user_id' => Auth::id(),
+                    'reason' => $data['reason'],
+                    'notes' => $data['notes'],
+                    'refund_number' => $data['refund_number'],
+                    'refund_network' => $data['refund_network'],
+                    'refund_name' => $data['refund_name'],
+                    'pickup_address' => $data['pickup_address'],
+                    'pickup_contact' => $data['pickup_contact'],
+                    'pickup_area' => $data['pickup_area'],
+                    'pickup_fee' => $pickupFee,
+                    'images' => implode(',', $imagePaths),
+                    'status' => 'pending',
+                ]);
 
-        // Attach selected items
-        foreach ($data['items'] as $itemId) {
-            $return->items()->create(['order_item_id' => $itemId]);
+                // Attach selected items
+                foreach ($data['items'] as $itemId) {
+                    $return->items()->create(['order_item_id' => $itemId]);
+                }
+
+                // Create initial status update
+                $return->statusUpdates()->create([
+                    'status' => 'pending',
+                    'note' => 'Return request submitted. Awaiting admin review. You will be notified once your request is processed.',
+                ]);
+
+                return $return;
+            });
+        } catch (\Throwable $e) {
+            foreach ($imagePaths as $path) {
+                Storage::disk('public')->delete($path);
+            }
+
+            throw $e;
         }
-
-        // Create initial status update
-        $return->statusUpdates()->create([
-            'status' => 'pending',
-            'note' => 'Return request submitted. Awaiting admin review. You will be notified once your request is processed.',
-        ]);
 
         return redirect()->route('returns.track', $return)
             ->with('success', "Return request {$returnNumber} has been submitted successfully. You can track the progress below.");
