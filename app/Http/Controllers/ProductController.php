@@ -71,9 +71,16 @@ class ProductController extends Controller
         $frequentSlugs = array_keys($frequentCategorySlugs);
         $suggestedCategories = collect();
         if (!empty($frequentSlugs)) {
-            $orderBy = implode(',', array_map(fn($s) => "'" . str_replace("'", "''", $s) . "'", $frequentSlugs));
+            $caseExpression = 'CASE slug';
+            $bindings = [];
+            foreach (array_values($frequentSlugs) as $position => $slug) {
+                $caseExpression .= ' WHEN ? THEN ' . $position;
+                $bindings[] = $slug;
+            }
+            $caseExpression .= ' END';
+
             $suggestedCategories = Category::whereIn('slug', $frequentSlugs)
-                ->orderByRaw("FIELD(slug, {$orderBy})")
+                ->orderByRaw($caseExpression, $bindings)
                 ->take(5)
                 ->get();
         }
