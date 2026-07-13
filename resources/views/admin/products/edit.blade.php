@@ -186,9 +186,21 @@
                                     <source src="{{ asset('storage/' . $media->path) }}" type="video/mp4">
                                 </video>
                                 <span style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;">VIDEO</span>
+                                <form method="POST" action="{{ route('admin.products.destroy-media', $media) }}" style="position:absolute;top:8px;right:8px;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" onclick="return confirm('Remove this video?')" style="background:#ef4444;color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-weight:bold;font-size:1rem;line-height:1;">×</button>
+                                </form>
                             </div>
                         @else
-                            <img src="{{ asset('storage/' . $media->path) }}" alt="" style="width:100%;border-radius:12px;object-fit:cover;height:150px;">
+                            <div style="position:relative;">
+                                <img src="{{ asset('storage/' . $media->path) }}" alt="" style="width:100%;border-radius:12px;object-fit:cover;height:150px;">
+                                <form method="POST" action="{{ route('admin.products.destroy-media', $media) }}" style="position:absolute;top:8px;right:8px;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" onclick="return confirm('Remove this image?')" style="background:#ef4444;color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-weight:bold;font-size:1rem;line-height:1;">×</button>
+                                </form>
+                            </div>
                         @endif
                     @endforeach
                 </div>

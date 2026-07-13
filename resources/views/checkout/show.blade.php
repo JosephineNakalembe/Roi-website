@@ -3,7 +3,51 @@
 @section('content')
     <div class="card" style="max-width:900px;margin:0 auto;">
         <h1>Checkout</h1>
-        <div style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:24px;">
+        <style>
+            .checkout-container {
+                grid-template-columns: 1fr !important;
+            }
+        </style>
+        <div class="checkout-container" style="display:grid;gap:24px;">
+            <div style="background:#f9fafb;border-radius:16px;padding:18px;">
+                <h2>Order summary</h2>
+                <div style="margin-top:16px;">
+                    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;margin-bottom:16px;scrollbar-width:thin;" id="orderSummarySlider">
+                        @foreach($items as $item)
+                            @php
+                                $colorParts = explode(':', $item['color'] ?? '');
+                                $colorDisplayName = $colorParts[1] ?? ($item['color'] ?? '');
+                            @endphp
+                            <div style="flex:0 0 auto;width:130px;text-align:center;background:#fff;padding:10px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                                <img src="{{ optional($item['product']->primaryImage)->path ? asset('storage/' . $item['product']->primaryImage->path) : 'https://via.placeholder.com/200x200' }}"
+                                     alt="{{ $item['product']->name }}"
+                                     style="width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:8px;">
+                                <p style="font-size:0.75rem;font-weight:600;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $item['product']->name }}</p>
+                                <p style="font-size:0.7rem;color:#6b7280;margin:2px 0;">Qty: {{ $item['quantity'] }}</p>
+                                @if($colorDisplayName || $item['size'])
+                                    <p style="font-size:0.65rem;color:#6b7280;margin:2px 0;">
+                                        @if($colorDisplayName)<span>{{ $colorDisplayName }}</span>@endif
+                                        @if($item['size'])<span> • {{ $item['size'] }}</span>@endif
+                                    </p>
+                                @endif
+                                <p style="font-size:0.85rem;font-weight:700;color:#1a1a2e;margin:6px 0 0;">UGX{{ number_format($item['total'], 0) }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <hr style="margin:18px 0;">
+                <div style="display:flex;justify-content:space-between;">
+                    <span>Subtotal</span><strong>UGX{{ number_format($subtotal, 0) }}</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span>Shipping</span><strong id="shippingDisplay">—</strong>
+                </div>
+                <hr style="margin:18px 0;">
+                <div style="display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;">
+                    <span>Total</span><strong id="totalDisplay">UGX{{ number_format($subtotal, 0) }}</strong>
+                </div>
+            </div>
             <div>
                 <form method="POST" action="{{ route('checkout.process') }}">
                     @csrf
@@ -54,36 +98,6 @@
 
                     <button class="btn" type="submit" style="width:100%;padding:14px;font-size:1rem;font-weight:600;">Place Order</button>
                 </form>
-            </div>
-            <div style="background:#f9fafb;border-radius:16px;padding:18px;">
-                <h2>Order summary</h2>
-                <div style="margin-top:16px;">
-                    @foreach($items as $item)
-                        <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:12px;">
-                            <div>
-                                <span>{{ $item['product']->name }} × {{ $item['quantity'] }}</span>
-                                @if($item['color'] || $item['size'])
-                                    <p style="font-size:0.85rem;color:#6b7280;margin-top:2px;">
-                                        @if($item['color'])<span>Color: {{ $item['color'] }}</span>@endif
-                                        @if($item['size'])<span> | Size: {{ $item['size'] }}</span>@endif
-                                    </p>
-                                @endif
-                            </div>
-                            <strong>UGX{{ number_format($item['total'], 0) }}</strong>
-                        </div>
-                    @endforeach
-                </div>
-                <hr style="margin:18px 0;">
-                <div style="display:flex;justify-content:space-between;">
-                    <span>Subtotal</span><strong>UGX{{ number_format($subtotal, 0) }}</strong>
-                </div>
-                <div style="display:flex;justify-content:space-between;">
-                    <span>Shipping</span><strong id="shippingDisplay">—</strong>
-                </div>
-                <hr style="margin:18px 0;">
-                <div style="display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;">
-                    <span>Total</span><strong id="totalDisplay">UGX{{ number_format($subtotal, 0) }}</strong>
-                </div>
             </div>
         </div>
     </div>

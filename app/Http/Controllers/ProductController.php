@@ -44,26 +44,78 @@ class ProductController extends Controller
         $query = Product::with('primaryImage', 'category')
             ->where('is_active', true)
             ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
-            ->when($categorySlug, fn ($q) => $q->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug)));
+            ->when($categorySlug && $categorySlug !== 'all', fn ($q) => $q->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug)));
 
-        // Randomize order for non-filtered views, stable for filtered
-        if (!$search && !$categorySlug) {
-            $query->inRandomOrder();
+        // Separate in-stock and out-of-stock products
+        if (!$search && (!$categorySlug || $categorySlug === 'all')) {
+            // Get all products first to separate them
+            $allProducts = $query->get();
+            $inStockProducts = $allProducts->where('stock', '>', 0);
+            $outOfStockProducts = $allProducts->where('stock', '<=', 0);
+
+            // Shuffle only in-stock products
+            $shuffledInStock = $inStockProducts->shuffle();
+
+            // Combine: shuffled in-stock first, then out-of-stock
+            $products = $shuffledInStock->concat($outOfStockProducts);
+
+            // Create a paginator manually
+            $page = $request->get('page', 1);
+            $perPage = 12;
+            $offset = ($page - 1) * $perPage;
+            $slicedProducts = $products->slice($offset, $perPage);
+            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                $slicedProducts,
+                $products->count(),
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+
+            // If AJAX request, return only the product cards HTML + next page URL
+            if ($request->ajax()) {
+                $html = view('shop.partials.product_cards', compact('paginator'))->render();
+                return response()->json([
+                    'html' => $html,
+                    'next_page_url' => $paginator->nextPageUrl(),
+                ]);
+            }
+
+            $products = $paginator;
         } else {
-            $query->latest();
+            // For filtered views, use latest order but still push out-of-stock to bottom
+            $allProducts = $query->latest()->get();
+            $inStockProducts = $allProducts->where('stock', '>', 0);
+            $outOfStockProducts = $allProducts->where('stock', '<=', 0);
+
+            // Combine: in-stock first (latest order), then out-of-stock (latest order)
+            $products = $inStockProducts->concat($outOfStockProducts);
+
+            // Create a paginator manually
+            $page = $request->get('page', 1);
+            $perPage = 12;
+            $offset = ($page - 1) * $perPage;
+            $slicedProducts = $products->slice($offset, $perPage);
+            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                $slicedProducts,
+                $products->count(),
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+
+            // If AJAX request, return only the product cards HTML + next page URL
+            if ($request->ajax()) {
+                $html = view('shop.partials.product_cards', compact('paginator'))->render();
+                return response()->json([
+                    'html' => $html,
+                    'next_page_url' => $paginator->nextPageUrl(),
+                ]);
+            }
+
+            $products = $paginator;
         }
 
-        // If AJAX request, return only the product cards HTML + next page URL
-        if ($request->ajax()) {
-            $products = $query->paginate(12)->withQueryString();
-            $html = view('shop.partials.product_cards', compact('products'))->render();
-            return response()->json([
-                'html' => $html,
-                'next_page_url' => $products->nextPageUrl(),
-            ]);
-        }
-
-        $products = $query->paginate(12)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
         // Get frequently searched categories for suggestions

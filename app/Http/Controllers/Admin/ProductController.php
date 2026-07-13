@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -65,8 +66,10 @@ class ProductController extends Controller
         // Auto-generate product_id
         $data['product_id'] = $this->generateNextProductId();
 
-        // Convert comma-separated strings to arrays
-        $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
+        // Convert comma-separated strings to arrays (if colors input exists)
+        if (isset($data['colors'])) {
+            $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
+        }
     
         // Process color-size-quantity combinations and auto-collect sizes
         $colorStock = [];
@@ -354,6 +357,19 @@ class ProductController extends Controller
     {
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Product deleted.');
+    }
+
+    public function destroyMedia(ProductImage $media)
+    {
+        // Delete the file from storage
+        if (Storage::disk('public')->exists($media->path)) {
+            Storage::disk('public')->delete($media->path);
+        }
+
+        // Delete the database record
+        $media->delete();
+
+        return back()->with('success', 'Media removed successfully.');
     }
 
     private function generateNextProductId(): string

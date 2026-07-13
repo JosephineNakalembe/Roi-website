@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="card" style="text-align:center;">
+    <section class="card card-centered-text">
         <h1>Welcome to ROI Store</h1>
         <p class="text-muted">Browse products, add items to your cart, checkout securely, and track orders from a single login.</p>
-        <div style="margin-top:20px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+        <div class="flex-center flex-gap-medium flex-wrap" style="margin-top:20px;">
             <a class="btn" href="{{ route('shop.index') }}">Shop Now</a>
             @guest
                 <a class="btn btn-secondary" href="{{ route('register') }}">Create Account</a>

@@ -1,68 +1,111 @@
 @extends('layouts.app')
 
 @section('content')
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-        <h1 style="margin-bottom:0;">Shop</h1>
-        <form method="GET" action="{{ route('shop.index') }}" style="display:flex;gap:8px;flex-wrap:wrap;">
-            <input class="input" type="search" name="search" value="{{ $search ?? '' }}" placeholder="Search" style="width:160px;padding:8px 12px;">
-            <select class="input" name="category" style="width:auto;padding:8px 12px;">
-                <option value="">All categories</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->slug }}"{{ $categorySlug === $category->slug ? ' selected' : '' }}>{{ $category->name }}</option>
-                @endforeach
-            </select>
-            <button class="btn" type="submit" style="padding:8px 16px;">Filter</button>
-        </form>
+    <style>
+        @media (max-width: 768px) {
+            .shop-header {
+                flex-direction: row !important;
+                align-items: center !important;
+            }
+            .shop-header h1 {
+                flex-direction: row !important;
+                align-items: center !important;
+            }
+            .shop-header form {
+                width: 100% !important;
+                max-width: 80% !important;
+                margin: 0 !important;
+            }
+            .shop-header input {
+                width: 100% !important;
+                font-size: 0.75rem !important;
+                padding: 4px 12px !important;
+            }
+            .shop-header button {
+                font-size: 0.75rem !important;
+                padding: 8px 12px !important;
+            }
+            #productGrid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px !important;
+            }
+            .category-pills {
+                font-size: 0.65rem !important;
+                padding: 4px 8px !important;
+            }
+            .product-card h2 {
+                font-size: 0.6rem !important;
+                font-weight: 400 !important;
+            }
+        }
+        @media (min-width: 769px) and (max-width: 1024px) {
+            #productGrid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+        }
+        @media (min-width: 1025px) {
+            #productGrid {
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
+        }
+        .search-wrapper {
+            position: relative;
+        }
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+        }
+    </style>
+    <div class="shop-header flex justify-between items-center gap-2 flex-wrap mb-2" style="margin-bottom:20px;">
+        <h1 class="mb-0 flex gap-2 items-center flex-wrap">
+            Shop
+            <form method="GET" action="{{ route('shop.index') }}" class="flex gap-1.5 flex-wrap" style="max-width:1000px;margin:0;">
+                <div class="search-wrapper relative">
+                    <input class="input" type="search" name="search" value="{{ $search ?? '' }}" placeholder="Search" class="w-35 px-2 py-1.5 pr-8">
+                    <button type="submit" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;"><svg style="width:20px;height:20px;stroke:#000;fill:none;stroke-width:2;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg></button>
+                </div>
+            </form>
+        </h1>
     </div>
 
     @php
-        $defaults = ['women-s-clothing' => 'Women\'s Clothing', 'men-s-clothing' => 'Men\'s Clothing', 'kids-baby' => 'Kids & Baby', 'electronics-gadgets' => 'Electronics', 'beauty-personal-care' => 'Beauty'];
+        $defaults = ['all' => 'All', 'women-s-clothing' => 'Women', 'men-s-clothing' => 'Men', 'beauty-personal-care' => 'Beauty'];
         $otherCategories = $categories->filter(fn($c) => !in_array($c->slug, array_keys($defaults)));
         $hasMore = $otherCategories->isNotEmpty();
     @endphp
 
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;align-items:center;">
-        <a href="{{ route('shop.index', array_filter(['search' => $search ?? null])) }}" class="btn btn-secondary" style="padding:6px 14px;border-radius:999px;font-size:0.85rem;{{ !$categorySlug ? 'opacity:1;' : '' }}">All</a>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;align-items:center;">
         @foreach($defaults as $slug => $label)
-            <a href="{{ route('shop.index', array_merge(request()->query(), ['category' => $slug])) }}" style="padding:6px 14px;border-radius:999px;font-size:0.85rem;text-decoration:none;font-weight:500;{{ $categorySlug === $slug ? 'background:#1a1a2e;color:#fff;' : 'background:#f1f3f5;color:#1a1a2e;' }}transition:all 0.2s;">{{ $label }}</a>
+            <a href="{{ route('shop.index', array_merge(request()->query(), ['category' => $slug])) }}" class="category-pills" style="padding:5px 12px;border-radius:6px;font-size:0.7rem;text-decoration:none;font-weight:500;white-space:nowrap;text-align:center;display:inline-flex;align-items:center;justify-content:center;{{ $categorySlug === $slug ? 'background:#1a1a2e;color:#fff;' : 'background:#f1f3f5;color:#1a1a2e;' }}transition:all 0.2s;">{{ $label }}</a>
         @endforeach
         @if($hasMore)
-            <button onclick="toggleCategories()" id="catToggle" style="padding:6px 14px;border-radius:999px;font-size:0.85rem;border:none;background:#f1f3f5;color:#1a1a2e;cursor:pointer;font-weight:500;">+{{ $otherCategories->count() }} more</button>
+            <button onclick="toggleCategories()" id="catToggle" class="category-pills" style="padding:5px 12px;border-radius:6px;font-size:0.7rem;border:none;background:#f1f3f5;color:#1a1a2e;cursor:pointer;font-weight:500;white-space:nowrap;text-align:center;display:inline-flex;align-items:center;justify-content:center;">+{{ $otherCategories->count() }} more</button>
         @endif
     </div>
 
     @if($hasMore)
-    <div id="extraCategories" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+    <div id="extraCategories" style="display:none;flex-wrap:wrap;gap:4px;margin-bottom:10px;">
         @foreach($otherCategories as $category)
-            <a href="{{ route('shop.index', array_merge(request()->query(), ['category' => $category->slug])) }}" style="padding:6px 14px;border-radius:999px;font-size:0.85rem;text-decoration:none;font-weight:500;{{ $categorySlug === $category->slug ? 'background:#1a1a2e;color:#fff;' : 'background:#f1f3f5;color:#1a1a2e;' }}transition:all 0.2s;">{{ $category->name }}</a>
+            <a href="{{ route('shop.index', array_merge(request()->query(), ['category' => $category->slug])) }}" class="category-pills" style="padding:5px 12px;border-radius:6px;font-size:0.7rem;text-decoration:none;font-weight:500;white-space:nowrap;text-align:center;display:inline-flex;align-items:center;justify-content:center;{{ $categorySlug === $category->slug ? 'background:#1a1a2e;color:#fff;' : 'background:#f1f3f5;color:#1a1a2e;' }}transition:all 0.2s;">{{ $category->name }}</a>
         @endforeach
     </div>
     @endif
 
-    <!-- Frequently Searched / Suggested Categories -->
-    @if($suggestedCategories->isNotEmpty() && !$search && !$categorySlug)
-        <div style="margin-bottom:16px;padding:12px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;">
-            <p style="font-size:0.85rem;font-weight:600;color:#166534;margin:0 0 8px 0;">🔥 Popular categories</p>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                @foreach($suggestedCategories as $sCat)
-                    <a href="{{ route('shop.index', ['category' => $sCat->slug]) }}" style="padding:4px 12px;border-radius:999px;font-size:0.8rem;text-decoration:none;background:#dcfce7;color:#166534;font-weight:500;">{{ $sCat->name }}</a>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    <div id="productGrid" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));">
+    <div id="productGrid" style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
         @forelse($products as $product)
-            <a href="{{ route('shop.show', $product->slug) }}" class="product-card" style="display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9ecef;border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s, transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)';this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='';this.style.transform='';">
+            <a href="{{ route('shop.show', $product->slug) }}" class="product-card" style="display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9ecef;border-radius:10px;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s, transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.08)';this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='';this.style.transform='';">
                 <img src="{{ optional($product->primaryImage)->path ? asset('storage/' . $product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $product->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
-                <div style="padding:12px 14px 14px;">
-                    <h2 style="font-size:0.95rem;font-weight:600;margin-bottom:2px;">{{ $product->name }}</h2>
-                    <p style="font-size:0.8rem;color:#6c757d;margin-bottom:4px;">{{ $product->category?->name ?? 'Uncategorized' }}</p>
-                    <p style="font-weight:700;font-size:1rem;">UGX{{ number_format($product->price, 0) }}</p>
+                <div style="padding:10px 12px 12px;">
+                    <h2 style="font-size:0.65rem;font-weight:600;margin-bottom:2px;">{{ $product->name }}</h2>
+                    <p style="font-weight:900;font-size:0.85rem;">UGX{{ number_format($product->price, 0) }}</p>
                     @if($product->stock <= 0)
                         <span class="badge badge-red">Out of Stock</span>
                     @elseif($product->stock <= 2)
-                        <span style="font-size:0.75rem;color:#c62828;">Only {{ $product->stock }} left</span>
+                        <span style="font-size:0.6rem;color:#c62828;">Only {{ $product->stock }} left</span>
                     @endif
                 </div>
             </a>

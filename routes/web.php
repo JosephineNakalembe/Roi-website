@@ -43,7 +43,6 @@ Route::middleware(['auth', PreventAdminAccess::class])->group(function () {
     Route::get('/profile/payments', [ProfileController::class, 'paymentMethods'])->name('profile.payments');
     Route::post('/profile/payments', [ProfileController::class, 'savePaymentMethod'])->name('profile.payment.save');
 
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/toggle-select', [CartController::class, 'toggleSelect'])->name('cart.toggle-select');
     Route::post('/cart/toggle-select-all', [CartController::class, 'toggleSelectAll'])->name('cart.toggle-select-all');
     Route::post('/cart/{product}', [CartController::class, 'add'])->name('cart.add');
@@ -72,11 +71,15 @@ Route::middleware(['auth', PreventAdminAccess::class])->group(function () {
     Route::post('/profile/delete-account', [ProfileController::class, 'deleteAccount'])->name('profile.delete-account');
 });
 
+// Cart accessible to guests
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+
 Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::post('categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
     Route::get('products/next-id', [AdminProductController::class, 'nextId'])->name('admin.products.next-id');
     Route::post('products/{product}/add-stock', [AdminProductController::class, 'addStock'])->name('admin.products.add-stock');
+    Route::delete('products/media/{media}', [AdminProductController::class, 'destroyMedia'])->name('admin.products.destroy-media');
     Route::resource('products', AdminProductController::class)->names('admin.products')->except(['show']);
     Route::get('orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');

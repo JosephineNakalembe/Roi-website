@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Sticky Header -->
+    <div class="sticky-header">
+        <div class="header-content">
+            <h1 class="mb-0">Customer Service</h1>
+        </div>
+    </div>
     <div class="card" style="max-width:900px;margin:0 auto;">
-        <h1>Customer Service</h1>
         <p class="text-muted">Send a complaint, ask a question, or follow up on an existing request.</p>
 
         <!-- Open New Ticket Button -->

@@ -1,11 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-            <h1>My Returns</h1>
-            <a class="btn btn-secondary" href="{{ route('orders.index') }}">Back to Orders</a>
+    <!-- Sticky Header -->
+    <div class="sticky-header">
+        <div class="header-content">
+            <h1 class="mb-0">My Returns</h1>
         </div>
+    </div>
+    <div class="card">
 
         @if($returns->isEmpty())
             <div style="text-align:center;padding:40px;color:#9ca3af;">

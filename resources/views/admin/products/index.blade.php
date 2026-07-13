@@ -2,13 +2,40 @@
 
 @section('content')
     <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <style>
+            @media (max-width: 768px) {
+                .admin-header {
+                    flex-direction: column !important;
+                    align-items: flex-start !important;
+                }
+                .admin-search-form {
+                    width: 100% !important;
+                }
+                .admin-search-form > div {
+                    flex: 1 !important;
+                    min-width: 100% !important;
+                }
+                .product-item {
+                    flex-direction: column !important;
+                    align-items: flex-start !important;
+                }
+                .product-item > div:first-child {
+                    width: 100% !important;
+                    height: 120px !important;
+                }
+                .product-item > div:last-child {
+                    width: 100% !important;
+                    flex-wrap: wrap !important;
+                }
+            }
+        </style>
+        <div class="admin-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
             <h1>Products</h1>
             <a class="btn" href="{{ route('admin.products.create') }}">Add Product</a>
         </div>
 
         <!-- Search & Filter Bar -->
-        <form method="GET" action="{{ route('admin.products.index') }}" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;padding:16px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
+        <form class="admin-search-form" method="GET" action="{{ route('admin.products.index') }}" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;padding:16px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
             <div style="flex:1;min-width:200px;">
                 <input type="text" name="search" class="input" placeholder="Search by name or product ID..." value="{{ request('search') }}" style="width:100%;">
             </div>
@@ -30,7 +57,7 @@
 
         <div style="display:grid;gap:14px;margin-top:16px;">
             @forelse($products as $product)
-                <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid #e5e7eb;border-radius:14px;">
+                <div class="product-item" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid #e5e7eb;border-radius:14px;">
                     <!-- Display Picture -->
                     <div style="width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#f3f4f6;">
                         @if($product->primaryImage)

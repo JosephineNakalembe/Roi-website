@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Sticky Header -->
+    <div class="sticky-header">
+        <div class="header-content">
+            <h1 class="mb-0">Wishlist</h1>
+        </div>
+    </div>
     <div class="card">
-        <h1>Wishlist</h1>
         @if($items->isEmpty())
             <p>Your wishlist is empty. Browse the shop to save products for later.</p>
         @else

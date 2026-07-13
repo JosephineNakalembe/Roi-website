@@ -58,6 +58,10 @@ class CheckoutController extends Controller
 
     public function show(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('message', 'Please login to checkout');
+        }
+
         $user = Auth::user();
         $cartItems = $user->cartItems()->with('product.primaryImage')->get();
 

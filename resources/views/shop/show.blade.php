@@ -45,56 +45,122 @@
         }
     @endphp
 
+    <!-- Sticky Search Bar -->
+    <div class="sticky-header-high" style="margin-bottom:20px;">
+        <div class="header-content">
+            <form method="GET" action="{{ route('shop.index') }}" style="display:flex;gap:8px;flex:1;max-width:600px;margin:0 auto;">
+                <div style="position:relative;flex:1;">
+                    <input class="input" type="search" name="search" placeholder="Search products..." style="width:100%;padding-right:40px;">
+                    <button type="submit" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;">
+                        <svg style="width:20px;height:20px;stroke:#000;fill:none;stroke-width:2;" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="M21 21l-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div style="display:flex;flex-direction:column;gap:20px;">
         <div class="card">
-            <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:24px;align-items:start;">
+            <style>
+                @media (max-width: 768px) {
+                    .product-detail-container {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .header-content form {
+                        max-width: 80%;
+                        margin: 0 auto;
+                    }
+                    .header-content form input[type="search"] {
+                        font-size: 0.75rem !important;
+                        padding: 8px 32px 8px 12px !important;
+                    }
+                    .header-content form button {
+                        width: 24px !important;
+                        height: 24px !important;
+                    }
+                    .header-content form button svg {
+                        width: 16px !important;
+                        height: 16px !important;
+                    }
+                    .product-detail-container h1 {
+                        font-size: 0.875rem !important;
+                    }
+                    .product-detail-container p {
+                        font-size: 0.875rem !important;
+                    }
+                    .product-detail-container label {
+                        font-size: 0.875rem !important;
+                    }
+                    .product-detail-container .size-pill {
+                        font-size: 0.875rem !important;
+                    }
+                    #productPrice {
+                        font-size: 1.1rem !important;
+                        font-weight: 700 !important;
+                    }
+                    .product-detail-container h3 {
+                        font-size: 0.875rem !important;
+                    }
+                }
+            </style>
+            <div class="product-detail-container" style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:24px;align-items:stretch;">
                 <div>
                     <!-- Product Media Slideshow -->
                     @if($allMedia->count() > 0)
                         <div style="position:relative;">
-                            <div id="mediaSlideshow" style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:8px;background:#f3f4f6;"></div>
+                            <div id="mediaSlideshow" style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:8px;background:#f3f4f6;">
+                                <!-- Slide Number Indicator -->
+                                <div id="slideIndicator" style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.6);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;z-index:10;">1/{{ $allMedia->count() }}</div>
+                            </div>
 
                             <!-- Navigation Arrows -->
                             <button type="button" onclick="changeSlide(-1)" id="prevBtn" style="position:absolute;top:50%;left:12px;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;z-index:10;">&lt;</button>
                             <button type="button" onclick="changeSlide(1)" id="nextBtn" style="position:absolute;top:50%;right:12px;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;z-index:10;">&gt;</button>
-
-                            <!-- Thumbnail Navigation -->
-                            <div id="thumbnailStrip" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:8px;"></div>
                         </div>
                     @else
                         <img src="https://via.placeholder.com/720x720" alt="{{ $product->name }}" class="product-image">
                     @endif
                 </div>
                 <div>
-                    <h1>{{ $product->name }}</h1>
+                    <h1 style="font-size:0.875rem;">{{ $product->name }}</h1>
                     <p class="text-muted">{{ $product->category?->name ?? 'Uncategorized' }}</p>
-                    <p id="productPrice" style="font-size:1.6rem;font-weight:700;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
-                    <p>{{ $product->description }}</p>
-                    <p class="text-muted">Stock available: <strong>{{ $product->stock }}</strong></p>
+                    <p id="productPrice" style="font-size:1.1rem;font-weight:700;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
+                    <p style="font-size:0.875rem;">{{ $product->description }}</p>
 
                     @if($product->stock > 0 && $product->stock <= 2)
-                        <p style="color:#dc2626;font-weight:600;margin-top:4px;font-size:0.9rem;">
-                            Only {{ $product->stock }} left in stock
+                        <p style="color:#dc2626;font-weight:600;margin-top:4px;font-size:0.875rem;">
+                            Only {{ $product->stock }} left in stock!
                         </p>
                     @endif
 
                     @if($product->stock > 0)
                         @if(auth()->check() && auth()->user()->isAdmin())
-                            <p style="margin-top:16px;color:#4b5563;">Admin users cannot add products to the cart. Use the admin dashboard for inventory and order management.</p>
+                            <p style="margin-top:16px;color:#4b5563;font-size:0.875rem;">Admin users cannot add products to the cart. Use the admin dashboard for inventory and order management.</p>
                         @else
                             <form method="POST" action="{{ route('cart.add', $product) }}" style="margin-top:16px;display:grid;gap:12px;">
                                 @csrf
                                 @if(!empty($colors))
                                     <div>
-                                        <label style="display:block;margin-bottom:8px;">Color</label>
-                                        <div id="colorButtons" style="display:flex;flex-wrap:wrap;gap:8px;">
+                                        <label style="display:block;margin-bottom:8px;font-size:0.875rem;">Color</label>
+                                        <div id="colorButtons" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;">
                                             @foreach($colors as $color)
+                                                @php
+                                                    // Parse color to get hex code and name
+                                                    $colorParts = explode(':', $color);
+                                                    $hexCode = $colorParts[0] ?? '#000000';
+                                                    $colorName = $colorParts[1] ?? $color;
+                                                @endphp
                                                 <button type="button"
                                                     class="color-pill"
                                                     data-color="{{ $color }}"
+                                                    data-hex="{{ $hexCode }}"
                                                     onclick="selectColor('{{ addslashes($color) }}')"
-                                                    style="cursor:pointer;border:2px solid #d1d5db;background:#fff;color:#111;border-radius:999px;padding:8px 18px;font-size:0.95rem;font-weight:600;white-space:nowrap;transition:all 0.15s;">
-                                                    {{ $color }}
+                                                    style="cursor:pointer;border:none;background:transparent;padding:0;min-width:40px;height:40px;transition:all 0.15s;display:flex;align-items:center;justify-content:center;"
+                                                    title="{{ $colorName }}">
+                                                    <span style="width:32px;height:32px;background:{{ $hexCode }};border-radius:6px;display:block;"></span>
                                                 </button>
                                             @endforeach
                                         </div>
@@ -103,18 +169,24 @@
                                 @endif
                                 @if($product->sizes && count($product->sizes) > 0)
                                     <div>
-                                        <label>Size</label>
-                                        <select class="input" name="size" required>
-                                            <option value="">Select size</option>
+                                        <label style="font-size:0.875rem;">Size</label>
+                                        <div id="sizeButtons" style="display:flex;flex-wrap:wrap;gap:8px;">
                                             @foreach($product->sizes as $size)
-                                                <option value="{{ $size }}">{{ $size }}</option>
+                                                <button type="button"
+                                                    class="size-pill"
+                                                    data-size="{{ $size }}"
+                                                    onclick="selectSize('{{ $size }}')"
+                                                    style="cursor:pointer;border:2px solid #d1d5db;background:#f1f3f5;color:#000;border-radius:8px;padding:8px 16px;font-size:0.875rem;font-weight:600;transition:all 0.15s;">
+                                                    {{ $size }}
+                                                </button>
                                             @endforeach
-                                        </select>
+                                        </div>
+                                        <input type="hidden" name="size" id="selectedSize" value="{{ $product->sizes[0] ?? '' }}" required>
                                     </div>
                                 @endif
                                 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
                                     <div style="flex:1;min-width:140px;">
-                                        <label>Quantity</label>
+                                        <label style="font-size:0.875rem;">Quantity</label>
                                         <input class="input" type="number" min="1" max="{{ $product->stock }}" name="quantity" value="1" required>
                                     </div>
                                     <button class="btn" type="submit">Add to Cart</button>
@@ -126,36 +198,61 @@
                             </form>
                         @endif
                     @else
-                        <p style="color:#dc2626;font-weight:600;margin-top:16px;">Out of Stock</p>
+                        <p style="color:#dc2626;font-weight:600;margin-top:16px;font-size:0.875rem;">Out of Stock</p>
                     @endif
 
                     <!-- Reviews Section -->
                     <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e9ecef;">
-                        <h3>Customer Reviews</h3>
-                        @if($reviews->isNotEmpty())
-                            <p class="text-muted" style="margin-bottom:12px;">
-                                ⭐ {{ number_format($avgRating, 1) }} — {{ $reviewCount }} review{{ $reviewCount !== 1 ? 's' : '' }}
-                            </p>
-                            <div style="display:grid;gap:12px;">
-                                @foreach($reviews as $review)
-                                    <div style="padding:12px;background:#f8f9fa;border-radius:10px;border:1px solid #e9ecef;">
-                                        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-                                            <strong style="font-size:0.9rem;">{{ $review->user?->name ?? 'Anonymous' }}</strong>
-                                            <span style="font-size:0.85rem;color:#f57f17;">{{ str_repeat('⭐', $review->rating) }}</span>
+                        <button type="button" onclick="toggleReviews()" class="btn btn-outline" style="width:100%;display:flex;justify-content:space-between;align-items:center;">
+                            <span>Customer Reviews</span>
+                            @if($reviews->isNotEmpty())
+                                <span>⭐ {{ number_format($avgRating, 1) }} ({{ $reviewCount }})</span>
+                            @else
+                                <span>No reviews yet</span>
+                            @endif
+                        </button>
+                        <div id="reviewsContent" style="display:none;margin-top:16px;">
+                            @if($reviews->isNotEmpty())
+                                <div style="display:grid;gap:12px;">
+                                    @foreach($reviews as $review)
+                                        <div style="padding:12px;background:#f8f9fa;border-radius:10px;border:1px solid #e9ecef;">
+                                            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                                                <strong style="font-size:0.875rem;">{{ $review->user?->name ?? 'Anonymous' }}</strong>
+                                                <span style="font-size:0.875rem;color:#f57f17;">{{ str_repeat('⭐', $review->rating) }}</span>
+                                            </div>
+                                            @if($review->comment)
+                                                <p style="margin:6px 0 0;font-size:0.875rem;color:#495057;">{{ $review->comment }}</p>
+                                            @endif
+                                            <p style="margin:4px 0 0;font-size:0.875rem;color:#adb5bd;">{{ $review->created_at->format('M d, Y') }}</p>
                                         </div>
-                                        @if($review->comment)
-                                            <p style="margin:6px 0 0;font-size:0.9rem;color:#495057;">{{ $review->comment }}</p>
-                                        @endif
-                                        <p style="margin:4px 0 0;font-size:0.75rem;color:#adb5bd;">{{ $review->created_at->format('M d, Y') }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-muted" style="font-size:0.9rem;">No reviews yet for this product.</p>
-                        @endif
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-muted" style="font-size:0.875rem;">No reviews yet for this product.</p>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- You Might Like Section -->
+            @if($suggestedProducts->isNotEmpty())
+                <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e5e7eb;">
+                    <h2 style="margin-bottom:16px;font-size:0.875rem;">You Might Like</h2>
+                    <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:16px;">
+                        @foreach($suggestedProducts->take(4) as $sProduct)
+                            <a href="{{ route('shop.show', $sProduct->slug) }}" class="product-card" style="display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9ecef;border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s, transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)';this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='';this.style.transform='';">
+                                <img src="{{ optional($sProduct->primaryImage)->path ? asset('storage/' . $sProduct->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $sProduct->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
+                                <div style="padding:12px 14px 14px;">
+                                    <h3 style="font-size:0.875rem;font-weight:600;margin-bottom:2px;">{{ $sProduct->name }}</h3>
+                                    <p style="font-weight:700;font-size:1.1rem;">UGX{{ number_format($sProduct->price, 0) }}</p>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
                         @if($product->size_guide)
                 <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e5e7eb;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
@@ -332,24 +429,6 @@
             </script>
         </div>
 
-        <!-- Suggested Products -->
-        @if($suggestedProducts->isNotEmpty())
-            <div style="margin-top:32px;">
-                <h2>You may also like</h2>
-                <div class="grid-3">
-                    @foreach($suggestedProducts as $sProduct)
-                        <a href="{{ route('shop.show', $sProduct->slug) }}" class="product-card" style="display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9ecef;border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s, transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)';this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='';this.style.transform='';">
-                            <img src="{{ optional($sProduct->primaryImage)->path ? asset('storage/' . $sProduct->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $sProduct->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
-                            <div style="padding:12px 14px 14px;">
-                                <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:2px;">{{ $sProduct->name }}</h3>
-                                <p style="font-weight:700;font-size:1rem;">UGX{{ number_format($sProduct->price, 0) }}</p>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
     </div>
 
     <script>
@@ -384,13 +463,12 @@
 
         function renderSlides() {
             const slideshow = document.getElementById('mediaSlideshow');
-            const thumbStrip = document.getElementById('thumbnailStrip');
+            const slideIndicator = document.getElementById('slideIndicator');
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             if (!slideshow) return;
 
             slideshow.innerHTML = '';
-            thumbStrip.innerHTML = '';
             currentSlide = 0;
 
             currentMedia.forEach((media, index) => {
@@ -408,22 +486,15 @@
                 slideshow.appendChild(slide);
             });
 
-            // Thumbnails + arrows only when more than one
+            // Update slide indicator
+            if (slideIndicator) {
+                slideIndicator.textContent = `1/${currentMedia.length}`;
+            }
+
+            // Arrows only when more than one
             if (currentMedia.length > 1) {
                 prevBtn.style.display = 'flex';
                 nextBtn.style.display = 'flex';
-                currentMedia.forEach((media, index) => {
-                    const thumb = document.createElement('div');
-                    thumb.className = 'thumbnail';
-                    thumb.style.cssText = `cursor:pointer;flex-shrink:0;width:80px;height:80px;border-radius:6px;overflow:hidden;border:2px solid ${index === 0 ? '#000' : '#e5e7eb'};`;
-                    thumb.onclick = () => goToSlide(index);
-                    if (media.media_type === 'video') {
-                        thumb.innerHTML = `<div style="width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">&#9654;</div>`;
-                    } else {
-                        thumb.innerHTML = `<img src="${media.path}" alt="Thumbnail" style="width:100%;height:100%;object-fit:cover;">`;
-                    }
-                    thumbStrip.appendChild(thumb);
-                });
             } else {
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
@@ -432,7 +503,7 @@
 
         function showSlide(n) {
             const slides = document.querySelectorAll('#mediaSlideshow .slide');
-            const thumbnails = document.querySelectorAll('#thumbnailStrip .thumbnail');
+            const slideIndicator = document.getElementById('slideIndicator');
             const total = slides.length;
             if (total === 0) return;
 
@@ -442,17 +513,26 @@
 
             slides.forEach(s => s.style.display = 'none');
             slides[currentSlide].style.display = 'block';
-            thumbnails.forEach((thumb, index) => {
-                thumb.style.border = index === currentSlide ? '2px solid #000' : '2px solid #e5e7eb';
-            });
+
+            // Update slide indicator
+            if (slideIndicator) {
+                slideIndicator.textContent = `${currentSlide + 1}/${total}`;
+            }
         }
 
         function changeSlide(direction) {
             showSlide(currentSlide + direction);
         }
 
-        function goToSlide(n) {
-            showSlide(n);
+        function toggleReviews() {
+            const reviewsContent = document.getElementById('reviewsContent');
+            if (reviewsContent) {
+                if (reviewsContent.style.display === 'none') {
+                    reviewsContent.style.display = 'block';
+                } else {
+                    reviewsContent.style.display = 'none';
+                }
+            }
         }
 
         function selectColor(color) {
@@ -462,16 +542,16 @@
             const hidden = document.getElementById('selectedColor');
             if (hidden) hidden.value = color;
 
+            // Parse hex code from color string
+            const colorParts = color.split(':');
+            const hexCode = colorParts[0] || color;
+
             // Update pill styles
             document.querySelectorAll('.color-pill').forEach(btn => {
                 if (btn.dataset.color === color) {
-                    btn.style.background = '#111';
-                    btn.style.color = '#fff';
-                    btn.style.borderColor = '#111';
+                    btn.querySelector('span').style.boxShadow = '0 0 0 2px #111';
                 } else {
-                    btn.style.background = '#fff';
-                    btn.style.color = '#111';
-                    btn.style.borderColor = '#d1d5db';
+                    btn.querySelector('span').style.boxShadow = 'none';
                 }
             });
 
@@ -487,6 +567,25 @@
             renderSlides();
         }
 
+        function selectSize(size) {
+            // Update hidden field
+            const hidden = document.getElementById('selectedSize');
+            if (hidden) hidden.value = size;
+
+            // Update pill styles
+            document.querySelectorAll('.size-pill').forEach(btn => {
+                if (btn.dataset.size === size) {
+                    btn.style.background = '#f1f3f5';
+                    btn.style.color = '#000';
+                    btn.style.borderColor = '#111';
+                } else {
+                    btn.style.background = '#f1f3f5';
+                    btn.style.color = '#000';
+                    btn.style.borderColor = '#d1d5db';
+                }
+            });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             if (selectedColor) {
@@ -494,6 +593,12 @@
             } else {
                 currentMedia = mediaForColor(null);
                 renderSlides();
+            }
+
+            // Initialize first size selection
+            const firstSizeBtn = document.querySelector('.size-pill');
+            if (firstSizeBtn) {
+                selectSize(firstSizeBtn.dataset.size);
             }
         });
 

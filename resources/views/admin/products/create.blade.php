@@ -111,15 +111,14 @@
             </div>
             <input type="hidden" name="size_guide" id="sizeGuideHidden">
             
-                        <input type="hidden" name="colors" id="colorsHidden">
             <input type="hidden" name="stock" value="0">
             <label style="display:none;"><input type="checkbox" name="is_active" value="1" checked> Published</label>
             
             <label style="font-weight:700;">Product Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Upload multiple images (JPG, PNG, max 5MB each)</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Upload multiple images. Drag to reorder, click × to remove.</p>
             <input type="file" name="images[]" id="imageInput" multiple accept="image/*" onchange="previewImages(event)">
             <div id="imagePreview" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:12px;margin-top:12px;"></div>
-            
+
             <label style="font-weight:700;margin-top:12px;">Product Video (Optional)</label>
             <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Upload a video (MP4, MOV, max 50MB)</p>
             <input type="file" name="video" id="videoInput" accept="video/*" onchange="previewVideo(event)">
@@ -231,10 +230,15 @@
             row.style.display = 'grid';
             row.style.gap = '10px';
             row.style.background = '#fafafa';
+            row.classList.add('color-row');
 
             row.innerHTML = `
-                <div style="display:grid;grid-template-columns:repeat(2, 1fr) 80px auto;gap:8px;align-items:center;">
-                    <input type="text" class="input" name="color_${index}" placeholder="Color (e.g., Red)" style="padding:6px;font-size:0.9rem;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px;align-items:center;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="color" name="color_${index}" value="#000000" style="width:50px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:0;flex-shrink:0;">
+                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" style="flex:1;padding:6px;font-size:0.9rem;flex:1;">
+                </div>
+
                     <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" style="padding:6px;font-size:0.9rem;">
                     <input type="number" class="input" name="quantity_${index}" placeholder="Qty" min="1" style="padding:6px;font-size:0.9rem;">
                     <button type="button" class="btn btn-secondary" onclick="this.closest('div[style*=border]').remove(); updateColors();" style="padding:4px 8px;font-size:0.85rem;">Remove</button>
@@ -275,12 +279,22 @@
         }
 
         function updateColors() {
-            const container = document.getElementById('colorQuantityContainer');
-            const colors = Array.from(container.querySelectorAll('input[type="text"]'))
-                .map(el => el.value)
-                .filter(val => val.trim());
-            document.getElementById('colorsHidden').value = colors.join(', ');
+           const container = document.getElementById('colorQuantityContainer');
+           const colors = [];
+           const colorNames = [];
+    
+           container.querySelectorAll('.color-row').forEach(row => {
+           const colorInput = row.querySelector('input[type="color"]');
+           const nameInput = row.querySelector('input[name^="color_name_"]');
+           if (colorInput && nameInput && nameInput.value.trim()) {
+            colors.push(colorInput.value);
+            colorNames.push(colorInput.value + ':' + nameInput.value.trim());
+           }
+          });
+    
+           document.getElementById('colorsHidden').value = JSON.stringify(colorNames);
         }
+
 
         document.addEventListener('input', function(e) {
             if (e.target.name.startsWith('color_')) {
@@ -334,26 +348,33 @@
 
         addColorQuantityRow();
 
-        function previewImages(event) {
-            const previewContainer = document.getElementById('imagePreview');
-            previewContainer.innerHTML = '';
-            const files = event.target.files;
-            if (files.length > 0) {
-                Array.from(files).forEach((file, index) => {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const wrapper = document.createElement('div');
-                        wrapper.style.position = 'relative';
-                        wrapper.innerHTML = `
-                            <img src="${e.target.result}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;border:2px solid #e5e7eb;">
-                            <span style="position:absolute;top:4px;left:4px;background:#000;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.75rem;">${index + 1}</span>
+           function previewImages(event) {
+              const previewContainer = document.getElementById('imagePreview');
+              previewContainer.innerHTML = '';
+              const files = event.target.files;
+              if (files.length > 0) {
+                  Array.from(files).forEach((file, index) => {
+                      const reader = new FileReader();
+                      reader.onload = function(e) {
+                         const wrapper = document.createElement('div');
+                         wrapper.style.position = 'relative';
+                         wrapper.draggable = true;
+                         wrapper.innerHTML = `
+                             <img src="${e.target.result}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;border:2px solid #e5e7eb;">
+                             <button type="button" onclick="removeImage(this)" style="position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-weight:bold;font-size:1rem;line-height:1;">×</button>
+                             <span style="position:absolute;top:4px;left:4px;background:#000;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.75rem;">${index + 1}</span>
                         `;
                         previewContainer.appendChild(wrapper);
                     };
-                    reader.readAsDataURL(file);
+                      reader.readAsDataURL(file);
                 });
             }
         }
+
+        function removeImage(btn) {
+            btn.closest('div[style*="position: relative"]').remove();
+        }
+
 
         function previewVideo(event) {
             const previewContainer = document.getElementById('videoPreview');
@@ -436,5 +457,6 @@
         document.getElementById('addCategoryModal').addEventListener('click', function(e) {
             if (e.target === this) closeAddCategoryModal();
         });
+
     </script>
 @endsection

@@ -13,6 +13,18 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
+        if (!Auth::check()) {
+            // Guest users see empty cart with message to login
+            return view('cart.index', [
+                'availableItems' => collect(),
+                'outOfStockItems' => collect(),
+                'subtotal' => 0,
+                'totalQuantity' => 0,
+                'suggestions' => collect(),
+                'suggestedCategories' => collect(),
+            ]);
+        }
+
         $user = Auth::user();
         $cartItems = $user->cartItems()->with('product.primaryImage')->get();
 
@@ -37,6 +49,7 @@ class CartController extends Controller
         $outOfStockItems = $items->filter(fn($item) => $item['product']->stock < 1);
         $selectedItems = $availableItems->filter(fn($item) => $item['selected']);
         $subtotal = $selectedItems->sum('total');
+        $totalQuantity = $selectedItems->sum('quantity');
 
         // Get suggestions based on popular categories
         $frequentCategorySlugs = Cache::get('frequent_categories', []);
@@ -57,7 +70,7 @@ class CartController extends Controller
             ->take(5)
             ->get();
 
-        return view('cart.index', compact('availableItems', 'outOfStockItems', 'subtotal', 'suggestions', 'suggestedCategories'));
+        return view('cart.index', compact('availableItems', 'outOfStockItems', 'subtotal', 'totalQuantity', 'suggestions', 'suggestedCategories'));
     }
 
     public function add(Request $request, Product $product)

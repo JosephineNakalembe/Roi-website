@@ -1,9 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Sticky Header -->
+    <div class="sticky-header">
+        <div class="header-content">
+            <h1 class="mb-0">Payment Methods</h1>
+        </div>
+    </div>
     <div class="card">
-        <h1>Payment Methods</h1>
-        <div style="display:grid;gap:16px;">
+        <div class="form-grid" style="gap:16px;">
             @forelse($paymentMethods as $method)
                 <div style="padding:16px;border:1px solid #e5e7eb;border-radius:14px;">
                     <strong>•••• {{ $method->last4 }}</strong>
@@ -14,18 +19,31 @@
                 <p>No payment methods saved yet.</p>
             @endforelse
         </div>
-        <form method="POST" action="{{ route('profile.payment.save') }}" style="margin-top:24px;display:grid;gap:12px;">
+        <form method="POST" action="{{ route('profile.payment.save') }}" class="form-grid" style="margin-top:24px;">
             @csrf
             <h2>Add Payment Method</h2>
-            <label>Cardholder</label>
-            <input class="input" name="cardholder" required>
-            <label>Card number</label>
-            <input class="input" name="card_number" required>
-            <label>Expiry month</label>
-            <input class="input" name="expiry_month" placeholder="MM" required>
-            <label>Expiry year</label>
-            <input class="input" name="expiry_year" placeholder="YYYY" required>
-            <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="is_default" value="1"> Set as default</label>
+            <div class="form-group">
+                <label class="form-label">Cardholder</label>
+                <input class="input input-full" name="cardholder" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Card number</label>
+                <input class="input input-full" name="card_number" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Expiry month</label>
+                <input class="input input-full" name="expiry_month" placeholder="MM" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Expiry year</label>
+                <input class="input input-full" name="expiry_year" placeholder="YYYY" required>
+            </div>
+            <div class="form-group">
+                <label class="flex-between flex-gap-small">
+                    <input type="checkbox" name="is_default" value="1" class="checkbox">
+                    Set as default
+                </label>
+            </div>
             <button class="btn">Save Payment Method</button>
         </form>
     </div>
