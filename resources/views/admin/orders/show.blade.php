@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.orders.index')])
+            <h1 class="mb-0">Order {{ $order->order_number }}</h1>
+        </div>
+    </div>
     <div class="card">
-        <h1>Order {{ $order->order_number }}</h1>
         <div style="display:grid;gap:18px;">
             <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                 <strong>Customer</strong>

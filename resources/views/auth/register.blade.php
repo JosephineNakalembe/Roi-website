@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button')
+            <h1 class="mb-0">Create Account</h1>
+        </div>
+    </div>
     <div class="card" style="max-width:520px;margin:0 auto;">
-        <h1>Create Account</h1>
         <form method="POST" action="{{ route('register.post') }}">
             @csrf
             <label>Name</label>

@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.dashboard')])
+            <h1 class="mb-0">Users</h1>
+        </div>
+    </div>
     <div class="card">
-        <h1>Users</h1>
         <form method="GET" style="margin-bottom:18px;display:flex;gap:10px;flex-wrap:wrap;">
             <input class="input" type="search" name="search" value="{{ $search ?? '' }}" placeholder="Search users">
             <button class="btn">Search</button>

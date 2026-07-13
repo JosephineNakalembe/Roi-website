@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="sticky-header">
+    <div class="header-content">
+        @include('partials.back-button', ['fallback' => route('admin.dashboard')])
+        <h1 class="mb-0">Product Reports</h1>
+    </div>
+</div>
 <div class="card" style="max-width:1200px;margin:0 auto;">
-    <h1>Product Reports</h1>
     <p class="text-muted">Profit and sales breakdown — cost prices are admin-only</p>
 
     <!-- Filter by date -->

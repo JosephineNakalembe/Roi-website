@@ -20,11 +20,13 @@
             .order-card .pending-review {
                 font-size: 0.75rem !important;
             }
-            .order-card .btn {
-                padding: 2px 6px !important;
-                font-size: 0.75rem !important;
-                height: 24px !important;
+            .order-card .order-action-btn {
+                padding: 1px 5px !important;
+                font-size: 0.6rem !important;
+                height: 20px !important;
+                min-height: 20px !important;
                 line-height: 1 !important;
+                border-radius: 4px !important;
             }
             .order-card .button-container {
                 flex-wrap: nowrap !important;
@@ -53,6 +55,7 @@
     <!-- Sticky Header -->
     <div class="sticky-header">
         <div class="header-content">
+            @include('partials.back-button')
             <h1 class="mb-0">My Orders</h1>
         </div>
     </div>
@@ -140,11 +143,11 @@
                                 </div>
                                 <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;">
                                     @if($canCancel)
-                                        <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn" style="background:#dc2626;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Cancel</button>
+                                        <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn order-action-btn" style="background:#dc2626;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Cancel</button>
                                     @endif
-                                    <button onclick="event.stopPropagation();openOrderModal({{ $order->id }})" class="btn" style="padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Track</button>
+                                    <button onclick="event.stopPropagation();openOrderModal({{ $order->id }})" class="btn order-action-btn" style="padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Track</button>
                                     @if($order->status === 'delivered' && $order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
-                                        <a href="{{ route('orders.return.create', $order) }}" class="btn" style="background:#f97316;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Return</a>
+                                        <a href="{{ route('orders.return.create', $order) }}" class="btn order-action-btn" style="background:#f97316;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Return</a>
                                     @endif
                                     <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" style="font-size:0.7rem;color:#2563eb;text-decoration:none;font-weight:500;white-space:nowrap;">Tap for details &rarr;</a>
                                 </div>

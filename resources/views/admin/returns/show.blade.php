@@ -1,10 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.returns.index')])
+            <h1 class="mb-0">Return {{ $orderReturn->return_number }}</h1>
+        </div>
+    </div>
     <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
             <div>
-                <h1>Return {{ $orderReturn->return_number }}</h1>
                 <p class="text-muted">
                     Order {{ $orderReturn->order->order_number }} • 
                     @if($orderReturn->status === 'pending')

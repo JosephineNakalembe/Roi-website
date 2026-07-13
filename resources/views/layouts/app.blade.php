@@ -71,6 +71,13 @@
         .modal-btn-confirm{background:#dc2626;color:#fff;}
         .modal-btn-confirm:hover{background:#b91c1c;}
         .hidden{display:none;}
+        .back-button{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:none;border:none;cursor:pointer;padding:2px 6px;color:#1a1a2e;font-size:1.15rem;font-weight:600;line-height:1;min-width:28px;min-height:28px;border-radius:6px;transition:background-color 0.2s;}
+        .back-button:hover{background:rgba(26,26,46,0.08);}
+        .back-button:active{background:rgba(26,26,46,0.12);}
+        .header-title-row{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+        .header-title-row h1{margin-bottom:0;}
+        .header-content-between{justify-content:space-between;flex-wrap:wrap;}
+        @media (max-width:768px){.back-button{font-size:1rem;min-width:26px;min-height:26px;padding:2px 4px;}.header-title-row{gap:6px;}}
     </style>
 </head>
 <body>
@@ -320,6 +327,15 @@
     </div>
 
     <script>
+        function goBack(button) {
+            const fallback = button?.dataset?.fallback || '/';
+            if (window.history.length > 1) {
+                history.back();
+            } else {
+                window.location.href = fallback;
+            }
+        }
+
         function toggleProfileDropdown(event) {
             if (event) {
                 event.stopPropagation();

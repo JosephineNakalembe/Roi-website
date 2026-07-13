@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button')
+            <h1 class="mb-0">Login</h1>
+        </div>
+    </div>
     <div class="card" style="max-width:520px;margin:0 auto;">
-        <h1>Login</h1>
         <form method="POST" action="{{ route('login.post') }}">
             @csrf
             <label>Email</label>

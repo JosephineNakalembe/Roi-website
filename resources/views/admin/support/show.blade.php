@@ -1,8 +1,13 @@
  @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.support.index')])
+            <h1 class="mb-0">Support Ticket</h1>
+        </div>
+    </div>
     <div class="card" style="max-width:900px;margin:0 auto;">
-        <h1>Support Ticket</h1>
         <p class="text-muted">From {{ $message->user->name }} ({{ $message->user->email }})</p>
 
         <div style="border:1px solid #e9ecef;border-radius:16px;overflow:hidden;margin-top:16px;">

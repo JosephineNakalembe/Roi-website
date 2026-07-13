@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.products.index')])
+            <h1 class="mb-0">Add Product</h1>
+        </div>
+    </div>
     <div class="card" style="max-width:700px;margin:0 auto;">
-        <h1>Add Product</h1>
         <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data" style="display:grid;gap:12px;">
             @csrf
                         <label>Product ID <span class="text-muted" style="font-weight:400;font-size:0.85rem;">— Auto-generated</span></label>

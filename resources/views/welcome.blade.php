@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button')
+            <h1 class="mb-0">Welcome to ROI Store</h1>
+        </div>
+    </div>
     <section class="card card-centered-text">
-        <h1>Welcome to ROI Store</h1>
         <p class="text-muted">Browse products, add items to your cart, checkout securely, and track orders from a single login.</p>
         <div class="flex-center flex-gap-medium flex-wrap" style="margin-top:20px;">
             <a class="btn" href="{{ route('shop.index') }}">Shop Now</a>

@@ -4,6 +4,7 @@
     <!-- Sticky Header -->
     <div class="sticky-header">
         <div class="header-content">
+            @include('partials.back-button')
             <h1 class="mb-0">Customer Service</h1>
         </div>
     </div>

@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button')
+            <h1 class="mb-0">Order {{ $order->order_number }}</h1>
+        </div>
+    </div>
     <div class="card">
-        <h1>Order {{ $order->order_number }}</h1>
         <p class="text-muted">
             Status: 
             @if($order->status === 'delivered')

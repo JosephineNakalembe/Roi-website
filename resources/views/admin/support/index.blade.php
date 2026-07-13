@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.dashboard')])
+            <h1 class="mb-0">Customer Messages</h1>
+        </div>
+    </div>
     <div class="card">
-        <h1>Customer Messages</h1>
         <p class="text-muted">Review and reply to buyer complaints and requests.</p>
 
         @if($messages->isEmpty())

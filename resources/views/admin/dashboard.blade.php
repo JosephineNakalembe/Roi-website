@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.dashboard')])
+            <h1 class="mb-0">Admin Dashboard</h1>
+        </div>
+    </div>
     <div class="card">
-        <h1>Admin Dashboard</h1>
         <p class="text-muted" style="margin-bottom:18px;">Overview of your store</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
             <div class="stat-card"><div class="stat-value">{{ $orders }}</div><div class="stat-label">Total Orders</div></div>

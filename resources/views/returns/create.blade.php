@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button')
+            <h1 class="mb-0">Return Items - {{ $order->order_number }}</h1>
+        </div>
+    </div>
     <div class="card" style="max-width:900px;margin:0 auto;">
-        <h1>Return Items - {{ $order->order_number }}</h1>
         
         <!-- Important Notices Box -->
         <div style="padding:16px;background:#fef2f2;border:2px solid #fecaca;border-radius:14px;margin-bottom:18px;">

@@ -48,6 +48,7 @@
     <!-- Sticky Search Bar -->
     <div class="sticky-header-high" style="margin-bottom:20px;">
         <div class="header-content">
+            @include('partials.back-button')
             <form method="GET" action="{{ route('shop.index') }}" style="display:flex;gap:8px;flex:1;max-width:600px;margin:0 auto;">
                 <div style="position:relative;flex:1;">
                     <input class="input" type="search" name="search" placeholder="Search products..." style="width:100%;padding-right:40px;">

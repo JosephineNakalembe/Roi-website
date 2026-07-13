@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.dashboard')])
+            <h1 class="mb-0">Return Requests</h1>
+        </div>
+    </div>
     <div class="card">
-        <h1>Return Requests</h1>
         <p class="text-muted" style="margin-bottom:18px;">Manage product returns from customers</p>
 
         <!-- Stats -->

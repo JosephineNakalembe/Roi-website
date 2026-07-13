@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button')
+            <h1 class="mb-0">Checkout</h1>
+        </div>
+    </div>
     <div class="card" style="max-width:900px;margin:0 auto;">
-        <h1>Checkout</h1>
         <style>
             .checkout-container {
                 grid-template-columns: 1fr !important;

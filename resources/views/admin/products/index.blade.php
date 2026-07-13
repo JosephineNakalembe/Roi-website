@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content header-content-between">
+            <div class="header-title-row">
+                @include('partials.back-button', ['fallback' => route('admin.dashboard')])
+                <h1 class="mb-0">Products</h1>
+            </div>
+            <a class="btn" href="{{ route('admin.products.create') }}">Add Product</a>
+        </div>
+    </div>
     <div class="card">
         <style>
             @media (max-width: 768px) {
@@ -29,10 +38,6 @@
                 }
             }
         </style>
-        <div class="admin-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-            <h1>Products</h1>
-            <a class="btn" href="{{ route('admin.products.create') }}">Add Product</a>
-        </div>
 
         <!-- Search & Filter Bar -->
         <form class="admin-search-form" method="GET" action="{{ route('admin.products.index') }}" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;padding:16px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">

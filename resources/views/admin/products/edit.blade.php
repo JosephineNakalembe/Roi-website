@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="sticky-header">
+        <div class="header-content">
+            @include('partials.back-button', ['fallback' => route('admin.products.index')])
+            <h1 class="mb-0">Edit Product</h1>
+        </div>
+    </div>
     <div class="card" style="max-width:700px;margin:0 auto;">
-        <h1>Edit Product</h1>
         <form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data" style="display:grid;gap:12px;">
             @csrf
                         @method('PATCH')
