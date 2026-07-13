@@ -11,9 +11,11 @@
         <p class="text-muted">Send a complaint, ask a question, or follow up on an existing request.</p>
 
         <!-- Open New Ticket Button -->
-        <button onclick="document.getElementById('newTicketForm').style.display = document.getElementById('newTicketForm').style.display === 'none' ? 'block' : 'none'" class="btn" style="margin-bottom:16px;">
-            + Open New Ticket
-        </button>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+            <button onclick="document.getElementById('newTicketForm').style.display = document.getElementById('newTicketForm').style.display === 'none' ? 'block' : 'none'" class="btn">
+                + Open New Ticket
+            </button>
+        </div>
 
         <form method="POST" action="{{ route('customer-service.store') }}" id="newTicketForm" style="display:none;gap:12px;margin-bottom:24px;">
             @csrf
@@ -21,7 +23,9 @@
             <input class="input" name="subject" placeholder="Message subject" required>
             <label>Message</label>
             <textarea class="input" name="message" rows="4" placeholder="Describe your issue or question" required></textarea>
-            <button class="btn" type="submit">Send Message</button>
+            <div style="display:flex;justify-content:flex-end;">
+                <button class="btn" type="submit">Send Message</button>
+            </div>
         </form>
 
         @if($messages->isNotEmpty())

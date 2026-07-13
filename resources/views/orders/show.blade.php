@@ -57,49 +57,84 @@
             <!-- Items -->
             <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                 <h2>Items</h2>
-                @foreach($order->items as $item)
-                    <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
-                        <div style="min-width:220px;flex:1;">
-                            <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
-                            @if($item->color || $item->size)
-                                @php
-                                    $colorParts = explode(':', $item->color ?? '');
-                                    $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
-                                @endphp
-                                <p style="font-size:0.85rem;color:#6b7280;margin-top:2px;">
-                                    @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
-                                    @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
-                                </p>
-                            @endif
-                            @if($item->review)
-                                <div style="margin-top:8px;padding:12px;background:#f3f4f6;border-radius:12px;">
-                                    <p style="margin:0 0 4px;font-weight:700;">Your review</p>
-                                    <p style="margin:0;font-size:0.95rem;">Rating: {{ $item->review->rating }}/5</p>
-                                    @if($item->review->comment)
-                                        <p style="margin:6px 0 0;font-size:0.95rem;color:#374151;">"{{ $item->review->comment }}"</p>
+                @if($order->status === 'delivered' && $order->items->contains(fn($item) => !$item->review))
+                    <form method="POST" action="{{ route('orders.bulk-review', $order) }}" style="display:grid;gap:16px;">
+                        @csrf
+                        @foreach($order->items as $item)
+                            <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+                                <div style="min-width:220px;flex:1;">
+                                    <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
+                                    @if($item->color || $item->size)
+                                        @php
+                                            $colorParts = explode(':', $item->color ?? '');
+                                            $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
+                                        @endphp
+                                        <p style="font-size:0.85rem;color:#6b7280;margin-top:2px;">
+                                            @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
+                                            @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
+                                        </p>
                                     @endif
-                                </div>
-                            @elseif($order->status === 'delivered')
-                                <form method="POST" action="{{ route('orders.items.review', ['order' => $order, 'item' => $item]) }}" style="margin-top:12px;display:grid;gap:10px;">
-                                    @csrf
-                                    <label style="font-weight:700;">Leave a review</label>
-                                    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                                        <select class="input" name="rating" style="max-width:120px;" required>
-                                            <option value="">Rating</option>
-                                            @for($i = 1; $i <= 5; $i++)
-                                                <option value="{{ $i }}">{{ $i }}</option>
-                                            @endfor
-                                        </select>
-                                        <textarea class="input" name="comment" rows="2" placeholder="Share how the product felt..." style="flex:1;"></textarea>
-                                    </div>
-                                    <button class="btn" type="submit">Submit review</button>
-                                </form>
-                            @endif
+                                    @if($item->review)
+                                        <div style="margin-top:8px;padding:12px;background:#f3f4f6;border-radius:12px;">
+                                            <p style="margin:0 0 4px;font-weight:700;">Your review</p>
+                                            <p style="margin:0;font-size:0.95rem;">Rating: {{ $item->review->rating }}/5</p>
+                                            @if($item->review->comment)
+                                                <p style="margin:6px 0 0;font-size:0.95rem;color:#374151;">"{{ $item->review->comment }}"</p>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div style="margin-top:12px;display:grid;gap:10px;">
+                                            <label style="font-weight:700;">Leave a review (optional)</label>
+                                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                                <select class="input" name="reviews[{{ $item->id }}][rating]" style="max-width:120px;">
+                                                    <option value="">Rating</option>
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                                <textarea class="input" name="reviews[{{ $item->id }}][comment]" rows="2" placeholder="Share how the product felt..." style="flex:1;"></textarea>
+                                            </div>
+                                        </div>
+                                    @endif
 
+                                </div>
+                                <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
+                            </div>
+                        @endforeach
+                        <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+                            <button class="btn" type="submit" style="padding:12px 24px;font-size:1rem;">Submit All Reviews</button>
                         </div>
-                        <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
-                    </div>
-                @endforeach
+                    </form>
+                @else
+                    @foreach($order->items as $item)
+                        <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
+                            <div style="min-width:220px;flex:1;">
+                                <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
+                                @if($item->color || $item->size)
+                                    @php
+                                        $colorParts = explode(':', $item->color ?? '');
+                                        $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
+                                    @endphp
+                                    <p style="font-size:0.85rem;color:#6b7280;margin-top:2px;">
+                                        @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
+                                        @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
+                                    </p>
+                                @endif
+                                @if($item->review)
+                                    <div style="margin-top:8px;padding:12px;background:#f3f4f6;border-radius:12px;">
+                                        <p style="margin:0 0 4px;font-weight:700;">Your review</p>
+                                        <p style="margin:0;font-size:0.95rem;">Rating: {{ $item->review->rating }}/5</p>
+                                        @if($item->review->comment)
+                                            <p style="margin:6px 0 0;font-size:0.95rem;color:#374151;">"{{ $item->review->comment }}"</p>
+                                        @endif
+                                    </div>
+                                @endif
+
+                            </div>
+                            <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
+                        </div>
+                    @endforeach
+                @endif
             </div>
 
             <!-- Totals -->

@@ -24,6 +24,8 @@ class Order extends Model
         'notes',
         'placed_at',
         'delivered_at',
+        'cancelled_at',
+        'cancellation_reason',
     ];
 
     protected $casts = [
@@ -32,6 +34,7 @@ class Order extends Model
         'total' => 'decimal:2',
         'placed_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     protected static function booted()

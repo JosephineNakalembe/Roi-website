@@ -60,6 +60,17 @@
         .cart-float:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(26,26,46,0.6);}
         .cart-float sup{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:9px;background:#dc2626;color:#fff;font-size:0.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #1a1a2e;}
         @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,0.4);}70%{box-shadow:0 0 0 15px rgba(220,38,38,0);}100%{box-shadow:0 0 0 0 rgba(220,38,38,0);}}
+        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+        .modal-card{background:#fff;border-radius:12px;padding:24px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);}
+        .modal-title{font-size:1rem;font-weight:600;color:#1a1a2e;margin-bottom:8px;}
+        .modal-text{font-size:0.8rem;color:#6c757d;margin-bottom:20px;line-height:1.5;}
+        .modal-buttons{display:flex;gap:12px;justify-content:flex-end;}
+        .modal-btn{padding:8px 20px;border-radius:6px;font-size:0.75rem;font-weight:500;cursor:pointer;border:none;transition:all 0.2s;}
+        .modal-btn-cancel{background:#f1f3f5;color:#1a1a2e;}
+        .modal-btn-cancel:hover{background:#e9ecef;}
+        .modal-btn-confirm{background:#dc2626;color:#fff;}
+        .modal-btn-confirm:hover{background:#b91c1c;}
+        .hidden{display:none;}
     </style>
 </head>
 <body>
@@ -148,10 +159,7 @@
                                     @endif
                                 </a>
                                 <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" style="text-decoration:none;">Account</a>
-                                <form method="POST" action="{{ route('logout') }}" onsubmit="showLogoutModal(event)">
-                                    @csrf
-                                    <button type="submit" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 bg-transparent border-none cursor-pointer">Logout</button>
-                                </form>
+                                <button type="button" onclick="showLogoutModal()" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 bg-transparent border-none cursor-pointer">Logout</button>
                             </div>
                         </div>
                     @else
@@ -208,10 +216,7 @@
                     @else
                         <a class="nav-link" href="{{ route('admin.dashboard') }}">Admin</a>
                     @endunless
-                    <form method="POST" action="{{ route('logout') }}" id="navbarLogoutForm" style="display:inline;" onsubmit="showLogoutModal(event)">
-                        @csrf
-                        <button type="submit" style="background:none;border:none;color:#111;cursor:pointer;font-size:0.8rem;">Logout</button>
-                    </form>
+                    <button type="button" onclick="showLogoutModal()" style="background:none;border:none;color:#111;cursor:pointer;font-size:0.8rem;">Logout</button>
                 </nav>
             </div>
         @endguest
@@ -272,10 +277,7 @@
                     @else
                         <a class="nav-link" href="{{ route('admin.dashboard') }}">Admin</a>
                     @endunless
-                    <form method="POST" action="{{ route('logout') }}" style="display:inline;" onsubmit="showLogoutModal(event)">
-                        @csrf
-                        <button type="submit" style="background:none;border:none;color:#111;cursor:pointer;font-size:0.8rem;">Logout</button>
-                    </form>
+                    <button type="button" onclick="showLogoutModal()" style="background:none;border:none;color:#111;cursor:pointer;font-size:0.8rem;">Logout</button>
                 @endif
             </nav>
         </div>
@@ -301,6 +303,21 @@
             </a>
         @endunless
     @endauth
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3 class="modal-title">Confirm Logout</h3>
+            <p class="modal-text">Are you sure you want to log out of this page?</p>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="hideLogoutModal()">Cancel</button>
+                <form id="logoutForm" method="POST" action="{{ route('logout') }}" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="modal-btn modal-btn-confirm">Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
         function toggleProfileDropdown(event) {
@@ -347,46 +364,27 @@
             overlay.classList.add('hidden');
         });
 
-        let logoutForm = null;
-        function showLogoutModal(event) {
-            if (event && event.target) {
-                event.preventDefault();
-                logoutForm = document.querySelector('form[onsubmit*="showLogoutModal"]') || document.getElementById('navbarLogoutForm');
-            } else {
-                logoutForm = document.getElementById('navbarLogoutForm');
-            }
+        // Logout Modal Functions
+        function showLogoutModal() {
             const modal = document.getElementById('logoutModal');
-            if (modal && logoutForm) {
-                modal.style.display = 'flex';
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.add('hidden');
             }
+            modal.classList.remove('hidden');
         }
 
-        function closeLogoutModal() {
+        function hideLogoutModal() {
             const modal = document.getElementById('logoutModal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-            logoutForm = null;
+            modal.classList.add('hidden');
         }
 
-        function proceedLogout() {
-            closeLogoutModal();
-            if (logoutForm) {
-                logoutForm.submit();
+        // Close modal when clicking outside
+        document.getElementById('logoutModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                hideLogoutModal();
             }
-        }
+        });
     </script>
-
-    <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
-            <h2 style="margin:0 0 16px 0;font-size:1.3rem;font-weight:700;color:#1a1a2e;">Confirm Logout</h2>
-            <p style="margin:0 0 24px 0;color:#6c757d;font-size:0.95rem;line-height:1.5;">Are you sure you want to logout of this page?</p>
-            <div style="display:flex;gap:12px;justify-content:center;">
-                <button onclick="closeLogoutModal()" style="flex:1;padding:12px 24px;border-radius:8px;border:1px solid #dee2e6;background:#fff;color:#1a1a2e;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.2s;">Cancel</button>
-                <button onclick="proceedLogout()" style="flex:1;padding:12px 24px;border-radius:8px;border:none;background:#dc2626;color:#fff;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.2s;">Confirm</button>
-            </div>
-        </div>
-    </div>
 </body>
 </html>

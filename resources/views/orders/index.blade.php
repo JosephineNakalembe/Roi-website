@@ -1,6 +1,55 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        @media (max-width: 768px) {
+            /* Consistent font size for entire page */
+            .card, .order-card, .card h2, .card strong, .card p, .card span, .card a, .card button {
+                font-size: 0.75rem !important;
+            }
+            .sticky-header h1 {
+                font-size: 0.75rem !important;
+            }
+            /* Reduce spacing between order cards */
+            .card > div[style*="display:grid"] {
+                gap: 8px !important;
+            }
+            .order-card {
+                padding: 8px !important;
+            }
+            .order-card .pending-review {
+                font-size: 0.75rem !important;
+            }
+            .order-card .btn {
+                padding: 2px 6px !important;
+                font-size: 0.75rem !important;
+                height: 24px !important;
+                line-height: 1 !important;
+            }
+            .order-card .button-container {
+                flex-wrap: nowrap !important;
+                gap: 4px !important;
+            }
+            .order-card .button-container a {
+                font-size: 0.75rem !important;
+            }
+            /* Cancel modal mobile responsive */
+            #cancelModal .card {
+                max-width: 90% !important;
+                padding: 16px !important;
+            }
+            #cancelModal h2 {
+                font-size: 0.85rem !important;
+            }
+            #cancelModal .textarea {
+                font-size: 0.75rem !important;
+            }
+            #cancelModal .btn {
+                padding: 6px 12px !important;
+                font-size: 0.75rem !important;
+            }
+        }
+    </style>
     <!-- Sticky Header -->
     <div class="sticky-header">
         <div class="header-content">
@@ -14,13 +63,18 @@
         @else
             @php
                 $activeOrders = $orders->filter(function($order) {
-                    // Active: not delivered, or delivered but has unreviewed items
+                    // Active: not delivered/cancelled, or delivered but has unreviewed items
+                    if ($order->status === 'cancelled') return false;
                     if ($order->status !== 'delivered') return true;
                     return $order->items->contains(fn($item) => !$item->review);
                 });
                 $pastOrders = $orders->filter(function($order) {
                     // Past: delivered AND all items have been reviewed
                     return $order->status === 'delivered' && !$order->items->contains(fn($item) => !$item->review);
+                });
+                $cancelledOrders = $orders->filter(function($order) {
+                    // Cancelled: status is cancelled
+                    return $order->status === 'cancelled';
                 });
             @endphp
 
@@ -31,8 +85,9 @@
                         @php
                             $hasUnreviewedItems = $order->status === 'delivered' && $order->items->contains(fn($item) => !$item->review);
                             $latestUpdate = $order->updates->first();
+                            $canCancel = $order->status === 'pending' || $order->status === 'processing';
                         @endphp
-                        <div onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#fff;cursor:pointer;transition:box-shadow 0.15s;border-left:4px solid {{ $hasUnreviewedItems ? '#dc2626' : ($order->status === 'shipped' ? '#2563eb' : '#d1d5db') }};" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
+                        <div class="order-card" onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#fff;cursor:pointer;transition:box-shadow 0.15s;border-left:4px solid {{ $hasUnreviewedItems ? '#dc2626' : ($order->status === 'shipped' ? '#2563eb' : ($canCancel ? '#f97316' : '#d1d5db')) }};" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
                                 <div>
                                     <strong>{{ $order->order_number }}</strong>
@@ -73,15 +128,26 @@
                                 </div>
                             @endif
 
-                            <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                                <div>
+                            <div class="button-container" style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
+                                <div style="display:flex;align-items:center;flex-shrink:0;">
                                     @if($hasUnreviewedItems)
-                                        <span style="font-size:0.8rem;color:#dc2626;">Items pending review</span>
+                                        <span class="pending-review" style="font-size:0.65rem;color:#dc2626;white-space:nowrap;">Items pending review</span>
                                     @elseif($order->status === 'shipped')
-                                        <span style="font-size:0.8rem;color:#2563eb;">Click to confirm receipt</span>
+                                        <span style="font-size:0.65rem;color:#2563eb;white-space:nowrap;">Click to confirm receipt</span>
+                                    @elseif($canCancel)
+                                        <span style="font-size:0.65rem;color:#f97316;white-space:nowrap;">Can be cancelled</span>
                                     @endif
                                 </div>
-                                <span style="font-size:0.8rem;color:#9ca3af;">Tap for details &rarr;</span>
+                                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;">
+                                    @if($canCancel)
+                                        <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn" style="background:#dc2626;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Cancel</button>
+                                    @endif
+                                    <button onclick="event.stopPropagation();openOrderModal({{ $order->id }})" class="btn" style="padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Track</button>
+                                    @if($order->status === 'delivered' && $order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
+                                        <a href="{{ route('orders.return.create', $order) }}" class="btn" style="background:#f97316;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Return</a>
+                                    @endif
+                                    <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" style="font-size:0.7rem;color:#2563eb;text-decoration:none;font-weight:500;white-space:nowrap;">Tap for details &rarr;</a>
+                                </div>
                             </div>
                         </div>
                     @endforeach
@@ -95,7 +161,7 @@
                         @php
                             $latestUpdate = $order->updates->first();
                         @endphp
-                        <div onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#f9fafb;cursor:pointer;transition:box-shadow 0.15s;opacity:0.85;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)';this.style.opacity='1'" onmouseout="this.style.boxShadow='';this.style.opacity='0.85'">
+                        <div class="order-card" onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#f9fafb;cursor:pointer;transition:box-shadow 0.15s;opacity:0.85;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)';this.style.opacity='1'" onmouseout="this.style.boxShadow='';this.style.opacity='0.85'">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
                                 <div>
                                     <strong style="color:#6b7280;">{{ $order->order_number }}</strong>
@@ -109,11 +175,47 @@
                                 </div>
                             </div>
 
-                            <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                            <div style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
+                                <span style="font-size:0.65rem;color:#6b7280;white-space:nowrap;flex-shrink:0;">✓ All items reviewed</span>
+                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" style="font-size:0.65rem;color:#6b7280;text-decoration:none;font-weight:500;white-space:nowrap;flex-shrink:0;">Tap for details &rarr;</a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            @if($cancelledOrders->isNotEmpty())
+                <h2 style="margin-bottom:16px;color:#dc2626;">Cancelled Orders</h2>
+                <div style="display:grid;gap:16px;">
+                    @foreach($cancelledOrders as $order)
+                        @php
+                            $latestUpdate = $order->updates->first();
+                        @endphp
+                        <div class="order-card" onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#fef2f2;cursor:pointer;transition:box-shadow 0.15s;opacity:0.85;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)';this.style.opacity='1'" onmouseout="this.style.boxShadow='';this.style.opacity='0.85'">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
                                 <div>
-                                    <span style="font-size:0.8rem;color:#6b7280;">✓ All items reviewed</span>
+                                    <strong style="color:#dc2626;">{{ $order->order_number }}</strong>
+                                    <p class="text-muted" style="margin:2px 0 0;">{{ $order->placed_at->format('F j, Y') }}</p>
+                                    @if($order->cancelled_at)
+                                        <p style="margin:2px 0 0;font-size:0.65rem;color:#991b1b;">Cancelled on {{ $order->cancelled_at->format('M d, Y') }}</p>
+                                    @endif
                                 </div>
-                                <span style="font-size:0.8rem;color:#9ca3af;">Tap for details &rarr;</span>
+                                <div style="text-align:right;">
+                                    <p style="margin:0;">
+                                        <span style="color:#dc2626;font-weight:600;">Cancelled</span>
+                                    </p>
+                                    <p style="margin:2px 0 0;font-weight:700;color:#991b1b;">UGX{{ number_format($order->total, 2) }}</p>
+                                </div>
+                            </div>
+
+                            @if($order->cancellation_reason)
+                                <div style="margin-top:8px;padding:8px 12px;background:#fee2e2;border-radius:8px;">
+                                    <p style="margin:0;font-size:0.7rem;color:#991b1b;"><strong>Reason:</strong> {{ $order->cancellation_reason }}</p>
+                                </div>
+                            @endif
+
+                            <div style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
+                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" style="font-size:0.65rem;color:#991b1b;text-decoration:none;font-weight:500;white-space:nowrap;flex-shrink:0;">Tap for details &rarr;</a>
                             </div>
                         </div>
                     @endforeach
@@ -129,6 +231,28 @@
         <div class="card" style="max-width:700px;width:100%;background:#fff;margin:auto;max-height:90vh;overflow-y:auto;">
             <div id="orderModalContent">
                 <p style="text-align:center;padding:30px;color:#6b7280;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Modal -->
+    <div id="cancelModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1001;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
+        <div class="card" style="max-width:500px;width:100%;background:#fff;margin:auto;">
+            <div id="cancelModalContent">
+                <h2 style="margin:0 0 16px;">Cancel Order</h2>
+                <p style="margin:0 0 20px;color:#6b7280;">Are you sure you want to cancel this order?</p>
+                <form id="cancelForm" method="POST" style="display:grid;gap:16px;">
+                    @csrf
+                    <input type="hidden" name="order_id" id="cancelOrderId">
+                    <div class="form-group">
+                        <label class="form-label">Reason for cancellation</label>
+                        <textarea class="textarea" name="reason" rows="3" placeholder="Please provide a reason for cancelling this order..." required></textarea>
+                    </div>
+                    <div style="display:flex;gap:12px;justify-content:flex-end;">
+                        <button type="button" onclick="hideCancelModal()" class="btn btn-secondary">Go Back</button>
+                        <button type="submit" class="btn" style="background:#dc2626;">Confirm Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -230,7 +354,7 @@
                 ` : ''}
 
                 <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
-                    <a href="{{ url('/orders') }}/${order.id}" class="btn btn-secondary" style="padding:8px 16px;font-size:0.9rem;">Full Details</a>
+                    <a href="{{ route('orders.show', $order) }}" class="btn btn-secondary" style="padding:8px 16px;font-size:0.9rem;">Full Details</a>
                     <button onclick="closeOrderModal()" class="btn" style="background:#6b7280;padding:8px 16px;font-size:0.9rem;">Close</button>
                 </div>
             `;
@@ -244,6 +368,55 @@
 
         document.getElementById('orderModal').addEventListener('click', function(e) {
             if (e.target === this) closeOrderModal();
+        });
+
+        // Cancel Modal Functions
+        function showCancelModal(orderId) {
+            const modal = document.getElementById('cancelModal');
+            const orderIdInput = document.getElementById('cancelOrderId');
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown) {
+                dropdown.classList.add('hidden');
+            }
+            orderIdInput.value = orderId;
+            modal.style.display = 'flex';
+        }
+
+        function hideCancelModal() {
+            const modal = document.getElementById('cancelModal');
+            modal.style.display = 'none';
+        }
+
+        // Close cancel modal when clicking outside
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) hideCancelModal();
+        });
+
+        // Handle cancel form submission
+        document.getElementById('cancelForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('{{ route('orders.cancel') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('[name="_token"]')?.value,
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    hideCancelModal();
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to cancel order');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while cancelling the order');
+            });
         });
     </script>
 @endsection

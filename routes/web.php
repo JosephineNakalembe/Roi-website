@@ -56,6 +56,8 @@ Route::middleware(['auth', PreventAdminAccess::class])->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('orders.confirm-received');
     Route::post('/orders/{order}/items/{item}/review', [OrderController::class, 'review'])->name('orders.items.review');
+    Route::post('/orders/{order}/bulk-review', [OrderController::class, 'bulkReview'])->name('orders.bulk-review');
+    Route::post('/orders/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/orders/{order}/return', [OrderReturnController::class, 'create'])->name('orders.return.create');
     Route::post('/orders/{order}/return', [OrderReturnController::class, 'store'])->name('orders.return.store');
     Route::get('/returns/{orderReturn}/track', [OrderReturnController::class, 'track'])->name('returns.track');

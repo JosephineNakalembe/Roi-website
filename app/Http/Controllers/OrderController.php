@@ -86,4 +86,84 @@ class OrderController extends Controller
         return back()->with('success', 'Thank you! Your review has been submitted.');
     }
 
+    public function bulkReview(Request $request, Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($order->status !== 'delivered') {
+            return back()->withErrors(['You can only review items after confirming delivery.']);
+        }
+
+        $data = $request->validate([
+            'reviews' => ['required', 'array'],
+            'reviews.*.rating' => ['nullable', 'integer', 'between:1,5'],
+            'reviews.*.comment' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $reviewCount = 0;
+
+        foreach ($data['reviews'] as $itemId => $reviewData) {
+            // Skip if no rating provided (optional reviews)
+            if (!isset($reviewData['rating']) || empty($reviewData['rating'])) {
+                continue;
+            }
+
+            $item = $order->items()->where('id', $itemId)->first();
+
+            if (!$item || $item->review) {
+                continue; // Skip if item doesn't exist or already reviewed
+            }
+
+            $item->review()->create([
+                'user_id' => Auth::id(),
+                'rating' => $reviewData['rating'],
+                'comment' => $reviewData['comment'] ?? null,
+            ]);
+
+            $reviewCount++;
+        }
+
+        if ($reviewCount > 0) {
+            return back()->with('success', "Thank you! {$reviewCount} review(s) have been submitted.");
+        }
+
+        return back()->with('info', 'No reviews were submitted. Please provide at least one rating.');
+    }
+
+    public function cancel(Request $request)
+    {
+        $data = $request->validate([
+            'order_id' => ['required', 'integer'],
+            'reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $order = Order::find($data['order_id']);
+
+        if (!$order || $order->user_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+        }
+
+        if (!in_array($order->status, ['pending', 'processing'])) {
+            return response()->json(['success' => false, 'message' => 'This order cannot be cancelled'], 400);
+        }
+
+        // Update order status to cancelled
+        $order->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => $data['reason'],
+        ]);
+
+        // Create an order update for tracking
+        $order->updates()->create([
+            'order_id' => $order->id,
+            'status' => 'cancelled',
+            'note' => 'Order cancelled by buyer. Reason: ' . $data['reason'],
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Order cancelled successfully']);
+    }
+
 }
