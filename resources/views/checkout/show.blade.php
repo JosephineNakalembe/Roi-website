@@ -89,7 +89,7 @@
                         <span style="font-size:1.2rem;">💵</span>
                         <div>
                             <strong style="display:block;">Cash on Delivery (COD)</strong>
-                            <span style="font-size:0.85rem;color:#6b7280;">Pay when you receive your order</span>
+                            <span style="font-size:0.85rem;color:#6b7280;">Pay when you receive your order (Pay with Mobile Money using Airtel or MTN)</span>
                         </div>
                     </div>
 

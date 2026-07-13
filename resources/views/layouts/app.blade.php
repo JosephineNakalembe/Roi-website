@@ -148,7 +148,7 @@
                                     @endif
                                 </a>
                                 <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" style="text-decoration:none;">Account</a>
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form method="POST" action="{{ route('logout') }}" onsubmit="showLogoutModal(event)">
                                     @csrf
                                     <button type="submit" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 bg-transparent border-none cursor-pointer">Logout</button>
                                 </form>
@@ -208,7 +208,7 @@
                     @else
                         <a class="nav-link" href="{{ route('admin.dashboard') }}">Admin</a>
                     @endunless
-                    <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                    <form method="POST" action="{{ route('logout') }}" id="navbarLogoutForm" style="display:inline;" onsubmit="showLogoutModal(event)">
                         @csrf
                         <button type="submit" style="background:none;border:none;color:#111;cursor:pointer;font-size:0.8rem;">Logout</button>
                     </form>
@@ -272,7 +272,7 @@
                     @else
                         <a class="nav-link" href="{{ route('admin.dashboard') }}">Admin</a>
                     @endunless
-                    <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                    <form method="POST" action="{{ route('logout') }}" style="display:inline;" onsubmit="showLogoutModal(event)">
                         @csrf
                         <button type="submit" style="background:none;border:none;color:#111;cursor:pointer;font-size:0.8rem;">Logout</button>
                     </form>
@@ -346,6 +346,47 @@
             mobileMenu.classList.add('hidden');
             overlay.classList.add('hidden');
         });
+
+        let logoutForm = null;
+        function showLogoutModal(event) {
+            if (event && event.target) {
+                event.preventDefault();
+                logoutForm = document.querySelector('form[onsubmit*="showLogoutModal"]') || document.getElementById('navbarLogoutForm');
+            } else {
+                logoutForm = document.getElementById('navbarLogoutForm');
+            }
+            const modal = document.getElementById('logoutModal');
+            if (modal && logoutForm) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            logoutForm = null;
+        }
+
+        function proceedLogout() {
+            closeLogoutModal();
+            if (logoutForm) {
+                logoutForm.submit();
+            }
+        }
     </script>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
+            <h2 style="margin:0 0 16px 0;font-size:1.3rem;font-weight:700;color:#1a1a2e;">Confirm Logout</h2>
+            <p style="margin:0 0 24px 0;color:#6c757d;font-size:0.95rem;line-height:1.5;">Are you sure you want to logout of this page?</p>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button onclick="closeLogoutModal()" style="flex:1;padding:12px 24px;border-radius:8px;border:1px solid #dee2e6;background:#fff;color:#1a1a2e;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.2s;">Cancel</button>
+                <button onclick="proceedLogout()" style="flex:1;padding:12px 24px;border-radius:8px;border:none;background:#dc2626;color:#fff;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.2s;">Confirm</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

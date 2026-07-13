@@ -62,8 +62,12 @@
                         <div style="min-width:220px;flex:1;">
                             <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
                             @if($item->color || $item->size)
+                                @php
+                                    $colorParts = explode(':', $item->color ?? '');
+                                    $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
+                                @endphp
                                 <p style="font-size:0.85rem;color:#6b7280;margin-top:2px;">
-                                    @if($item->color)<span>Color: {{ $item->color }}</span>@endif
+                                    @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
                                     @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
                                 </p>
                             @endif
