@@ -32,8 +32,12 @@
                 flex-wrap: nowrap !important;
                 gap: 4px !important;
             }
-            .order-card .button-container a {
+            .order-card .button-container a,
+            .order-card .button-container button,
+            .order-card .button-container span {
                 font-size: 0.75rem !important;
+                flex-shrink: 0 !important;
+                text-align: center !important;
             }
             /* Cancel modal mobile responsive */
             #cancelModal .card {
@@ -131,27 +135,21 @@
                                 </div>
                             @endif
 
-                            <div class="button-container" style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
-                                <div style="display:flex;align-items:center;flex-shrink:0;">
-                                    @if($hasUnreviewedItems)
-                                        <span class="pending-review" style="font-size:0.65rem;color:#dc2626;white-space:nowrap;">Items pending review</span>
-                                    @elseif($order->status === 'shipped')
-                                        <span style="font-size:0.65rem;color:#2563eb;white-space:nowrap;">Click to confirm receipt</span>
-                                    @elseif($canCancel)
-                                        <span style="font-size:0.65rem;color:#f97316;white-space:nowrap;">Can be cancelled</span>
-                                    @endif
-                                </div>
-                                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;">
-                                    @if($canCancel)
-                                        <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn order-action-btn" style="background:#dc2626;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Cancel</button>
-                                    @endif
-                                    <button onclick="event.stopPropagation();openOrderModal({{ $order->id }})" class="btn order-action-btn" style="padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Track</button>
-                                    @if($order->status === 'delivered' && $order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
-                                        <a href="{{ route('orders.return.create', $order) }}" class="btn order-action-btn" style="background:#f97316;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Return</a>
-                                    @endif
-                                    <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" style="font-size:0.7rem;color:#2563eb;text-decoration:none;font-weight:500;white-space:nowrap;">Tap for details &rarr;</a>
-                                </div>
-                            </div>
+            <div class="button-container" style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
+                @if($hasUnreviewedItems)
+                    <span class="pending-review" style="font-size:0.65rem;color:#dc2626;white-space:nowrap;flex-shrink:0;">Items pending review</span>
+                @elseif($order->status === 'shipped')
+                    <span class="order-action-btn" style="font-size:0.65rem;color:#2563eb;white-space:nowrap;flex-shrink:0;padding:1px 5px;">Confirm Receipt</span>
+                @endif
+                @if($canCancel)
+                    <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn order-action-btn" style="background:#dc2626;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Cancel</button>
+                @endif
+                <button onclick="event.stopPropagation();openOrderModal({{ $order->id }})" class="btn order-action-btn" style="padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Track</button>
+                @if($order->status === 'delivered' && $order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
+                    <a href="{{ route('orders.return.create', $order) }}" class="btn order-action-btn" style="background:#f97316;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Return</a>
+                @endif
+                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="btn order-action-btn" style="background:#2563eb;padding:3px 8px;font-size:0.65rem;white-space:nowrap;text-decoration:none;color:#fff !important;">View Details</a>
+            </div>
                         </div>
                     @endforeach
                 </div>
@@ -180,7 +178,7 @@
 
                             <div style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
                                 <span style="font-size:0.65rem;color:#6b7280;white-space:nowrap;flex-shrink:0;">✓ All items reviewed</span>
-                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" style="font-size:0.65rem;color:#6b7280;text-decoration:none;font-weight:500;white-space:nowrap;flex-shrink:0;">Tap for details &rarr;</a>
+                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="order-action-btn" style="font-size:0.65rem;white-space:nowrap;flex-shrink:0;text-decoration:none;color:#fff !important;background:#2563eb;padding:1px 5px;">View Details</a>
                             </div>
                         </div>
                     @endforeach
@@ -218,7 +216,7 @@
                             @endif
 
                             <div style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
-                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" style="font-size:0.65rem;color:#991b1b;text-decoration:none;font-weight:500;white-space:nowrap;flex-shrink:0;">Tap for details &rarr;</a>
+                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="order-action-btn" style="font-size:0.65rem;white-space:nowrap;flex-shrink:0;text-decoration:none;color:#fff !important;background:#6b7280;padding:1px 5px;">View Details</a>
                             </div>
                         </div>
                     @endforeach

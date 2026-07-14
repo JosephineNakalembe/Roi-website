@@ -143,7 +143,7 @@
             </div>
 
             <!-- Totals -->
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:#f9fafb;border-radius:14px;flex-wrap:wrap;gap:12px;">
+            <div class="totals-container" style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:#f9fafb;border-radius:14px;flex-wrap:wrap;gap:12px;">
                 <div>
                     <p class="text-muted">Subtotal</p>
                     <p class="text-muted">Shipping</p>
@@ -221,4 +221,18 @@
             @endif
         </div>
     </div>
+    <style>
+        @media (max-width: 768px) {
+            .totals-container {
+                display: grid !important;
+                grid-template-columns: 1fr auto !important;
+                gap: 8px 16px !important;
+            }
+            .totals-container > div:first-child p,
+            .totals-container > div:last-child p {
+                margin: 0 !important;
+                min-height: 1.5rem !important;
+            }
+        }
+    </style>
 @endsection

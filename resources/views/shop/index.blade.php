@@ -66,7 +66,6 @@
             <form method="GET" action="{{ route('shop.index') }}" class="flex gap-1.5 flex-wrap" style="max-width:1000px;margin:0;">
                 <div class="search-wrapper relative">
                     <input class="input" type="search" name="search" value="{{ $search ?? '' }}" placeholder="Search" class="w-35 px-2 py-1.5 pr-8">
-                    <button type="submit" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;"><svg style="width:20px;height:20px;stroke:#000;fill:none;stroke-width:2;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg></button>
                 </div>
             </form>
         </h1>

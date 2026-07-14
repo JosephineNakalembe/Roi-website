@@ -327,6 +327,8 @@
     </div>
 
     <script>
+        let previousSearchPage = null;
+
         function goBack(button) {
             const fallback = button?.dataset?.fallback || '/';
             if (window.history.length > 1) {
@@ -335,6 +337,93 @@
                 window.location.href = fallback;
             }
         }
+
+        function setupSearchBar(form) {
+            const input = form.querySelector('input[name="search"]');
+            const searchBtn = form.querySelector('button[type="submit"]');
+            
+            if (!input || !searchBtn) return;
+
+            // Check if we're on a search results page
+            const hasSearchParam = window.location.search.includes('search=');
+            const searchValue = input.value.trim();
+
+            // If on search results page, hide search button and show cancel button
+            if (hasSearchParam || searchValue) {
+                searchBtn.style.display = 'none';
+                let cancelBtn = form.querySelector('.search-cancel-btn');
+                if (!cancelBtn) {
+                    cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.className = 'search-cancel-btn';
+                    cancelBtn.innerHTML = '✕';
+                    cancelBtn.style.cssText = 'position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;font-size:0.9rem;color:#6c757d;line-height:1;';
+                    cancelBtn.onclick = function(e) {
+                        e.preventDefault();
+                        // Clear input and navigate back
+                        window.location.href = previousSearchPage || window.location.pathname;
+                    };
+                    input.parentNode.appendChild(cancelBtn);
+                }
+            }
+
+            // Handle input changes
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    searchBtn.style.display = 'none';
+                    let cancelBtn = form.querySelector('.search-cancel-btn');
+                    if (!cancelBtn) {
+                        cancelBtn = document.createElement('button');
+                        cancelBtn.type = 'button';
+                        cancelBtn.className = 'search-cancel-btn';
+                        cancelBtn.innerHTML = '✕';
+                        cancelBtn.style.cssText = 'position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;font-size:0.9rem;color:#6c757d;line-height:1;';
+                        cancelBtn.onclick = function(e) {
+                            e.preventDefault();
+                            input.value = '';
+                            searchBtn.style.display = 'block';
+                            cancelBtn.remove();
+                            // If on search results page, navigate back
+                            if (window.location.search.includes('search=')) {
+                                window.location.href = previousSearchPage || window.location.pathname;
+                            } else {
+                                input.focus();
+                            }
+                        };
+                        input.parentNode.appendChild(cancelBtn);
+                    }
+                } else {
+                    // Only show search button if not on search results page
+                    if (!window.location.search.includes('search=')) {
+                        searchBtn.style.display = 'block';
+                    }
+                    const cancelBtn = form.querySelector('.search-cancel-btn');
+                    if (cancelBtn) cancelBtn.remove();
+                }
+            });
+
+            // Store current page before search
+            if (!hasSearchParam && !searchValue) {
+                previousSearchPage = window.location.href;
+            }
+
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                if (!input.value.trim()) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+
+        // Initialize all search bars on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('form[method="GET"]').forEach(function(form) {
+                if (form.querySelector('input[name="search"]')) {
+                    setupSearchBar(form);
+                }
+            });
+        });
 
         function toggleProfileDropdown(event) {
             if (event) {

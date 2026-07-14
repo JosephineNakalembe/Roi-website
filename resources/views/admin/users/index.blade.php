@@ -10,7 +10,6 @@
     <div class="card">
         <form method="GET" style="margin-bottom:18px;display:flex;gap:10px;flex-wrap:wrap;">
             <input class="input" type="search" name="search" value="{{ $search ?? '' }}" placeholder="Search users">
-            <button class="btn">Search</button>
         </form>
         <div style="display:grid;gap:14px;">
             @foreach($users as $user)

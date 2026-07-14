@@ -52,12 +52,6 @@
             <form method="GET" action="{{ route('shop.index') }}" style="display:flex;gap:8px;flex:1;max-width:600px;margin:0 auto;">
                 <div style="position:relative;flex:1;">
                     <input class="input" type="search" name="search" placeholder="Search products..." style="width:100%;padding-right:40px;">
-                    <button type="submit" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;">
-                        <svg style="width:20px;height:20px;stroke:#000;fill:none;stroke-width:2;" viewBox="0 0 24 24">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="M21 21l-4.35-4.35"></path>
-                        </svg>
-                    </button>
                 </div>
             </form>
         </div>

@@ -53,7 +53,6 @@
                 </select>
             </div>
             <div style="display:flex;gap:8px;">
-                <button type="submit" class="btn" style="background:#3b82f6;color:#fff;">Search</button>
                 @if(request('search') || request('category'))
                     <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Clear</a>
                 @endif
