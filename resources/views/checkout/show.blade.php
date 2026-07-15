@@ -12,18 +12,172 @@
             .checkout-container {
                 grid-template-columns: 1fr !important;
             }
+            
+            #orderSummarySlider {
+                scrollbar-width: thin;
+                scrollbar-color: #000 #f3f4f6;
+            }
+            
+            #orderSummarySlider::-webkit-scrollbar {
+                height: 6px;
+            }
+            
+            #orderSummarySlider::-webkit-scrollbar-track {
+                background: #f3f4f6;
+                border-radius: 3px;
+            }
+            
+            #orderSummarySlider::-webkit-scrollbar-thumb {
+                background: #000;
+                border-radius: 3px;
+            }
+            
+            #orderSummarySlider::-webkit-scrollbar-thumb:hover {
+                background: #374426;
+            }
+            
+            /* Desktop: show 6 cards at a time */
+            .carousel-card {
+                flex: 0 0 calc((100% - 60px) / 6) !important;
+                max-width: calc((100% - 60px) / 6) !important;
+            }
+            
+            @media (max-width: 768px) {
+                /* Mobile: show 3 cards at a time - narrower width */
+
+                header {
+                     width: 100%;
+                     padding-left: 0;
+                     padding-right: 0;
+                }
+                .carousel-card {
+                    flex: 0 0 calc((100% - 16px) / 3) !important;
+                    max-width: calc((100% - 16px) / 3) !important;
+                    padding: 6px !important;
+                }
+                
+                #orderSummarySlider {
+                    padding-bottom: 6px;
+                    max-height: 150px;
+                    margin-bottom: 10px;
+                    gap:6px;
+                }
+                
+                /* Make cards more compact on mobile */
+                .carousel-card img {
+                    height: 80px !important;
+                    margin-bottom: 2px !important;
+                    border-radius: 4px !important;
+                }
+                
+                .carousel-card p {
+                    margin: 1px 0 !important;
+                    padding: 6px;
+                }
+                
+                .carousel-card p[style*="font-size:0.75rem"] {
+                    font-size: 0.55rem !important;
+                    font-weight: 600 !important;
+                    margin: 1px 0 !important;
+                }
+                
+                .carousel-card p[style*="font-size:0.7rem"] {
+                    font-size: 0.55rem !important;
+                    margin: 1px 0 !important;
+                }
+                
+                .carousel-card p[style*="font-size:0.65rem"] {
+                    font-size: 0.5rem !important;
+                    margin: 1px 0 !important;
+                }
+                
+                .carousel-card p[style*="font-size:0.85rem"] {
+                    font-size: 0.6rem !important;
+                    margin: 2px 0 0 0 !important;
+                    font-weight: 700 !important;
+                }
+                
+                /* Show smaller navigation buttons on mobile */
+                .carousel-btn {
+                    display: flex !important;
+                    width: 26px !important;
+                    height: 26px !important;
+                    font-size: 0.9rem !important;
+                }
+                
+                /* Adjust button position for smaller screens */
+                .carousel-btn:first-child {
+                    left: -5px !important;
+                }
+                
+                .carousel-btn:last-child {
+                    right: -5px !important;
+                }
+                
+                /* Make shipping form font bigger on mobile */
+                /*.checkout-container label {
+                    font-size: 0.9rem !important;
+                    font-weight: 600 !important;
+                    margin-bottom: 4px !important;
+                }
+                
+                .checkout-container input,
+                .checkout-container textarea {
+                    font-size: 0.9rem !important;
+                    padding: 8px 10px !important;
+                }
+                
+                .checkout-container h2 {
+                    font-size: 1rem !important;
+                    font-weight: 700 !important;
+                }*/
+                
+                /* Ensure mobile nav is full width from edge to edge */
+                header {
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                }
+                
+                /* Add padding to nav content so icons don't touch screen edges */
+                .md\\:hidden {
+                    padding-left: 12px !important;
+                    padding-right: 12px !important;
+                }
+            }
+            
+            @media (max-width: 400px) {
+                /* Very small mobile: show 3 cards at a time */
+                .carousel-card {
+                    flex: 0 0 calc((100% - 24px) / 3) !important;
+                    max-width: calc((100% - 24px) / 3) !important;
+                }
+                
+                .carousel-btn {
+                    width: 32px !important;
+                    height: 32px !important;
+                    font-size: 1.1rem !important;
+                }
+                
+                .carousel-btn:first-child {
+                    left: 2px !important;
+                }
+                
+                .carousel-btn:last-child {
+                    right: 2px !important;
+                }
+            }
         </style>
         <div class="checkout-container" style="display:grid;gap:24px;">
             <div style="background:#f9fafb;border-radius:16px;padding:18px;">
                 <h2>Order summary</h2>
-                <div style="margin-top:16px;">
-                    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;margin-bottom:16px;scrollbar-width:thin;" id="orderSummarySlider">
+                <div style="margin-top:16px;position:relative;">
+                    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;margin-bottom:16px;scrollbar-width:thin;scroll-behavior:smooth;" id="orderSummarySlider">
                         @foreach($items as $item)
                             @php
                                 $colorParts = explode(':', $item['color'] ?? '');
                                 $colorDisplayName = $colorParts[1] ?? ($item['color'] ?? '');
                             @endphp
-                            <div style="flex:0 0 auto;width:130px;text-align:center;background:#fff;padding:10px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                            <div class="carousel-card" style="flex:0 0 auto;width:100px;text-align:center;background:#fff;padding:10px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 4px rgba(0,0,0,0.05);">
                                 <img src="{{ optional($item['product']->primaryImage)->path ? asset('storage/' . $item['product']->primaryImage->path) : 'https://via.placeholder.com/200x200' }}"
                                      alt="{{ $item['product']->name }}"
                                      style="width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:8px;">
@@ -39,6 +193,10 @@
                             </div>
                         @endforeach
                     </div>
+                    @if($items->count() > 1)
+                        <button type="button" class="carousel-btn" onclick="scrollCarousel(-1)" style="position:absolute;left:-10px;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.2);">‹</button>
+                        <button type="button" class="carousel-btn" onclick="scrollCarousel(1)" style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.2);">›</button>
+                    @endif
                 </div>
 
                 <hr style="margin:18px 0;">
@@ -191,5 +349,37 @@
             deliveryAreaHidden.value = oldArea;
             updateShippingAndTotal(oldArea);
         }
+
+        // Carousel scroll function
+        function scrollCarousel(direction) {
+            const slider = document.getElementById('orderSummarySlider');
+            if (!slider) return;
+            
+            const cardWidth = 142; // card width (130px) + gap (12px)
+            const scrollAmount = cardWidth * 2; // scroll 2 cards at a time
+            
+            slider.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+
+        // Hide carousel buttons when at edges
+        function updateCarouselButtons() {
+            const slider = document.getElementById('orderSummarySlider');
+            if (!slider || slider.children.length <= 1) return;
+            
+            // Buttons visibility is handled by CSS and the conditional in Blade template
+            // This function can be extended for edge detection if needed
+        }
+
+        // Update carousel on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.getElementById('orderSummarySlider');
+            if (slider) {
+                slider.addEventListener('scroll', updateCarouselButtons);
+                updateCarouselButtons();
+            }
+        });
     </script>
 @endsection

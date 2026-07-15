@@ -50,6 +50,7 @@
         }
         .search-wrapper {
             position: relative;
+            
         }
         .search-icon {
             position: absolute;

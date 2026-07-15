@@ -31,6 +31,9 @@ class User extends Authenticatable
         'status',
         'phone',
         'address',
+        'email_verified_at',
+        'verification_token',
+        'verification_token_expires_at',
     ];
 
     /**

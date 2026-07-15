@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\CustomerServiceController as AdminCustomerService
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ReturnController as AdminReturnController;
 use App\Http\Controllers\OrderReturnController;
+use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\PreventAdminAccess;
 use Illuminate\Support\Facades\Route;
@@ -28,9 +30,20 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    
+    // Password reset routes
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode'])->name('password.send-code');
+    Route::get('/forgot-password/verify', [ForgotPasswordController::class, 'showVerifyCodeForm'])->name('password.verify-code');
+    Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyCode'])->name('password.verify-code.post');
+    Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.reset.post');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Email verification route (accessible to anyone with the token)
+Route::get('/verify-email/{token}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
 
 Route::get('/shop', [ProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{slug}', [ProductController::class, 'show'])->name('shop.show');

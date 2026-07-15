@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -52,16 +54,31 @@ class AuthController extends Controller
 
         $isAdminEmail = $data['email'] === 'josephinenakalembe33@gmail.com';
 
+        // Generate verification token
+        $verificationToken = Str::random(60);
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
             'role' => $isAdminEmail ? 'admin' : 'user',
             'status' => 'active',
+            'verification_token' => $verificationToken,
+            'verification_token_expires_at' => now()->addHours(24),
         ]);
 
+        // Send verification email
+        $verificationUrl = route('verification.verify', $verificationToken);
+        Mail::send('emails.verify', ['verificationUrl' => $verificationUrl, 'user' => $user], function ($message) use ($user) {
+            $message->to($user->email)
+                ->subject('Verify Your Email Address');
+        });
+
+        // Auto-login the user but redirect to a page telling them to verify email
         Auth::login($user);
-        return redirect($user->role === 'admin' ? route('admin.dashboard') : route('shop.index'));
+
+        return redirect()->route('shop.index')
+            ->with('success', 'Registration successful! Please check your email to verify your account.');
     }
 
     public function logout(Request $request)
