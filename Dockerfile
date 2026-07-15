@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libsqlite3-dev \
-    libpq-dev \
     zip \
     unzip \
     nodejs \
@@ -16,12 +15,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install \
-    pdo \
-    pdo_pgsql \
-    pdo_sqlite \
-    mbstring \
-    gd
+RUN docker-php-ext-install pdo_sqlite mbstring gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -30,33 +24,30 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 # Copy composer files
-COPY composer.json
+COPY composer.json ./
 
-# Install PHP dependencies
+# Install dependencies
 RUN composer install --no-dev --no-scripts --no-autoloader
 
 # Copy application files
 COPY . .
 
-# Install frontend dependencies and build assets
+# Install npm dependencies and build
 RUN npm install
 RUN npm run build
 
-# Complete Composer setup
+# Complete composer install
 RUN composer dump-autoload --optimize
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Create Laravel required directories and permissions
+# Create necessary directories
 RUN mkdir -p storage/framework/{cache,sessions,views} \
     && mkdir -p storage/logs \
     && mkdir -p bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
-# Clear and cache Laravel configuration
-RUN php artisan optimize:clear
-
 # Expose port
 EXPOSE 8000
 
-# Start Laravel server on Render assigned port
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# Start server
+CMD php artisan serve --host=0.0.0.0 --port=8000  
