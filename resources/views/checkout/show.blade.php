@@ -43,7 +43,7 @@
             }
             
             @media (max-width: 768px) {
-                /* Mobile: show 3 cards at a time - narrower width */
+                /* Mobile: show 4 cards at a time - narrower width */
 
                 header {
                      width: 100%;
@@ -51,9 +51,9 @@
                      padding-right: 0;
                 }
                 .carousel-card {
-                    flex: 0 0 calc((100% - 16px) / 3) !important;
-                    max-width: calc((100% - 16px) / 3) !important;
-                    padding: 6px !important;
+                    flex: 0 0 calc((100% - 20px) / 4) !important;
+                    max-width: calc((100% - 20px) / 4) !important;
+                    padding: 4px !important;
                 }
                 
                 #orderSummarySlider {

@@ -139,7 +139,7 @@
                 </div>
 
                 <!-- Subtotal & Checkout -->
-                <div class="flex-between flex-gap-large flex-wrap" style="margin-top:20px;padding:16px;background:#f9fafb;border-radius:14px;border:1px solid #e5e7eb;">
+                <div id="cartSummary" class="flex-between flex-gap-large flex-wrap" style="margin-top:20px;padding:16px;background:#f9fafb;border-radius:14px;border:1px solid #e5e7eb;position:sticky;bottom:0;z-index:40;box-shadow:0 -2px 10px rgba(0,0,0,0.1);">
                     <div>
                         <p class="text-muted" style="font-size:0.9rem;margin:0;">Total items ({{ $totalQuantity }})</p>
                         <h2 style="margin:4px 0 0;">UGX{{ number_format($subtotal, 0) }}</h2>

@@ -11,7 +11,7 @@
 /* Sticky Header */
 .sticky-header {
     position: sticky;
-    top: 0;
+    top: 60px;
     z-index: 40;
     background: rgba(254, 251, 235, 0.95);
     backdrop-filter: blur(10px);
@@ -23,7 +23,7 @@
 /* Sticky Header with higher z-index (for product details) */
 .sticky-header-high {
     position: sticky;
-    top: 0;
+    top: 60px;
     z-index: 45;
     background: rgba(254, 251, 235, 0.95);
     backdrop-filter: blur(10px);
