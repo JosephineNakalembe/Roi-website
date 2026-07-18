@@ -27,7 +27,7 @@ services:
       - key: LOG_CHANNEL
         value: errorlog
       - key: LOG_LEVEL
-        value: error
+        value: debug
       - key: MAIL_MAILER
         value: smtp
       - key: MAIL_HOST

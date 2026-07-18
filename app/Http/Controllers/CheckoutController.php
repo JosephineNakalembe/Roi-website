@@ -194,7 +194,11 @@ class CheckoutController extends Controller
         $user->cartItems()->delete();
 
         // Send order confirmation email
-        Mail::to($user->email)->send(new OrderConfirmedMail($order));
+        try {
+            Mail::to($user->email)->send(new OrderConfirmedMail($order));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send order confirmation email: ' . $e->getMessage());
+        }
 
         return redirect()->route('orders.index')->with('success', 'Your order has been placed successfully. Estimated delivery: ' . $estStart . ' - ' . $estEnd . '.');
     }
