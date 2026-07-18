@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderCancelledMail;
+use App\Mail\OrderDeliveredMail;
+use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use App\Models\OrderUpdate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -74,6 +78,16 @@ class OrderController extends Controller
             'status' => $data['status'],
             'note' => $data['note'] ?? 'Order status updated to ' . ucfirst($data['status']) . '.',
         ]);
+
+        // Send status notification email to customer
+        $emailMap = [
+            'shipped' => OrderShippedMail::class,
+            'delivered' => OrderDeliveredMail::class,
+            'cancelled' => OrderCancelledMail::class,
+        ];
+        if (isset($emailMap[$data['status']])) {
+            Mail::to($order->user->email)->send(new $emailMap[$data['status']]($order));
+        }
 
         return back()->with('success', 'Order status updated and tracking history saved.');
     }

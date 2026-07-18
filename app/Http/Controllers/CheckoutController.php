@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderConfirmedMail;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
 {
@@ -190,6 +192,9 @@ class CheckoutController extends Controller
 
         // Clear the cart from database
         $user->cartItems()->delete();
+
+        // Send order confirmation email
+        Mail::to($user->email)->send(new OrderConfirmedMail($order));
 
         return redirect()->route('orders.index')->with('success', 'Your order has been placed successfully. Estimated delivery: ' . $estStart . ' - ' . $estEnd . '.');
     }

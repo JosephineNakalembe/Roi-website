@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderCancelledMail;
+use App\Mail\OrderDeliveredMail;
 use App\Models\Order;
 use App\Models\OrderItemReturn;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -52,6 +55,9 @@ class OrderController extends Controller
             'status' => 'delivered',
             'note' => 'Buyer confirmed receipt of items.',
         ]);
+
+        // Send delivery confirmation email
+        Mail::to($order->user->email)->send(new OrderDeliveredMail($order));
 
         return back()->with('success', 'You have confirmed receipt of your items. Please leave a review for the products.');
     }
@@ -162,6 +168,9 @@ class OrderController extends Controller
             'status' => 'cancelled',
             'note' => 'Order cancelled by buyer. Reason: ' . $data['reason'],
         ]);
+
+        // Send cancellation email
+        Mail::to($order->user->email)->send(new OrderCancelledMail($order));
 
         return response()->json(['success' => true, 'message' => 'Order cancelled successfully']);
     }

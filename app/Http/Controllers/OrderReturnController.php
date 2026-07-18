@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ReturnRequestedMail;
 use App\Models\Order;
 use App\Models\OrderReturn;
 use App\Models\OrderReturnUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class OrderReturnController extends Controller
@@ -189,6 +191,9 @@ class OrderReturnController extends Controller
             'status' => 'pending',
             'note' => 'Return request submitted. Awaiting admin review. You will be notified once your request is processed.',
         ]);
+
+        // Send return requested email
+        Mail::to($order->user->email)->send(new ReturnRequestedMail($return));
 
         return redirect()->route('returns.track', $return)
             ->with('success', "Return request {$returnNumber} has been submitted successfully. You can track the progress below.");

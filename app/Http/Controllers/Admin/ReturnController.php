@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ReturnStatusMail;
 use App\Models\OrderReturn;
 use App\Models\OrderReturnUpdate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class ReturnController extends Controller
@@ -78,6 +80,9 @@ class ReturnController extends Controller
             'status' => $data['status'],
             'note' => $note . ($data['admin_notes'] && $data['status'] !== 'rejected' ? ' Admin note: ' . $data['admin_notes'] : ''),
         ]);
+
+        // Send return status update email to customer
+        Mail::to($orderReturn->user->email)->send(new ReturnStatusMail($orderReturn));
 
         return back()->with('success', "Return {$orderReturn->return_number} has been updated to " . ucfirst($data['status']) . ".");
     }
