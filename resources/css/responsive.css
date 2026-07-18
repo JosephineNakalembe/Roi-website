@@ -13,11 +13,11 @@
     position: sticky;
     top: 60px;
     z-index: 40;
-    background: rgba(14, 14, 26, 0.95);
+    background: rgba(254, 251, 235, 0.95);
     backdrop-filter: blur(10px);
     padding: 12px 0;
     margin-bottom: 8px;
-    border-bottom: 1px solid #2a2a42;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 /* Sticky Header with higher z-index (for product details) */
@@ -25,11 +25,11 @@
     position: sticky;
     top: 60px;
     z-index: 45;
-    background: rgba(14, 14, 26, 0.95);
+    background: rgba(254, 251, 235, 0.95);
     backdrop-filter: blur(10px);
     padding: 12px 0;
     margin-bottom: 8px;
-    border-bottom: 1px solid #2a2a42;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 /* Header Content Container */
@@ -556,13 +556,25 @@
         padding: 12px 16px;
     }
 
-    /* Font size bumps - 2 sizes up from baseline, headers untouched */
+    /* Font size reductions - three sizes down */
     body {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
+    }
+
+    h1 {
+        font-size: 1rem !important;
+    }
+
+    h2 {
+        font-size: 0.875rem !important;
+    }
+
+    h3 {
+        font-size: 0.8rem !important;
     }
 
     p, span, div, a {
-        font-size: 0.875rem !important;
+        font-size: 0.75rem !important;
     }
 
     /* Page Headers - smaller on mobile */
@@ -588,7 +600,7 @@
     }
 
     .back-button-small {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         padding: 2px 6px;
     }
 
@@ -599,7 +611,7 @@
 
     /* Search Bar - smaller on mobile */
     .header-content form input[type="search"] {
-        font-size: 0.875rem !important;
+        font-size: 0.75rem !important;
         padding: 8px 32px 8px 12px !important;
     }
 
@@ -615,12 +627,12 @@
 
     /* Shop page search bar - smaller on mobile */
     .shop-header input {
-        font-size: 0.875rem !important;
+        font-size: 0.75rem !important;
         padding: 8px 12px !important;
     }
 
     .shop-header button {
-        font-size: 0.875rem !important;
+        font-size: 0.75rem !important;
         padding: 8px 12px !important;
     }
 
@@ -631,16 +643,16 @@
     }
 
     header .text-lg {
-        font-size: 1rem !important;
+        font-size: 0.875rem !important;
     }
 
     header .nav-link {
-        font-size: 0.875rem !important;
+        font-size: 0.75rem !important;
         padding: 2px 6px !important;
     }
 
     header .btn {
-        font-size: 0.875rem !important;
+        font-size: 0.75rem !important;
         padding: 6px 10px !important;
     }
 
@@ -695,7 +707,7 @@
         left: 16px;
         text-align: center;
         padding: 12px 16px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 
     /* Product Grid - Shop Page */
@@ -710,7 +722,7 @@
     }
 
     .product-card p {
-        font-size: 0.95rem !important;
+        font-size: 0.85rem !important;
     }
 
     /* Search & Filter Form */
@@ -799,7 +811,7 @@
 
     /* Tables */
     table {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     th, td {
@@ -850,7 +862,7 @@
     /* Color pills */
     button[class*="color-pill"] {
         padding: 6px 14px !important;
-        font-size: 0.9rem !important;
+        font-size: 0.85rem !important;
     }
 
     /* Suggested products grid */
@@ -970,7 +982,7 @@
 
     .btn {
         padding: 8px 16px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 }
 
