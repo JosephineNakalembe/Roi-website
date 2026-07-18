@@ -24,6 +24,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ProductController::class, 'index'])->name('home');
 
+Route::get('/test-email', function () {
+    try {
+        \Illuminate\Support\Facades\Mail::raw('Test email from ROI Store', function ($message) {
+            $message->to(\Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user()->email : 'josephinenakalembe33@gmail.com')
+                    ->subject('ROI Store - Test Email');
+        });
+        return response()->json(['status' => 'sent', 'mailer' => config('mail.default'), 'host' => config('mail.mailers.smtp.host')]);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'failed', 'error' => $e->getMessage(), 'mailer' => config('mail.default')]);
+    }
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
