@@ -10,7 +10,7 @@
         foreach ($allMedia as $media) {
             if ($media->color) {
                 $colorImageMap[$media->color][] = [
-                    'path' => asset('storage/' . $media->path),
+                    'path' => media_url($media->path),
                     'media_type' => $media->media_type,
                 ];
             }
@@ -21,7 +21,7 @@
         foreach ($allMedia as $media) {
             if (!$media->color) {
                 $generalMedia[] = [
-                    'path' => asset('storage/' . $media->path),
+                    'path' => media_url($media->path),
                     'media_type' => $media->media_type,
                 ];
             }
@@ -108,38 +108,38 @@
                         <div style="position:relative;">
                             <div id="mediaSlideshow" style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:8px;background:#f3f4f6;">
                                 <!-- Slide Number Indicator -->
-                                <div id="slideIndicator" style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.6);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;z-index:10;">1/{{ $allMedia->count() }}</div>
+                                <div id="slideIndicator" style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.6);color:#fff;padding:4px 8px;border-radius:4px;font-size:0.85rem;z-index:10;">1/{{ $allMedia->count() }}</div>
                             </div>
 
                             <!-- Navigation Arrows -->
-                            <button type="button" onclick="changeSlide(-1)" id="prevBtn" style="position:absolute;top:50%;left:12px;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;z-index:10;">&lt;</button>
-                            <button type="button" onclick="changeSlide(1)" id="nextBtn" style="position:absolute;top:50%;right:12px;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.2rem;display:none;align-items:center;justify-content:center;z-index:10;">&gt;</button>
+                            <button type="button" onclick="changeSlide(-1)" id="prevBtn" style="position:absolute;top:50%;left:12px;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.3rem;display:none;align-items:center;justify-content:center;z-index:10;">&lt;</button>
+                            <button type="button" onclick="changeSlide(1)" id="nextBtn" style="position:absolute;top:50%;right:12px;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.3rem;display:none;align-items:center;justify-content:center;z-index:10;">&gt;</button>
                         </div>
                     @else
                         <img src="https://via.placeholder.com/720x720" alt="{{ $product->name }}" class="product-image">
                     @endif
                 </div>
                 <div>
-                    <h1 style="font-size:0.875rem;">{{ $product->name }}</h1>
+                    <h1 style="font-size:0.975rem;">{{ $product->name }}</h1>
                     <p class="text-muted">{{ $product->category?->name ?? 'Uncategorized' }}</p>
-                    <p id="productPrice" style="font-size:1.1rem;font-weight:700;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
-                    <p style="font-size:0.875rem;">{{ $product->description }}</p>
+                    <p id="productPrice" style="font-size:1.2rem;font-weight:700;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
+                    <p style="font-size:0.975rem;">{{ $product->description }}</p>
 
                     @if($product->stock > 0 && $product->stock <= 2)
-                        <p style="color:#dc2626;font-weight:600;margin-top:4px;font-size:0.875rem;">
+                        <p style="color:#dc2626;font-weight:600;margin-top:4px;font-size:0.975rem;">
                             Only {{ $product->stock }} left in stock!
                         </p>
                     @endif
 
                     @if($product->stock > 0)
                         @if(auth()->check() && auth()->user()->isAdmin())
-                            <p style="margin-top:16px;color:#4b5563;font-size:0.875rem;">Admin users cannot add products to the cart. Use the admin dashboard for inventory and order management.</p>
+                            <p style="margin-top:16px;color:#4b5563;font-size:0.975rem;">Admin users cannot add products to the cart. Use the admin dashboard for inventory and order management.</p>
                         @else
                             <form method="POST" action="{{ route('cart.add', $product) }}" style="margin-top:16px;display:grid;gap:12px;">
                                 @csrf
                                 @if(!empty($colors))
                                     <div>
-                                        <label style="display:block;margin-bottom:8px;font-size:0.875rem;">Color</label>
+                                        <label style="display:block;margin-bottom:8px;font-size:0.975rem;">Color</label>
                                         <div id="colorButtons" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;">
                                             @foreach($colors as $color)
                                                 @php
@@ -164,14 +164,14 @@
                                 @endif
                                 @if($product->sizes && count($product->sizes) > 0)
                                     <div>
-                                        <label style="font-size:0.875rem;">Size</label>
+                                        <label style="font-size:0.975rem;">Size</label>
                                         <div id="sizeButtons" style="display:flex;flex-wrap:wrap;gap:8px;">
                                             @foreach($product->sizes as $size)
                                                 <button type="button"
                                                     class="size-pill"
                                                     data-size="{{ $size }}"
                                                     onclick="selectSize('{{ $size }}')"
-                                                    style="cursor:pointer;border:2px solid #d1d5db;background:#f1f3f5;color:#000;border-radius:8px;padding:8px 16px;font-size:0.875rem;font-weight:600;transition:all 0.15s;">
+                                                    style="cursor:pointer;border:2px solid #d1d5db;background:#f1f3f5;color:#000;border-radius:8px;padding:8px 16px;font-size:0.975rem;font-weight:600;transition:all 0.15s;">
                                                     {{ $size }}
                                                 </button>
                                             @endforeach
@@ -181,7 +181,7 @@
                                 @endif
                                 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
                                     <div style="flex:1;min-width:140px;">
-                                        <label style="font-size:0.875rem;">Quantity</label>
+                                        <label style="font-size:0.975rem;">Quantity</label>
                                         <input class="input" type="number" min="1" max="{{ $product->stock }}" name="quantity" value="1" required>
                                     </div>
                                     <button class="btn" type="submit">Add to Cart</button>
@@ -193,7 +193,7 @@
                             </form>
                         @endif
                     @else
-                        <p style="color:#dc2626;font-weight:600;margin-top:16px;font-size:0.875rem;">Out of Stock</p>
+                        <p style="color:#dc2626;font-weight:600;margin-top:16px;font-size:0.975rem;">Out of Stock</p>
                     @endif
 
                     <!-- Reviews Section -->
@@ -212,18 +212,18 @@
                                     @foreach($reviews as $review)
                                         <div style="padding:12px;background:#f8f9fa;border-radius:10px;border:1px solid #e9ecef;">
                                             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-                                                <strong style="font-size:0.875rem;">{{ $review->user?->name ?? 'Anonymous' }}</strong>
-                                                <span style="font-size:0.875rem;color:#f57f17;">{{ str_repeat('⭐', $review->rating) }}</span>
+                                                <strong style="font-size:0.975rem;">{{ $review->user?->name ?? 'Anonymous' }}</strong>
+                                                <span style="font-size:0.975rem;color:#f57f17;">{{ str_repeat('⭐', $review->rating) }}</span>
                                             </div>
                                             @if($review->comment)
-                                                <p style="margin:6px 0 0;font-size:0.875rem;color:#495057;">{{ $review->comment }}</p>
+                                                <p style="margin:6px 0 0;font-size:0.975rem;color:#495057;">{{ $review->comment }}</p>
                                             @endif
-                                            <p style="margin:4px 0 0;font-size:0.875rem;color:#adb5bd;">{{ $review->created_at->format('M d, Y') }}</p>
+                                            <p style="margin:4px 0 0;font-size:0.975rem;color:#adb5bd;">{{ $review->created_at->format('M d, Y') }}</p>
                                         </div>
                                     @endforeach
                                 </div>
                             @else
-                                <p class="text-muted" style="font-size:0.875rem;">No reviews yet for this product.</p>
+                                <p class="text-muted" style="font-size:0.975rem;">No reviews yet for this product.</p>
                             @endif
                         </div>
                     </div>
@@ -233,14 +233,14 @@
             <!-- You Might Like Section -->
             @if($suggestedProducts->isNotEmpty())
                 <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e5e7eb;">
-                    <h2 style="margin-bottom:16px;font-size:0.875rem;">You Might Like</h2>
+                    <h2 style="margin-bottom:16px;font-size:0.975rem;">You Might Like</h2>
                     <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:16px;">
                         @foreach($suggestedProducts->take(4) as $sProduct)
                             <a href="{{ route('shop.show', $sProduct->slug) }}" class="product-card" style="display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9ecef;border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s, transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)';this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='';this.style.transform='';">
-                                <img src="{{ optional($sProduct->primaryImage)->path ? asset('storage/' . $sProduct->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $sProduct->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
+                                <img src="{{ optional($sProduct->primaryImage)->path ? media_url($sProduct->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $sProduct->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
                                 <div style="padding:12px 14px 14px;">
-                                    <h3 style="font-size:0.875rem;font-weight:600;margin-bottom:2px;">{{ $sProduct->name }}</h3>
-                                    <p style="font-weight:700;font-size:1.1rem;">UGX{{ number_format($sProduct->price, 0) }}</p>
+                                    <h3 style="font-size:0.975rem;font-weight:600;margin-bottom:2px;">{{ $sProduct->name }}</h3>
+                                    <p style="font-weight:700;font-size:1.2rem;">UGX{{ number_format($sProduct->price, 0) }}</p>
                                 </div>
                             </a>
                         @endforeach
@@ -252,7 +252,7 @@
                 <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e5e7eb;">
                     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
                         <h3 style="margin:0;">Size Guide</h3>
-                        <button id="unitToggle" onclick="toggleUnit()" style="padding:6px 14px;border-radius:999px;font-size:0.8rem;border:2px solid #1a1a2e;background:#fff;color:#1a1a2e;cursor:pointer;font-weight:600;transition:all 0.2s;">Switch to cm</button>
+                        <button id="unitToggle" onclick="toggleUnit()" style="padding:6px 14px;border-radius:999px;font-size:0.9rem;border:2px solid #1a1a2e;background:#fff;color:#1a1a2e;cursor:pointer;font-weight:600;transition:all 0.2s;">Switch to cm</button>
                     </div>
                     @php
                         $sizeGuide = null;
@@ -302,7 +302,7 @@
                         @endphp
                         @if(!empty($sizesWithData))
                             <div style="overflow-x:auto;">
-                                <table id="clothingSizeTable" style="width:100%;border-collapse:collapse;font-size:0.9rem;margin-top:12px;">
+                                <table id="clothingSizeTable" style="width:100%;border-collapse:collapse;font-size:1rem;margin-top:12px;">
                                     <thead>
                                         <tr style="background:#f3f4f6;">
                                             <th style="padding:12px;border:1px solid #e5e7eb;text-align:left;font-weight:600;">Measurement</th>
@@ -352,7 +352,7 @@
                         @endphp
                         @if(!empty($shoeData) && !empty($colsWithData))
                             <div style="overflow-x:auto;">
-                                <table id="shoeSizeTable" style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:12px;">
+                                <table id="shoeSizeTable" style="width:100%;border-collapse:collapse;font-size:0.95rem;margin-top:12px;">
                                     <thead>
                                         <tr style="background:#f3f4f6;">
                                             @foreach($colsWithData as $col)

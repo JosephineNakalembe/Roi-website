@@ -31,7 +31,7 @@
         .code {
             background-color: #f0f0f0;
             padding: 15px 30px;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: bold;
             letter-spacing: 8px;
             text-align: center;
@@ -41,7 +41,7 @@
         }
         .footer {
             text-align: center;
-            font-size: 12px;
+            font-size: 14px;
             color: #666;
             margin-top: 30px;
         }

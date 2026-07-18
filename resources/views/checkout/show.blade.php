@@ -75,24 +75,24 @@
                     padding: 6px;
                 }
                 
-                .carousel-card p[style*="font-size:0.75rem"] {
+                .carousel-card p[style*="font-size:0.85rem"] {
                     font-size: 0.55rem !important;
                     font-weight: 600 !important;
                     margin: 1px 0 !important;
                 }
                 
-                .carousel-card p[style*="font-size:0.7rem"] {
+                .carousel-card p[style*="font-size:0.8rem"] {
                     font-size: 0.55rem !important;
                     margin: 1px 0 !important;
                 }
                 
-                .carousel-card p[style*="font-size:0.65rem"] {
-                    font-size: 0.5rem !important;
+                .carousel-card p[style*="font-size:0.75rem"] {
+                    font-size: 0.7rem !important;
                     margin: 1px 0 !important;
                 }
                 
-                .carousel-card p[style*="font-size:0.85rem"] {
-                    font-size: 0.6rem !important;
+                .carousel-card p[style*="font-size:0.95rem"] {
+                    font-size: 0.7rem !important;
                     margin: 2px 0 0 0 !important;
                     font-weight: 700 !important;
                 }
@@ -178,24 +178,24 @@
                                 $colorDisplayName = $colorParts[1] ?? ($item['color'] ?? '');
                             @endphp
                             <div class="carousel-card" style="flex:0 0 auto;width:100px;text-align:center;background:#fff;padding:10px;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 4px rgba(0,0,0,0.05);">
-                                <img src="{{ optional($item['product']->primaryImage)->path ? asset('storage/' . $item['product']->primaryImage->path) : 'https://via.placeholder.com/200x200' }}"
+                                <img src="{{ optional($item['product']->primaryImage)->path ? media_url($item['product']->primaryImage->path) : 'https://via.placeholder.com/200x200' }}"
                                      alt="{{ $item['product']->name }}"
                                      style="width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:8px;">
-                                <p style="font-size:0.75rem;font-weight:600;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $item['product']->name }}</p>
-                                <p style="font-size:0.7rem;color:#6b7280;margin:2px 0;">Qty: {{ $item['quantity'] }}</p>
+                                <p style="font-size:0.85rem;font-weight:600;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $item['product']->name }}</p>
+                                <p style="font-size:0.8rem;color:#6b7280;margin:2px 0;">Qty: {{ $item['quantity'] }}</p>
                                 @if($colorDisplayName || $item['size'])
-                                    <p style="font-size:0.65rem;color:#6b7280;margin:2px 0;">
+                                    <p style="font-size:0.75rem;color:#6b7280;margin:2px 0;">
                                         @if($colorDisplayName)<span>{{ $colorDisplayName }}</span>@endif
                                         @if($item['size'])<span> • {{ $item['size'] }}</span>@endif
                                     </p>
                                 @endif
-                                <p style="font-size:0.85rem;font-weight:700;color:#1a1a2e;margin:6px 0 0;">UGX{{ number_format($item['total'], 0) }}</p>
+                                <p style="font-size:0.95rem;font-weight:700;color:#1a1a2e;margin:6px 0 0;">UGX{{ number_format($item['total'], 0) }}</p>
                             </div>
                         @endforeach
                     </div>
                     @if($items->count() > 1)
-                        <button type="button" class="carousel-btn" onclick="scrollCarousel(-1)" style="position:absolute;left:-10px;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.2);">‹</button>
-                        <button type="button" class="carousel-btn" onclick="scrollCarousel(1)" style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.2);">›</button>
+                        <button type="button" class="carousel-btn" onclick="scrollCarousel(-1)" style="position:absolute;left:-10px;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.2);">‹</button>
+                        <button type="button" class="carousel-btn" onclick="scrollCarousel(1)" style="position:absolute;right:-10px;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.2);">›</button>
                     @endif
                 </div>
 
@@ -207,7 +207,7 @@
                     <span>Shipping</span><strong id="shippingDisplay">—</strong>
                 </div>
                 <hr style="margin:18px 0;">
-                <div style="display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;">
+                <div style="display:flex;justify-content:space-between;font-size:1.2rem;font-weight:700;">
                     <span>Total</span><strong id="totalDisplay">UGX{{ number_format($subtotal, 0) }}</strong>
                 </div>
             </div>
@@ -229,7 +229,7 @@
                         <input type="hidden" name="delivery_area" id="deliveryAreaHidden" value="{{ old('delivery_area') }}">
                         <div id="deliveryAreaDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #d1d5db;border-radius:10px;max-height:220px;overflow-y:auto;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
                         </div>
-                        <p id="deliveryAreaError" style="display:none;color:#dc2626;font-size:0.85rem;font-weight:600;margin-top:4px;">Area Out of Delivery Scope</p>
+                        <p id="deliveryAreaError" style="display:none;color:#dc2626;font-size:0.95rem;font-weight:600;margin-top:4px;">Area Out of Delivery Scope</p>
                     </div>
 
                     <label>Address Line</label>
@@ -243,23 +243,23 @@
                                     <div style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
                                 </div>
                             </div>
-                            <span style="font-size:0.9rem;color:#374151;user-select:none;">Save as default for future orders</span>
+                            <span style="font-size:1rem;color:#374151;user-select:none;">Save as default for future orders</span>
                         </label>
                     </div>
 
                     <h2>Payment Method</h2>
                     <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
-                        <span style="font-size:1.2rem;">💵</span>
+                        <span style="font-size:1.3rem;">💵</span>
                         <div>
                             <strong style="display:block;">Cash on Delivery (COD)</strong>
-                            <span style="font-size:0.85rem;color:#6b7280;">Pay when you receive your order (Pay with Mobile Money using Airtel or MTN)</span>
+                            <span style="font-size:0.95rem;color:#6b7280;">Pay when you receive your order (Pay with Mobile Money using Airtel or MTN)</span>
                         </div>
                     </div>
 
                     <label>Order Notes (optional)</label>
                     <textarea class="input" name="notes" rows="3" placeholder="Any special instructions" style="margin-bottom:16px;">{{ old('notes') }}</textarea>
 
-                    <button class="btn" type="submit" style="width:100%;padding:14px;font-size:1rem;font-weight:600;">Place Order</button>
+                    <button class="btn" type="submit" style="width:100%;padding:14px;font-size:1.1rem;font-weight:600;">Place Order</button>
                 </form>
             </div>
         </div>
@@ -307,7 +307,7 @@
             deliveryAreaDropdown.innerHTML = filtered.map(([area, price]) =>
                 `<div style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;background:#fff;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'" onclick="selectArea('${area.replace(/'/g, "\\'")}')">
                     <span>${area}</span>
-                    <span style="color:#6b7280;font-size:0.85rem;">UGX${price.toLocaleString('en-US')}</span>
+                    <span style="color:#6b7280;font-size:0.95rem;">UGX${price.toLocaleString('en-US')}</span>
                 </div>`
             ).join('');
         }

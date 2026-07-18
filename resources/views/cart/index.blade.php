@@ -62,7 +62,7 @@
                     <form method="POST" action="{{ route('cart.toggle-select-all') }}" id="selectAllForm" class="flex-between flex-gap-medium">
                         @csrf
                         <input type="hidden" name="selected" value="{{ $allSelected ? '0' : '1' }}">
-                        <label class="flex-between flex-gap-small" style="cursor:pointer;font-size:0.95rem;">
+                        <label class="flex-between flex-gap-small" style="cursor:pointer;font-size:1.05rem;">
                             <input type="checkbox" onchange="this.closest('form').submit();" {{ $allSelected ? 'checked' : '' }} class="checkbox" style="accent-color:#1a1a2e;">
                             <strong>Select All ({{ $availableItems->count() }} items)</strong>
                         </label>
@@ -88,21 +88,21 @@
                             </form>
                             <!-- Product Image -->
                             <div onclick="openEditModal('{{ $item['product']->id }}', '{{ $item['color'] ?? '' }}', '{{ $item['size'] ?? '' }}')" style="width:80px;height:80px;border-radius:10px;overflow:hidden;background:#f3f4f6;cursor:pointer;flex-shrink:0;">
-                                <img src="{{ optional($item['product']->primaryImage)->path ? asset('storage/' . $item['product']->primaryImage->path) : 'https://via.placeholder.com/200x200' }}" alt="{{ $item['product']->name }}" style="width:100%;height:100%;object-fit:cover;">
+                                <img src="{{ optional($item['product']->primaryImage)->path ? media_url($item['product']->primaryImage->path) : 'https://via.placeholder.com/200x200' }}" alt="{{ $item['product']->name }}" style="width:100%;height:100%;object-fit:cover;">
                             </div>
                             <!-- Details -->
                             <div onclick="openEditModal('{{ $item['product']->id }}', '{{ $item['color'] ?? '' }}', '{{ $item['size'] ?? '' }}')" style="flex:1;min-width:0;cursor:pointer;">
-                                <h3 style="font-size:1rem;margin:0 0 4px 0;font-weight:600;">{{ $item['product']->name }}</h3>
+                                <h3 style="font-size:1.1rem;margin:0 0 4px 0;font-weight:600;">{{ $item['product']->name }}</h3>
                                 @if($colorDisplayName)
-                                    <p style="font-size:0.85rem;color:#6b7280;margin:0 0 4px 0;">Color: {{ $colorDisplayName }}</p>
+                                    <p style="font-size:0.95rem;color:#6b7280;margin:0 0 4px 0;">Color: {{ $colorDisplayName }}</p>
                                 @endif
                                 @if($item['size'])
-                                    <p style="font-size:0.85rem;color:#6b7280;margin:0 0 4px 0;">Size: {{ $item['size'] }}</p>
+                                    <p style="font-size:0.95rem;color:#6b7280;margin:0 0 4px 0;">Size: {{ $item['size'] }}</p>
                                 @endif
-                                <strong style="font-size:1rem;">UGX{{ number_format($item['unit_price'] ?? $item['product']->price, 0) }}</strong>
-                                <p class="text-muted" style="font-size:0.75rem;margin:2px 0 0;">{{ $item['quantity'] }} × UGX{{ number_format($item['unit_price'] ?? $item['product']->price, 0) }}</p>
+                                <strong style="font-size:1.1rem;">UGX{{ number_format($item['unit_price'] ?? $item['product']->price, 0) }}</strong>
+                                <p class="text-muted" style="font-size:0.85rem;margin:2px 0 0;">{{ $item['quantity'] }} × UGX{{ number_format($item['unit_price'] ?? $item['product']->price, 0) }}</p>
                                 @if($lowStock)
-                                    <p style="font-size:0.8rem;color:#dc2626;font-weight:600;margin:4px 0 0;">
+                                    <p style="font-size:0.9rem;color:#dc2626;font-weight:600;margin:4px 0 0;">
                                         Only {{ $item['product']->stock }} left
                                     </p>
                                 @endif
@@ -117,7 +117,7 @@
                                 </button>
                                 <!-- Quantity -->
                                 <div style="position:relative;">
-                                    <button type="button" onclick="toggleQuantityDropdown('{{ $item['cart_key'] }}')" class="btn-gray" style="font-weight:700;font-size:0.9rem;min-width:50px;padding:4px 8px;">
+                                    <button type="button" onclick="toggleQuantityDropdown('{{ $item['cart_key'] }}')" class="btn-gray" style="font-weight:700;font-size:1rem;min-width:50px;padding:4px 8px;">
                                         {{ $item['quantity'] }}
                                     </button>
                                     <div id="quantityDropdown_{{ $item['cart_key'] }}" style="display:none;position:absolute;top:100%;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:100;min-width:120px;max-height:250px;overflow-y:auto;margin-top:4px;padding:8px;">
@@ -125,9 +125,9 @@
                                             <input type="number" min="1" max="{{ $item['product']->stock }}" value="{{ $item['quantity'] }}" id="quantityInput_{{ $item['cart_key'] }}" class="input-small" style="width:100%;" placeholder="Enter qty">
                                             <button type="button" onclick="updateQuantityFromInput('{{ $item['product']->id }}', '{{ $item['color'] ?? '' }}', '{{ $item['size'] ?? '' }}', '{{ $item['cart_key'] }}')" class="btn-blue btn-full" style="margin-top:6px;font-weight:600;">Update</button>
                                         </div>
-                                        <div style="font-size:0.75rem;color:#6b7280;margin-bottom:4px;">Quick select:</div>
+                                        <div style="font-size:0.85rem;color:#6b7280;margin-bottom:4px;">Quick select:</div>
                                         @for($i = 1; $i <= min($item['product']->stock, 10); $i++)
-                                            <button type="button" onclick="updateQuantity('{{ $item['product']->id }}', '{{ $item['color'] ?? '' }}', '{{ $item['size'] ?? '' }}', {{ $i }})" class="btn-outline btn-full" style="text-align:left;font-size:0.9rem;transition:background 0.15s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">
+                                            <button type="button" onclick="updateQuantity('{{ $item['product']->id }}', '{{ $item['color'] ?? '' }}', '{{ $item['size'] ?? '' }}', {{ $i }})" class="btn-outline btn-full" style="text-align:left;font-size:1rem;transition:background 0.15s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">
                                                 {{ $i }}
                                             </button>
                                         @endfor
@@ -141,7 +141,7 @@
                 <!-- Subtotal & Checkout -->
                 <div id="cartSummary" class="flex-between flex-gap-large flex-wrap" style="margin-top:20px;padding:16px;background:#f9fafb;border-radius:14px;border:1px solid #e5e7eb;position:sticky;bottom:0;z-index:40;box-shadow:0 -2px 10px rgba(0,0,0,0.1);">
                     <div>
-                        <p class="text-muted" style="font-size:0.9rem;margin:0;">Total items ({{ $totalQuantity }})</p>
+                        <p class="text-muted" style="font-size:1rem;margin:0;">Total items ({{ $totalQuantity }})</p>
                         <h2 style="margin:4px 0 0;">UGX{{ number_format($subtotal, 0) }}</h2>
                     </div>
                     <div class="flex-row flex-gap-small">
@@ -174,8 +174,8 @@
 
             @if($suggestedCategories->isNotEmpty())
                 <div class="card-success" style="margin-top:32px;padding:16px;">
-                    <h2 style="font-size:1.1rem;margin-bottom:10px;color:#166534;">You may also like</h2>
-                    <p style="font-size:0.85rem;color:#15803d;margin-bottom:10px;">Popular categories based on what customers are searching for</p>
+                    <h2 style="font-size:1.2rem;margin-bottom:10px;color:#166534;">You may also like</h2>
+                    <p style="font-size:0.95rem;color:#15803d;margin-bottom:10px;">Popular categories based on what customers are searching for</p>
                     <div class="flex-row flex-gap-small flex-wrap" style="margin-bottom:14px;">
                         @foreach($suggestedCategories as $sCat)
                             <a href="{{ route('shop.index', ['category' => $sCat->slug]) }}" class="btn-green btn-small" style="border-radius:999px;font-weight:500;transition:all 0.2s;">{{ $sCat->name }}</a>
@@ -190,7 +190,7 @@
                     <div class="grid-3">
                         @foreach($suggestions as $product)
                             <div class="card">
-                                <img src="{{ optional($product->primaryImage)->path ? asset('storage/' . $product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $product->name }}" class="product-image">
+                                <img src="{{ optional($product->primaryImage)->path ? media_url($product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $product->name }}" class="product-image">
                                 <h3>{{ $product->name }}</h3>
                                 <p class="text-muted">UGX{{ number_format($product->price, 0) }}</p>
                                 <a class="btn btn-secondary" href="{{ route('shop.show', $product->slug) }}">View</a>
@@ -278,7 +278,7 @@
             <div>
                 <label>Quantity</label>
                 <input class="input" type="number" name="quantity" value="${item.quantity}" min="1" max="${item.product.stock}" required>
-                <p style="font-size:0.85rem;color:#6b7280;margin-top:4px;">Max: ${item.product.stock}</p>
+                <p style="font-size:0.95rem;color:#6b7280;margin-top:4px;">Max: ${item.product.stock}</p>
             </div>
         `;
         

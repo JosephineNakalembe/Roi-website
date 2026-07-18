@@ -74,7 +74,7 @@
                                             $colorParts = explode(':', $item->color ?? '');
                                             $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
                                         @endphp
-                                        <p style="font-size:0.85rem;color:#6b7280;margin-top:2px;">
+                                        <p style="font-size:0.95rem;color:#6b7280;margin-top:2px;">
                                             @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
                                             @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
                                         </p>
@@ -82,9 +82,9 @@
                                     @if($item->review)
                                         <div style="margin-top:8px;padding:12px;background:#f3f4f6;border-radius:12px;">
                                             <p style="margin:0 0 4px;font-weight:700;">Your review</p>
-                                            <p style="margin:0;font-size:0.95rem;">Rating: {{ $item->review->rating }}/5</p>
+                                            <p style="margin:0;font-size:1.05rem;">Rating: {{ $item->review->rating }}/5</p>
                                             @if($item->review->comment)
-                                                <p style="margin:6px 0 0;font-size:0.95rem;color:#374151;">"{{ $item->review->comment }}"</p>
+                                                <p style="margin:6px 0 0;font-size:1.05rem;color:#374151;">"{{ $item->review->comment }}"</p>
                                             @endif
                                         </div>
                                     @else
@@ -107,7 +107,7 @@
                             </div>
                         @endforeach
                         <div style="display:flex;justify-content:flex-end;margin-top:16px;">
-                            <button class="btn" type="submit" style="padding:12px 24px;font-size:1rem;">Submit All Reviews</button>
+                            <button class="btn" type="submit" style="padding:12px 24px;font-size:1.1rem;">Submit All Reviews</button>
                         </div>
                     </form>
                 @else
@@ -120,7 +120,7 @@
                                         $colorParts = explode(':', $item->color ?? '');
                                         $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
                                     @endphp
-                                    <p style="font-size:0.85rem;color:#6b7280;margin-top:2px;">
+                                    <p style="font-size:0.95rem;color:#6b7280;margin-top:2px;">
                                         @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
                                         @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
                                     </p>
@@ -128,9 +128,9 @@
                                 @if($item->review)
                                     <div style="margin-top:8px;padding:12px;background:#f3f4f6;border-radius:12px;">
                                         <p style="margin:0 0 4px;font-weight:700;">Your review</p>
-                                        <p style="margin:0;font-size:0.95rem;">Rating: {{ $item->review->rating }}/5</p>
+                                        <p style="margin:0;font-size:1.05rem;">Rating: {{ $item->review->rating }}/5</p>
                                         @if($item->review->comment)
-                                            <p style="margin:6px 0 0;font-size:0.95rem;color:#374151;">"{{ $item->review->comment }}"</p>
+                                            <p style="margin:6px 0 0;font-size:1.05rem;color:#374151;">"{{ $item->review->comment }}"</p>
                                         @endif
                                     </div>
                                 @endif
@@ -160,7 +160,7 @@
                 <div style="display:flex;justify-content:flex-end;">
                     <form method="POST" action="{{ route('orders.confirm-received', $order) }}" onsubmit="return confirm('Have you received all items in this order?');">
                         @csrf
-                        <button class="btn" style="background:#059669;padding:12px 24px;font-size:1rem;">I Have Received My Items</button>
+                        <button class="btn" style="background:#059669;padding:12px 24px;font-size:1.1rem;">I Have Received My Items</button>
                     </form>
                 </div>
             @endif
@@ -168,12 +168,12 @@
             @if($order->status === 'delivered')
                 @if($order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
                     <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
-                        <a href="{{ route('returns.index') }}" class="btn btn-secondary" style="padding:12px 24px;font-size:1rem;">View My Returns</a>
-                        <a href="{{ route('orders.return.create', $order) }}" class="btn" style="background:#f97316;padding:12px 24px;font-size:1rem;">Request Return</a>
+                        <a href="{{ route('returns.index') }}" class="btn btn-secondary" style="padding:12px 24px;font-size:1.1rem;">View My Returns</a>
+                        <a href="{{ route('orders.return.create', $order) }}" class="btn" style="background:#f97316;padding:12px 24px;font-size:1.1rem;">Request Return</a>
                     </div>
                 @else
                     <div style="padding:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;margin-top:12px;">
-                        <p style="margin:0;color:#991b1b;font-size:0.9rem;">
+                        <p style="margin:0;color:#991b1b;font-size:1rem;">
                             ⏰ The <strong>7-day return period</strong> for this order has expired.
                         </p>
                     </div>
@@ -201,15 +201,15 @@
                                         @endif
                                     </span>
                                 </div>
-                                <p style="margin:4px 0 0;font-size:0.85rem;color:#6b7280;">
+                                <p style="margin:4px 0 0;font-size:0.95rem;color:#6b7280;">
                                     Reason: {{ $return->reason }} • {{ $return->created_at->format('M d, Y') }}
                                 </p>
                                 @if($return->statusUpdates->isNotEmpty())
                                     <div style="margin-top:8px;padding-left:12px;border-left:2px solid #e5e7eb;">
                                         @foreach($return->statusUpdates as $update)
-                                            <div style="font-size:0.8rem;color:#6b7280;margin-bottom:4px;">
+                                            <div style="font-size:0.9rem;color:#6b7280;margin-bottom:4px;">
                                                 <span style="font-weight:600;">{{ ucfirst($update->status) }}</span> — {{ $update->note }}
-                                                <span style="color:#9ca3af;font-size:0.75rem;">{{ $update->created_at->format('M d, H:i') }}</span>
+                                                <span style="color:#9ca3af;font-size:0.85rem;">{{ $update->created_at->format('M d, H:i') }}</span>
                                             </div>
                                         @endforeach
                                     </div>

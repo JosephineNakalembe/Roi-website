@@ -10,7 +10,7 @@
     <div class="card" style="max-width:700px;margin:0 auto;">
         <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data" style="display:grid;gap:12px;">
             @csrf
-                        <label>Product ID <span class="text-muted" style="font-weight:400;font-size:0.85rem;">— Auto-generated</span></label>
+                        <label>Product ID <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— Auto-generated</span></label>
             <input class="input" name="product_id_display" id="productIdDisplay" value="ER0000036" readonly style="background:#f3f4f6;cursor:not-allowed;">
             <input type="hidden" name="product_id" id="productIdHidden" value="ER0000036">
             
@@ -25,10 +25,10 @@
                 @endforeach
             </select>
             
-            <label>Additional Categories <span class="text-muted" style="font-weight:400;font-size:0.85rem;">— a product can belong to multiple categories</span></label>
+            <label>Additional Categories <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— a product can belong to multiple categories</span></label>
             <div id="additionalCategories" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                 @foreach($categories as $category)
-                    <label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:0.9rem;">
+                    <label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:1rem;">
                         <input type="checkbox" name="categories[]" value="{{ $category->id }}" {{ in_array($category->id, old('categories', [])) ? 'checked' : '' }}>
                         {{ $category->name }}
                     </label>
@@ -40,20 +40,20 @@
             <label>Description</label>
             <textarea class="input" name="description" rows="4">{{ old('description') }}</textarea>
             <label>Base Price (UGX)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Used as a fallback when a color has no specific price.</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Used as a fallback when a color has no specific price.</p>
             <input class="input" name="price" type="number" step="0.01" value="{{ old('price', '0.00') }}" required>
             
-            <label>Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.85rem;">— for profit reports, not shown to customers</span></label>
+            <label>Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— for profit reports, not shown to customers</span></label>
             <input class="input" name="cost_price" type="number" step="0.01" value="{{ old('cost_price', '0.00') }}" placeholder="What you paid per unit">
             
             <label style="font-weight:700;">Color, Size, Quantity, Price & Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Each color can have its own price and its own set of images. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
             <div id="colorQuantityContainer" style="display:grid;gap:10px;margin-bottom:10px;"></div>
             <button type="button" class="btn btn-secondary" onclick="addColorQuantityRow()">+ Add Color</button>
 
             
             <label style="font-weight:700;margin-top:12px;">Size Guide (Optional)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Select the type and enter measurements. Only filled fields will be displayed on the product page.</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Select the type and enter measurements. Only filled fields will be displayed on the product page.</p>
             
             <div style="display:flex;gap:12px;margin-bottom:12px;">
                 <label style="display:flex;align-items:center;gap:6px;font-weight:500;cursor:pointer;">
@@ -66,7 +66,7 @@
 
             <!-- Clothing Size Guide -->
             <div id="clothingSizeGuide" style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+                <table style="width:100%;border-collapse:collapse;font-size:1rem;">
                     <thead>
                         <tr style="background:#f3f4f6;">
                             <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Measurement</th>
@@ -82,20 +82,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Waist (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Hip (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Length (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Inseam (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Thigh (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Burst (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Shoulder (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.85rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
+                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Waist (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
+                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Hip (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
+                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Length (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
+                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Inseam (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
+                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Thigh (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
+                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Burst (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
+                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Shoulder (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Shoes Size Guide (Baby to Grown-up) -->
             <div id="shoesSizeGuide" style="overflow-x:auto;display:none;">
-                <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.95rem;">
                     <thead>
                         <tr style="background:#f3f4f6;">
                             <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">US Baby</th>
@@ -120,12 +120,12 @@
             <label style="display:none;"><input type="checkbox" name="is_active" value="1" checked> Published</label>
             
             <label style="font-weight:700;">Product Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Upload multiple images. Drag to reorder, click × to remove.</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Upload multiple images. Drag to reorder, click × to remove.</p>
             <input type="file" name="images[]" id="imageInput" multiple accept="image/*" onchange="previewImages(event)">
             <div id="imagePreview" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:12px;margin-top:12px;"></div>
 
             <label style="font-weight:700;margin-top:12px;">Product Video (Optional)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:0.9rem;">Upload a video (MP4, MOV, max 50MB)</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Upload a video (MP4, MOV, max 50MB)</p>
             <input type="file" name="video" id="videoInput" accept="video/*" onchange="previewVideo(event)">
             <div id="videoPreview" style="margin-top:12px;"></div>
             
@@ -142,7 +142,7 @@
                 <button type="button" class="btn btn-secondary" onclick="closeAddCategoryModal()">Cancel</button>
                 <button type="button" class="btn" onclick="saveNewCategory()">Add Category</button>
             </div>
-            <p id="addCategoryError" style="color:#ef4444;font-size:0.9rem;display:none;margin:8px 0 0 0;"></p>
+            <p id="addCategoryError" style="color:#ef4444;font-size:1rem;display:none;margin:8px 0 0 0;"></p>
         </div>
     </div>
 
@@ -200,7 +200,7 @@
                 shoeFields.forEach(field => {
                     const td = document.createElement('td');
                     td.style.cssText = 'padding:4px;border:1px solid #e5e7eb;text-align:center;';
-                    td.innerHTML = `<input type="text" name="shoe_${idx}_${field}" class="input shoe-guide-input" value="${row[field]}" style="padding:4px;font-size:0.85rem;text-align:center;width:100%;box-sizing:border-box;" placeholder="-">`;
+                    td.innerHTML = `<input type="text" name="shoe_${idx}_${field}" class="input shoe-guide-input" value="${row[field]}" style="padding:4px;font-size:0.95rem;text-align:center;width:100%;box-sizing:border-box;" placeholder="-">`;
                     tr.appendChild(td);
                 });
                 tbody.appendChild(tr);
@@ -241,20 +241,20 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px;align-items:center;">
                 <div style="display:flex;align-items:center;gap:8px;">
                     <input type="color" name="color_${index}" value="#000000" style="width:50px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:0;flex-shrink:0;">
-                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" style="flex:1;padding:6px;font-size:0.9rem;flex:1;">
+                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" style="flex:1;padding:6px;font-size:1rem;flex:1;">
                 </div>
 
-                    <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" style="padding:6px;font-size:0.9rem;">
-                    <input type="number" class="input" name="quantity_${index}" placeholder="Qty" min="1" style="padding:6px;font-size:0.9rem;">
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('div[style*=border]').remove(); updateColors();" style="padding:4px 8px;font-size:0.85rem;">Remove</button>
+                    <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" style="padding:6px;font-size:1rem;">
+                    <input type="number" class="input" name="quantity_${index}" placeholder="Qty" min="1" style="padding:6px;font-size:1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('div[style*=border]').remove(); updateColors();" style="padding:4px 8px;font-size:0.95rem;">Remove</button>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr;gap:6px;">
-                    <label style="font-size:0.85rem;font-weight:600;">Price for this color (UGX)</label>
-                    <input type="number" class="input" name="price_${index}" placeholder="Leave blank to use base price" step="0.01" min="0" style="padding:6px;font-size:0.9rem;">
+                    <label style="font-size:0.95rem;font-weight:600;">Price for this color (UGX)</label>
+                    <input type="number" class="input" name="price_${index}" placeholder="Leave blank to use base price" step="0.01" min="0" style="padding:6px;font-size:1rem;">
                 </div>
                 <div style="display:grid;grid-template-columns:1fr;gap:6px;">
-                    <label style="font-size:0.85rem;font-weight:600;">Images for this color (optional)</label>
-                    <input type="file" name="color_images_${index}[]" multiple accept="image/*" onchange="previewColorImages(event, ${index})" style="font-size:0.85rem;">
+                    <label style="font-size:0.95rem;font-weight:600;">Images for this color (optional)</label>
+                    <input type="file" name="color_images_${index}[]" multiple accept="image/*" onchange="previewColorImages(event, ${index})" style="font-size:0.95rem;">
                     <div id="colorImagePreview_${index}" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));gap:8px;margin-top:4px;"></div>
                 </div>
             `;
@@ -366,8 +366,8 @@
                          wrapper.draggable = true;
                          wrapper.innerHTML = `
                              <img src="${e.target.result}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;border:2px solid #e5e7eb;">
-                             <button type="button" onclick="removeImage(this)" style="position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-weight:bold;font-size:1rem;line-height:1;">×</button>
-                             <span style="position:absolute;top:4px;left:4px;background:#000;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.75rem;">${index + 1}</span>
+                             <button type="button" onclick="removeImage(this)" style="position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-weight:bold;font-size:1.1rem;line-height:1;">×</button>
+                             <span style="position:absolute;top:4px;left:4px;background:#000;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.85rem;">${index + 1}</span>
                         `;
                         previewContainer.appendChild(wrapper);
                     };
@@ -437,7 +437,7 @@
 
                     const additionalDiv = document.getElementById('additionalCategories');
                     const label = document.createElement('label');
-                    label.style.cssText = 'display:flex;align-items:center;gap:4px;font-weight:400;font-size:0.9rem;';
+                    label.style.cssText = 'display:flex;align-items:center;gap:4px;font-weight:400;font-size:1rem;';
                     const cb = document.createElement('input');
                     cb.type = 'checkbox';
                     cb.name = 'categories[]';

@@ -58,7 +58,7 @@
                             <p class="text-muted" style="margin:2px 0 0;">
                                 Order {{ $return->order->order_number }} — {{ $return->user->name }}
                             </p>
-                            <p style="margin:4px 0 0;font-size:0.8rem;color:#9ca3af;">
+                            <p style="margin:4px 0 0;font-size:0.9rem;color:#9ca3af;">
                                 {{ $return->created_at->format('M d, Y H:i') }} • 
                                 @if($return->status === 'pending')
                                     <span class="badge badge-amber">Pending</span>
@@ -72,7 +72,7 @@
                                 • Reason: {{ $return->reason }}
                             </p>
                         </div>
-                        <a class="btn btn-secondary" href="{{ route('admin.returns.show', $return) }}" style="padding:8px 14px;font-size:0.85rem;">View Details</a>
+                        <a class="btn btn-secondary" href="{{ route('admin.returns.show', $return) }}" style="padding:8px 14px;font-size:0.95rem;">View Details</a>
                     </div>
                 @endforeach
             </div>

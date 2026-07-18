@@ -65,12 +65,12 @@
                                             <strong style="color:{{ $upStatusColor }};">
                                                 {{ $update->status === 'shipped' ? '🚚 Shipped' : ($update->status === 'delivered' ? '✅ Delivered' : ucfirst($update->status)) }}
                                             </strong>
-                                            <span style="font-size:0.8rem;color:#9ca3af;">{{ $update->created_at->format('M d, H:i') }}</span>
+                                            <span style="font-size:0.9rem;color:#9ca3af;">{{ $update->created_at->format('M d, H:i') }}</span>
                                         </div>
                                         @if($update->note)
-                                            <p style="margin:6px 0 0;font-size:0.9rem;color:#374151;">{{ $update->note }}</p>
+                                            <p style="margin:6px 0 0;font-size:1rem;color:#374151;">{{ $update->note }}</p>
                                         @endif
-                                        <p style="margin:4px 0 0;font-size:0.75rem;color:#9ca3af;">by {{ $update->status === 'delivered' && str_contains($update->note ?? '', 'Buyer confirmed') ? 'Buyer' : 'Admin' }}</p>
+                                        <p style="margin:4px 0 0;font-size:0.85rem;color:#9ca3af;">by {{ $update->status === 'delivered' && str_contains($update->note ?? '', 'Buyer confirmed') ? 'Buyer' : 'Admin' }}</p>
                                     </div>
                                 </div>
                             @endforeach
@@ -80,7 +80,7 @@
                                 <div style="background:#f9fafb;padding:12px;border-radius:12px;border:1px solid #e5e7eb;">
                                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                                         <strong style="color:#6b7280;">📦 Order Placed</strong>
-                                        <span style="font-size:0.8rem;color:#9ca3af;">{{ $order->created_at->format('M d, H:i') }}</span>
+                                        <span style="font-size:0.9rem;color:#9ca3af;">{{ $order->created_at->format('M d, H:i') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
                                 <div style="background:#f9fafb;padding:12px;border-radius:12px;border:1px solid #e5e7eb;">
                                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                                         <strong style="color:#6b7280;">📦 Order Placed</strong>
-                                        <span style="font-size:0.8rem;color:#9ca3af;">{{ $order->created_at->format('M d, H:i') }}</span>
+                                        <span style="font-size:0.9rem;color:#9ca3af;">{{ $order->created_at->format('M d, H:i') }}</span>
                                     </div>
                                 </div>
                             </div>

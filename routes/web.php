@@ -17,7 +17,6 @@ use App\Http\Controllers\Admin\CustomerServiceController as AdminCustomerService
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ReturnController as AdminReturnController;
 use App\Http\Controllers\OrderReturnController;
-use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\PreventAdminAccess;
@@ -41,9 +40,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Email verification route (accessible to anyone with the token)
-Route::get('/verify-email/{token}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
 
 Route::get('/shop', [ProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{slug}', [ProductController::class, 'show'])->name('shop.show');

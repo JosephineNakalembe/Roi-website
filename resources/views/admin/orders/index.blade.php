@@ -67,7 +67,7 @@
                         <div>
                             <strong>{{ $order->order_number }}</strong>
                             <p class="text-muted" style="margin:2px 0 0;">{{ $order->user->name }} — UGX{{ number_format($order->total, 2) }}</p>
-                            <p style="margin:4px 0 0;font-size:0.8rem;color:#9ca3af;">
+                            <p style="margin:4px 0 0;font-size:0.9rem;color:#9ca3af;">
                                 {{ $order->placed_at->format('M d, Y H:i') }} • 
                                 @if($isNew)
                                     <span class="badge badge-blue">New</span>
@@ -80,11 +80,11 @@
                                 @endif
                             </p>
                             @if($lastUpdate && $lastUpdate->note)
-                                <p style="margin:4px 0 0;font-size:0.8rem;color:#6b7280;">{{ $lastUpdate->note }}</p>
+                                <p style="margin:4px 0 0;font-size:0.9rem;color:#6b7280;">{{ $lastUpdate->note }}</p>
                             @endif
                         </div>
                         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                            <a class="btn btn-secondary" href="{{ route('admin.orders.show', $order) }}" style="padding:8px 14px;font-size:0.85rem;">Details</a>
+                            <a class="btn btn-secondary" href="{{ route('admin.orders.show', $order) }}" style="padding:8px 14px;font-size:0.95rem;">Details</a>
                         </div>
                     </div>
                 @endforeach

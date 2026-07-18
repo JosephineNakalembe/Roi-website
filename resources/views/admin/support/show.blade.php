@@ -14,7 +14,7 @@
             <!-- Chat Header -->
             <div style="padding:16px 20px;background:#f8f9fa;border-bottom:1px solid #e9ecef;">
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                    <strong style="font-size:1.05rem;">{{ $message->subject }}</strong>
+                    <strong style="font-size:1.15rem;">{{ $message->subject }}</strong>
                     <span>
                         Status: 
                         @if($message->status === 'closed')
@@ -32,10 +32,10 @@
             <div style="padding:20px;display:grid;gap:12px;max-height:500px;overflow-y:auto;">
                 <!-- Initial User Message -->
                 <div style="display:flex;justify-content:flex-end;">
-                    <div style="max-width:80%;background:#1a1a2e;color:#fff;padding:12px 16px;border-radius:16px 16px 4px 16px;font-size:0.95rem;">
-                        <p style="margin:0;font-weight:500;font-size:0.8rem;opacity:0.65;">{{ $message->user->name }}</p>
+                    <div style="max-width:80%;background:#1a1a2e;color:#fff;padding:12px 16px;border-radius:16px 16px 4px 16px;font-size:1.05rem;">
+                        <p style="margin:0;font-weight:500;font-size:0.9rem;opacity:0.65;">{{ $message->user->name }}</p>
                         <p style="margin:4px 0 0;">{{ $message->message }}</p>
-                        <p style="margin:4px 0 0;font-size:0.75rem;opacity:0.65;">{{ $message->created_at->format('M d, H:i') }}</p>
+                        <p style="margin:4px 0 0;font-size:0.85rem;opacity:0.65;">{{ $message->created_at->format('M d, H:i') }}</p>
                     </div>
                 </div>
 
@@ -44,18 +44,18 @@
                     @foreach($message->replies as $reply)
                         @if($reply['sender'] === 'admin')
                             <div style="display:flex;justify-content:flex-start;">
-                                <div style="max-width:80%;background:#f1f3f5;color:#1a1a2e;padding:12px 16px;border-radius:16px 16px 16px 4px;font-size:0.95rem;">
-                                    <p style="margin:0;font-weight:500;font-size:0.8rem;color:#6c757d;">Admin</p>
+                                <div style="max-width:80%;background:#f1f3f5;color:#1a1a2e;padding:12px 16px;border-radius:16px 16px 16px 4px;font-size:1.05rem;">
+                                    <p style="margin:0;font-weight:500;font-size:0.9rem;color:#6c757d;">Admin</p>
                                     <p style="margin:4px 0 0;">{{ $reply['message'] }}</p>
-                                    <p style="margin:4px 0 0;font-size:0.75rem;color:#adb5bd;">{{ \Carbon\Carbon::parse($reply['created_at'])->format('M d, H:i') }}</p>
+                                    <p style="margin:4px 0 0;font-size:0.85rem;color:#adb5bd;">{{ \Carbon\Carbon::parse($reply['created_at'])->format('M d, H:i') }}</p>
                                 </div>
                             </div>
                         @else
                             <div style="display:flex;justify-content:flex-end;">
-                                <div style="max-width:80%;background:#1a1a2e;color:#fff;padding:12px 16px;border-radius:16px 16px 4px 16px;font-size:0.95rem;">
-                                    <p style="margin:0;font-weight:500;font-size:0.8rem;opacity:0.65;">{{ $message->user->name }}</p>
+                                <div style="max-width:80%;background:#1a1a2e;color:#fff;padding:12px 16px;border-radius:16px 16px 4px 16px;font-size:1.05rem;">
+                                    <p style="margin:0;font-weight:500;font-size:0.9rem;opacity:0.65;">{{ $message->user->name }}</p>
                                     <p style="margin:4px 0 0;">{{ $reply['message'] }}</p>
-                                    <p style="margin:4px 0 0;font-size:0.75rem;opacity:0.65;">{{ \Carbon\Carbon::parse($reply['created_at'])->format('M d, H:i') }}</p>
+                                    <p style="margin:4px 0 0;font-size:0.85rem;opacity:0.65;">{{ \Carbon\Carbon::parse($reply['created_at'])->format('M d, H:i') }}</p>
                                 </div>
                             </div>
                         @endif
@@ -67,7 +67,7 @@
             <form method="POST" action="{{ route('admin.support.update', $message) }}" style="padding:20px;border-top:1px solid #e9ecef;background:#f8f9fa;">
                 @csrf
                 @method('PATCH')
-                <label style="font-weight:500;font-size:0.9rem;margin-bottom:6px;display:block;">Reply as Admin</label>
+                <label style="font-weight:500;font-size:1rem;margin-bottom:6px;display:block;">Reply as Admin</label>
                 <textarea class="input" name="message" rows="3" required placeholder="Type your reply..."></textarea>
                 <div style="display:flex;gap:12px;margin-top:12px;align-items:center;flex-wrap:wrap;">
                     <button class="btn" type="submit">Send Reply</button>

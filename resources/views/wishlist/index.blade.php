@@ -15,7 +15,7 @@
             <div class="grid-3">
                 @foreach($items as $item)
                     <div class="card">
-                        <img src="{{ optional($item->product->primaryImage)->path ? asset('storage/' . $item->product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $item->product->name }}" style="width:100%;border-radius:12px;object-fit:cover;height:240px;aspect-ratio:1/1;">
+                        <img src="{{ optional($item->product->primaryImage)->path ? media_url($item->product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $item->product->name }}" style="width:100%;border-radius:12px;object-fit:cover;height:240px;aspect-ratio:1/1;">
                         <h2>{{ $item->product->name }}</h2>
                         <p class="text-muted">{{ $item->product->category?->name ?? 'Uncategorized' }}</p>
                         <p style="font-weight:700;">UGX{{ number_format($item->product->price, 0) }}</p>

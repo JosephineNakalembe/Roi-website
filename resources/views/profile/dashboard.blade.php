@@ -15,21 +15,21 @@
         <div style="margin-bottom:24px;padding:16px;background:#f9fafb;border-radius:12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <h2 style="margin:0;">Profile</h2>
-                <button type="button" onclick="toggleProfileEdit()" class="btn" style="padding:6px 12px;font-size:0.75rem;">Edit</button>
+                <button type="button" onclick="toggleProfileEdit()" class="btn" style="padding:6px 12px;font-size:0.85rem;">Edit</button>
             </div>
             
             <!-- Display Mode -->
             <div id="profileDisplay" style="display:grid;gap:12px;">
                 <div>
-                    <label class="form-label" style="font-size:0.75rem;color:#6b7280;">Name</label>
+                    <label class="form-label" style="font-size:0.85rem;color:#6b7280;">Name</label>
                     <p style="margin:4px 0 0;font-weight:500;">{{ $user->name }}</p>
                 </div>
                 <div>
-                    <label class="form-label" style="font-size:0.75rem;color:#6b7280;">Email</label>
+                    <label class="form-label" style="font-size:0.85rem;color:#6b7280;">Email</label>
                     <p style="margin:4px 0 0;font-weight:500;">{{ $user->email }}</p>
                 </div>
                 <div>
-                    <label class="form-label" style="font-size:0.75rem;color:#6b7280;">Phone</label>
+                    <label class="form-label" style="font-size:0.85rem;color:#6b7280;">Phone</label>
                     <p style="margin:4px 0 0;font-weight:500;">{{ $user->phone ?? 'Not provided' }}</p>
                 </div>
             </div>
@@ -74,7 +74,7 @@
         <p class="text-muted" style="margin-bottom:12px;">Permanently delete your account and all personal data.</p>
         <form method="POST" action="{{ route('profile.delete-account') }}" onsubmit="return confirm('Are you absolutely sure? This will permanently delete your account, addresses, payment methods, and all personal data. Your order records will be kept on our end for reporting purposes. This action cannot be undone.');">
             @csrf
-            <label class="flex-between flex-gap-small" style="cursor:pointer;font-size:0.9rem;">
+            <label class="flex-between flex-gap-small" style="cursor:pointer;font-size:1rem;">
                 <input type="checkbox" name="confirm" value="1" required class="checkbox">
                 I understand that this action is permanent and cannot be undone.
             </label>

@@ -181,7 +181,7 @@
     }
 
     /* Price displays */
-    p[style*="font-size:1.6rem"], p[id="productPrice"] {
+    p[style*="font-size:1.7rem"], p[id="productPrice"] {
         font-size: 1.3rem !important;
     }
 

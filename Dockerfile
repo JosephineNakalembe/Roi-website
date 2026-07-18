@@ -47,11 +47,15 @@ RUN mkdir -p storage/framework/{cache,sessions,views} \
     && mkdir -p bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
+# Create storage symlink
+RUN php artisan storage:link --force
+
 # Expose port
 EXPOSE 8000
 
 # Start server
 CMD php artisan config:clear && \
     php artisan config:cache && \
+    php artisan storage:link --force && \
     php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=8000

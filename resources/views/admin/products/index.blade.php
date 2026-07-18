@@ -65,17 +65,17 @@
                     <!-- Display Picture -->
                     <div style="width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#f3f4f6;">
                         @if($product->primaryImage)
-                            <img src="{{ asset('storage/' . $product->primaryImage->path) }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+                            <img src="{{ media_url($product->primaryImage->path) }}" alt="" style="width:100%;height:100%;object-fit:cover;">
                         @else
-                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:0.75rem;">No<br>Image</div>
+                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:0.85rem;">No<br>Image</div>
                         @endif
                     </div>
                     <div style="flex:1;min-width:0;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                            <strong style="font-size:1rem;">{{ $product->name }}</strong>
-                            <span style="font-size:0.8rem;color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:4px;">{{ $product->product_id }}</span>
+                            <strong style="font-size:1.1rem;">{{ $product->name }}</strong>
+                            <span style="font-size:0.9rem;color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:4px;">{{ $product->product_id }}</span>
                         </div>
-                        <div class="text-muted" style="font-size:0.85rem;margin-top:2px;">
+                        <div class="text-muted" style="font-size:0.95rem;margin-top:2px;">
                             @if($product->categories->isNotEmpty())
                                 {{ $product->categories->pluck('name')->implode(', ') }}
                             @elseif($product->category)
@@ -87,18 +87,18 @@
                         </div>
                     </div>
                     <div style="display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;">
-                        <button class="btn btn-secondary" onclick="openStockModal('{{ $product->id }}', '{{ addslashes($product->name) }}', '{{ $product->stock }}')" style="padding:6px 14px;font-size:0.85rem;background:#059669;color:#fff;border:none;">+ Stock</button>
-                        <a class="btn btn-secondary" href="{{ route('admin.products.edit', $product) }}" style="padding:6px 14px;font-size:0.85rem;">Edit</a>
+                        <button class="btn btn-secondary" onclick="openStockModal('{{ $product->id }}', '{{ addslashes($product->name) }}', '{{ $product->stock }}')" style="padding:6px 14px;font-size:0.95rem;background:#059669;color:#fff;border:none;">+ Stock</button>
+                        <a class="btn btn-secondary" href="{{ route('admin.products.edit', $product) }}" style="padding:6px 14px;font-size:0.95rem;">Edit</a>
                         <form method="POST" action="{{ route('admin.products.destroy', $product) }}" style="margin:0;" onsubmit="return confirm('Delete this product?');">
                             @csrf
                             @method('DELETE')
-                            <button class="btn" style="background:#ef4444;color:#fff;padding:6px 14px;font-size:0.85rem;">Delete</button>
+                            <button class="btn" style="background:#ef4444;color:#fff;padding:6px 14px;font-size:0.95rem;">Delete</button>
                         </form>
                     </div>
                 </div>
             @empty
                 <div style="text-align:center;padding:40px;color:#9ca3af;">
-                    <p style="font-size:1.1rem;">No products found.</p>
+                    <p style="font-size:1.2rem;">No products found.</p>
                     @if(request('search') || request('category'))
                         <a href="{{ route('admin.products.index') }}" class="btn btn-secondary" style="margin-top:12px;">Clear Filters</a>
                     @endif
@@ -112,22 +112,22 @@
     <div id="stockModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
         <div style="background:#fff;border-radius:16px;padding:24px;max-width:440px;width:90%;margin:auto;">
             <h2 style="margin:0 0 8px 0;">Add Stock</h2>
-            <p id="stockProductName" style="color:#6b7280;font-size:0.9rem;margin-bottom:16px;"></p>
+            <p id="stockProductName" style="color:#6b7280;font-size:1rem;margin-bottom:16px;"></p>
             <form id="stockForm" method="POST" style="display:grid;gap:12px;">
                 @csrf
                 <div>
                     <label>Quantity to add <span style="color:#dc2626;">*</span></label>
-                    <input type="number" class="input" name="quantity" min="1" value="1" required style="padding:10px;font-size:1rem;">
+                    <input type="number" class="input" name="quantity" min="1" value="1" required style="padding:10px;font-size:1.1rem;">
                 </div>
                 <div>
-                    <label>New Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.8rem;">— optional, for profit reports</span></label>
-                    <input type="number" class="input" name="cost_price" step="0.01" min="0" placeholder="Leave blank to keep current" style="padding:10px;font-size:1rem;">
+                    <label>New Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.9rem;">— optional, for profit reports</span></label>
+                    <input type="number" class="input" name="cost_price" step="0.01" min="0" placeholder="Leave blank to keep current" style="padding:10px;font-size:1.1rem;">
                 </div>
                 <div>
-                    <label>New Selling Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.8rem;">— optional</span></label>
-                    <input type="number" class="input" name="price" step="0.01" min="0" placeholder="Leave blank to keep current" style="padding:10px;font-size:1rem;">
+                    <label>New Selling Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.9rem;">— optional</span></label>
+                    <input type="number" class="input" name="price" step="0.01" min="0" placeholder="Leave blank to keep current" style="padding:10px;font-size:1.1rem;">
                 </div>
-                <p style="font-size:0.85rem;color:#6b7280;" id="currentStockDisplay">Current stock: 0</p>
+                <p style="font-size:0.95rem;color:#6b7280;" id="currentStockDisplay">Current stock: 0</p>
                 <div style="display:flex;gap:8px;justify-content:flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeStockModal()">Cancel</button>
                     <button class="btn" type="submit" style="background:#059669;color:#fff;">Add Stock</button>

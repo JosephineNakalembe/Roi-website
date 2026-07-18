@@ -32,6 +32,20 @@ services:
         value: log
       - key: FILESYSTEM_DISK
         value: public
+      - key: PUBLIC_DISK_DRIVER
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: auto
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_URL
+        sync: false
     startCommand: |
       mkdir -p storage/framework/{sessions,views,cache}
       mkdir -p storage/logs
@@ -40,5 +54,6 @@ services:
       php artisan config:clear
       php artisan cache:clear
       php artisan view:clear
+      php artisan storage:link --force
       php artisan migrate --force --seed
       php artisan serve --host=0.0.0.0 --port=$PORT

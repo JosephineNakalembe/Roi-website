@@ -13,13 +13,13 @@
                 <p class="text-muted" style="margin:2px 0 0;">
                     Order {{ $orderReturn->order->order_number }} • 
                     @if($orderReturn->status === 'pending')
-                        <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:0.8rem;font-weight:600;background:#fef3c7;color:#92400e;">Pending Review</span>
+                        <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:0.9rem;font-weight:600;background:#fef3c7;color:#92400e;">Pending Review</span>
                     @elseif($orderReturn->status === 'approved')
-                        <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:0.8rem;font-weight:600;background:#dbeafe;color:#1e40af;">Approved</span>
+                        <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:0.9rem;font-weight:600;background:#dbeafe;color:#1e40af;">Approved</span>
                     @elseif($orderReturn->status === 'rejected')
-                        <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:0.8rem;font-weight:600;background:#fee2e2;color:#991b1b;">Rejected</span>
+                        <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:0.9rem;font-weight:600;background:#fee2e2;color:#991b1b;">Rejected</span>
                     @elseif($orderReturn->status === 'refunded')
-                        <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:0.8rem;font-weight:600;background:#d1fae5;color:#065f46;">Refunded</span>
+                        <span style="display:inline-block;padding:4px 12px;border-radius:999px;font-size:0.9rem;font-weight:600;background:#d1fae5;color:#065f46;">Refunded</span>
                     @endif
                 </p>
             </div>
@@ -66,14 +66,14 @@
                             $textColor = $isComplete ? ($isCurrent ? '#1e40af' : '#065f46') : '#9ca3af';
                         @endphp
                         <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;margin-bottom:8px;background:{{ $bgColor }};border:1px solid {{ $borderColor }};border-radius:12px;{{ $isCurrent ? 'box-shadow:0 2px 8px rgba(37,99,235,0.15);' : '' }}">
-                            <span style="font-size:1.4rem;flex-shrink:0;">{{ $statusIcons[$status] }}</span>
+                            <span style="font-size:1.5rem;flex-shrink:0;">{{ $statusIcons[$status] }}</span>
                             <div style="flex:1;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                                     <strong style="color:{{ $textColor }};">{{ $statusLabels[$status] }}</strong>
                                     @if($isComplete && !$isCurrent)
-                                        <span style="color:#059669;font-size:0.8rem;">✓ Completed</span>
+                                        <span style="color:#059669;font-size:0.9rem;">✓ Completed</span>
                                     @elseif($isCurrent)
-                                        <span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:0.75rem;font-weight:600;background:#2563eb;color:#fff;">Current</span>
+                                        <span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:0.85rem;font-weight:600;background:#2563eb;color:#fff;">Current</span>
                                     @endif
                                 </div>
                                 @if($isCurrent)
@@ -81,7 +81,7 @@
                                         $latestUpdate = $orderReturn->statusUpdates->first();
                                     @endphp
                                     @if($latestUpdate && $latestUpdate->note)
-                                        <p style="margin:4px 0 0;font-size:0.85rem;color:#374151;">{{ $latestUpdate->note }}</p>
+                                        <p style="margin:4px 0 0;font-size:0.95rem;color:#374151;">{{ $latestUpdate->note }}</p>
                                     @endif
                                 @endif
                             </div>
@@ -125,7 +125,7 @@
                                 @endif
                                 <div>
                                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                                        <strong style="font-size:0.9rem;color:{{ $color }};">
+                                        <strong style="font-size:1rem;color:{{ $color }};">
                                             {{ match($update->status) {
                                                 'pending' => 'Return Requested',
                                                 'approved' => 'Approved',
@@ -136,10 +136,10 @@
                                                 default => ucfirst($update->status)
                                             } }}
                                         </strong>
-                                        <span style="font-size:0.8rem;color:#9ca3af;">{{ $update->created_at->format('M d, Y H:i') }}</span>
+                                        <span style="font-size:0.9rem;color:#9ca3af;">{{ $update->created_at->format('M d, Y H:i') }}</span>
                                     </div>
                                     @if($update->note)
-                                        <p style="margin:4px 0 0;font-size:0.85rem;color:#374151;">{{ $update->note }}</p>
+                                        <p style="margin:4px 0 0;font-size:0.95rem;color:#374151;">{{ $update->note }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -152,8 +152,8 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
                 <!-- Refund Info -->
                 <div style="padding:16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;">
-                    <h2 style="font-size:1rem;color:#166534;margin:0 0 10px 0;">💳 Refund Details</h2>
-                    <div style="display:grid;gap:6px;font-size:0.9rem;">
+                    <h2 style="font-size:1.1rem;color:#166534;margin:0 0 10px 0;">💳 Refund Details</h2>
+                    <div style="display:grid;gap:6px;font-size:1rem;">
                         <p style="margin:0;"><strong>Network:</strong> {{ $orderReturn->refund_network }}</p>
                         <p style="margin:0;"><strong>Name:</strong> {{ $orderReturn->refund_name }}</p>
                         <p style="margin:0;"><strong>Number:</strong> {{ $orderReturn->refund_number }}</p>
@@ -165,8 +165,8 @@
 
                 <!-- Pickup Info -->
                 <div style="padding:16px;background:#fffbeb;border:1px solid #fde68a;border-radius:14px;">
-                    <h2 style="font-size:1rem;color:#92400e;margin:0 0 10px 0;">🚚 Pickup Details</h2>
-                    <div style="display:grid;gap:6px;font-size:0.9rem;">
+                    <h2 style="font-size:1.1rem;color:#92400e;margin:0 0 10px 0;">🚚 Pickup Details</h2>
+                    <div style="display:grid;gap:6px;font-size:1rem;">
                         <p style="margin:0;"><strong>Area:</strong> {{ $orderReturn->pickup_area }}</p>
                         <p style="margin:0;"><strong>Address:</strong> {{ $orderReturn->pickup_address }}</p>
                         <p style="margin:0;"><strong>Contact:</strong> {{ $orderReturn->pickup_contact }}</p>
@@ -185,14 +185,14 @@
                             <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
                                 <div>
                                     <strong>{{ $item->product_name }}</strong>
-                                    <p style="margin:2px 0 0;font-size:0.85rem;color:#6b7280;">
+                                    <p style="margin:2px 0 0;font-size:0.95rem;color:#6b7280;">
                                         Qty: {{ $item->quantity }} • UGX{{ number_format($item->total_price, 2) }}
                                         @if($item->color || $item->size)
                                             • {{ $item->color ? "Color: {$item->color}" : '' }}{{ $item->size ? " Size: {$item->size}" : '' }}
                                         @endif
                                     </p>
                                 </div>
-                                <span style="font-size:0.85rem;color:#6b7280;">{{ $orderReturn->reason }}</span>
+                                <span style="font-size:0.95rem;color:#6b7280;">{{ $orderReturn->reason }}</span>
                             </div>
                         </div>
                     @endforeach
@@ -217,7 +217,7 @@
                     <div style="display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:8px;">
                         @foreach(explode(',', $orderReturn->images) as $image)
                             <div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
-                                <img src="{{ asset('storage/' . $image) }}" style="width:100%;height:150px;object-fit:cover;display:block;">
+                                <img src="{{ media_url($image) }}" style="width:100%;height:150px;object-fit:cover;display:block;">
                             </div>
                         @endforeach
                     </div>
@@ -226,8 +226,8 @@
 
             <!-- Important Info -->
             <div style="padding:16px;background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;">
-                <h2 style="color:#166534;font-size:1rem;margin:0 0 8px 0;">ℹ️ How Returns Work</h2>
-                <ul style="margin:0;padding-left:18px;font-size:0.9rem;color:#065f46;display:grid;gap:4px;">
+                <h2 style="color:#166534;font-size:1.1rem;margin:0 0 8px 0;">ℹ️ How Returns Work</h2>
+                <ul style="margin:0;padding-left:18px;font-size:1rem;color:#065f46;display:grid;gap:4px;">
                     <li>Your return request will be reviewed by our team within <strong>24-48 hours</strong>.</li>
                     <li>Once approved, a rider will be sent to pick up the items from your address.</li>
                     <li>The <strong>pickup fee (UGX {{ number_format($orderReturn->pickup_fee, 0) }})</strong> will be deducted from your refund or paid to the rider.</li>

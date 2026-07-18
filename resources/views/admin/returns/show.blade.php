@@ -52,7 +52,7 @@
                         @php $item = $returnItem->orderItem; @endphp
                         <div style="padding:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;">
                             <strong>{{ $item->product_name }}</strong>
-                            <p style="margin:2px 0 0;font-size:0.85rem;color:#6b7280;">
+                            <p style="margin:2px 0 0;font-size:0.95rem;color:#6b7280;">
                                 Quantity: {{ $item->quantity }} • UGX{{ number_format($item->total_price, 2) }}
                                 @if($item->color || $item->size)
                                     • {{ $item->color ? "Color: {$item->color}" : '' }}{{ $item->size ? " Size: {$item->size}" : '' }}
@@ -70,7 +70,7 @@
                     <div style="display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
                         @foreach(explode(',', $orderReturn->images) as $image)
                             <div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
-                                <img src="{{ asset('storage/' . $image) }}" style="width:100%;height:150px;object-fit:cover;display:block;">
+                                <img src="{{ media_url($image) }}" style="width:100%;height:150px;object-fit:cover;display:block;">
                             </div>
                         @endforeach
                     </div>
@@ -117,10 +117,10 @@
                                         <strong style="color:{{ $color }};">
                                             {{ ucfirst($update->status) }}
                                         </strong>
-                                        <span style="font-size:0.8rem;color:#9ca3af;">{{ $update->created_at->format('M d, H:i') }}</span>
+                                        <span style="font-size:0.9rem;color:#9ca3af;">{{ $update->created_at->format('M d, H:i') }}</span>
                                     </div>
                                     @if($update->note)
-                                        <p style="margin:6px 0 0;font-size:0.9rem;color:#374151;">{{ $update->note }}</p>
+                                        <p style="margin:6px 0 0;font-size:1rem;color:#374151;">{{ $update->note }}</p>
                                     @endif
                                 </div>
                             </div>

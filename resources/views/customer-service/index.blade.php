@@ -42,7 +42,7 @@
                                     @endif
                                     <div>
                                         <strong>{{ $message->subject }}</strong>
-                                        <p class="text-muted" style="margin:2px 0 0;font-size:0.85rem;">{{ $message->created_at->format('M d, Y H:i') }} • 
+                                        <p class="text-muted" style="margin:2px 0 0;font-size:0.95rem;">{{ $message->created_at->format('M d, Y H:i') }} • 
                                             @if($message->status === 'closed')
                                                 <span style="color:#6b7280;">Closed</span>
                                             @elseif($message->status === 'answered')
@@ -53,13 +53,13 @@
                                         </p>
                                     </div>
                                     @if(!$message->seen_by_user && $message->replies && count($message->replies) > 0 && (collect($message->replies)->last()['sender'] ?? '') === 'admin')
-                                        <span class="badge badge-red" style="font-size:0.75rem;">New Reply</span>
+                                        <span class="badge badge-red" style="font-size:0.85rem;">New Reply</span>
                                     @endif
                                 </div>
                                 @if($message->status !== 'closed')
                                     <form method="POST" action="{{ route('customer-service.close', $message) }}" onsubmit="return confirm('Are you sure you want to close this ticket?');">
                                         @csrf
-                                        <button class="btn" style="background:#ef4444;padding:6px 12px;font-size:0.85rem;">Close Ticket</button>
+                                        <button class="btn" style="background:#ef4444;padding:6px 12px;font-size:0.95rem;">Close Ticket</button>
                                     </form>
                                 @endif
                             </div>
@@ -69,9 +69,9 @@
                         <div style="padding:16px;display:grid;gap:12px;">
                             <!-- Initial User Message -->
                             <div style="display:flex;justify-content:flex-end;">
-                                <div style="max-width:80%;background:#2563eb;color:#fff;padding:12px 16px;border-radius:16px 16px 4px 16px;font-size:0.95rem;">
+                                <div style="max-width:80%;background:#2563eb;color:#fff;padding:12px 16px;border-radius:16px 16px 4px 16px;font-size:1.05rem;">
                                     <p style="margin:0;">{{ $message->message }}</p>
-                                    <p style="margin:4px 0 0;font-size:0.75rem;opacity:0.7;">{{ $message->created_at->format('M d, H:i') }}</p>
+                                    <p style="margin:4px 0 0;font-size:0.85rem;opacity:0.7;">{{ $message->created_at->format('M d, H:i') }}</p>
                                 </div>
                             </div>
 
@@ -80,17 +80,17 @@
                                 @foreach($message->replies as $reply)
                                     @if($reply['sender'] === 'admin')
                                         <div style="display:flex;justify-content:flex-start;">
-                                            <div style="max-width:80%;background:#f3f4f6;color:#111;padding:12px 16px;border-radius:16px 16px 16px 4px;font-size:0.95rem;">
-                                                <p style="margin:0;font-weight:600;font-size:0.8rem;color:#6b7280;">Admin</p>
+                                            <div style="max-width:80%;background:#f3f4f6;color:#111;padding:12px 16px;border-radius:16px 16px 16px 4px;font-size:1.05rem;">
+                                                <p style="margin:0;font-weight:600;font-size:0.9rem;color:#6b7280;">Admin</p>
                                                 <p style="margin:4px 0 0;">{{ $reply['message'] }}</p>
-                                                <p style="margin:4px 0 0;font-size:0.75rem;color:#9ca3af;">{{ \Carbon\Carbon::parse($reply['created_at'])->format('M d, H:i') }}</p>
+                                                <p style="margin:4px 0 0;font-size:0.85rem;color:#9ca3af;">{{ \Carbon\Carbon::parse($reply['created_at'])->format('M d, H:i') }}</p>
                                             </div>
                                         </div>
                                     @else
                                         <div style="display:flex;justify-content:flex-end;">
-                                            <div style="max-width:80%;background:#2563eb;color:#fff;padding:12px 16px;border-radius:16px 16px 4px 16px;font-size:0.95rem;">
+                                            <div style="max-width:80%;background:#2563eb;color:#fff;padding:12px 16px;border-radius:16px 16px 4px 16px;font-size:1.05rem;">
                                                 <p style="margin:0;">{{ $reply['message'] }}</p>
-                                                <p style="margin:4px 0 0;font-size:0.75rem;opacity:0.7;">{{ \Carbon\Carbon::parse($reply['created_at'])->format('M d, H:i') }}</p>
+                                                <p style="margin:4px 0 0;font-size:0.85rem;opacity:0.7;">{{ \Carbon\Carbon::parse($reply['created_at'])->format('M d, H:i') }}</p>
                                             </div>
                                         </div>
                                     @endif

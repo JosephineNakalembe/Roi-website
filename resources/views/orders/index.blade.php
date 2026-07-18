@@ -22,7 +22,7 @@
             }
             .order-card .order-action-btn {
                 padding: 1px 5px !important;
-                font-size: 0.6rem !important;
+                font-size: 0.7rem !important;
                 height: 20px !important;
                 min-height: 20px !important;
                 line-height: 1 !important;
@@ -118,7 +118,7 @@
                             @if($latestUpdate)
                                 <div style="margin-top:10px;padding:10px 14px;background:#f9fafb;border-radius:10px;border-left:3px solid {{ $order->status === 'delivered' ? '#059669' : ($order->status === 'shipped' ? '#2563eb' : '#d1d5db') }};">
                                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                                        <span style="font-size:0.85rem;font-weight:600;">
+                                        <span style="font-size:0.95rem;font-weight:600;">
                                             @if($latestUpdate->status === 'shipped')
                                                 <span style="color:#2563eb;">Shipped</span>
                                             @elseif($latestUpdate->status === 'delivered')
@@ -127,28 +127,28 @@
                                                 {{ ucfirst($latestUpdate->status) }}
                                             @endif
                                         </span>
-                                        <span style="font-size:0.75rem;color:#9ca3af;">{{ $latestUpdate->created_at->format('M d, H:i') }}</span>
+                                        <span style="font-size:0.85rem;color:#9ca3af;">{{ $latestUpdate->created_at->format('M d, H:i') }}</span>
                                     </div>
                                     @if($latestUpdate->note)
-                                        <p style="margin:4px 0 0;font-size:0.85rem;color:#6b7280;">{{ $latestUpdate->note }}</p>
+                                        <p style="margin:4px 0 0;font-size:0.95rem;color:#6b7280;">{{ $latestUpdate->note }}</p>
                                     @endif
                                 </div>
                             @endif
 
             <div class="button-container" style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
                 @if($hasUnreviewedItems)
-                    <span class="pending-review" style="font-size:0.65rem;color:#dc2626;white-space:nowrap;flex-shrink:0;">Items pending review</span>
+                    <span class="pending-review" style="font-size:0.75rem;color:#dc2626;white-space:nowrap;flex-shrink:0;">Items pending review</span>
                 @elseif($order->status === 'shipped')
-                    <span class="order-action-btn" style="font-size:0.65rem;color:#2563eb;white-space:nowrap;flex-shrink:0;padding:1px 5px;">Confirm Receipt</span>
+                    <span class="order-action-btn" style="font-size:0.75rem;color:#2563eb;white-space:nowrap;flex-shrink:0;padding:1px 5px;">Confirm Receipt</span>
                 @endif
                 @if($canCancel)
-                    <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn order-action-btn" style="background:#dc2626;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Cancel</button>
+                    <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn order-action-btn" style="background:#dc2626;padding:3px 8px;font-size:0.75rem;white-space:nowrap;">Cancel</button>
                 @endif
-                <button onclick="event.stopPropagation();openOrderModal({{ $order->id }})" class="btn order-action-btn" style="padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Track</button>
+                <button onclick="event.stopPropagation();openOrderModal({{ $order->id }})" class="btn order-action-btn" style="padding:3px 8px;font-size:0.75rem;white-space:nowrap;">Track</button>
                 @if($order->status === 'delivered' && $order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
-                    <a href="{{ route('orders.return.create', $order) }}" class="btn order-action-btn" style="background:#f97316;padding:3px 8px;font-size:0.65rem;white-space:nowrap;">Return</a>
+                    <a href="{{ route('orders.return.create', $order) }}" class="btn order-action-btn" style="background:#f97316;padding:3px 8px;font-size:0.75rem;white-space:nowrap;">Return</a>
                 @endif
-                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="btn order-action-btn" style="background:#2563eb;padding:3px 8px;font-size:0.65rem;white-space:nowrap;text-decoration:none;color:#fff !important;">View Details</a>
+                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="btn order-action-btn" style="background:#2563eb;padding:3px 8px;font-size:0.75rem;white-space:nowrap;text-decoration:none;color:#fff !important;">View Details</a>
             </div>
                         </div>
                     @endforeach
@@ -177,8 +177,8 @@
                             </div>
 
                             <div style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
-                                <span style="font-size:0.65rem;color:#6b7280;white-space:nowrap;flex-shrink:0;">✓ All items reviewed</span>
-                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="order-action-btn" style="font-size:0.65rem;white-space:nowrap;flex-shrink:0;text-decoration:none;color:#fff !important;background:#2563eb;padding:1px 5px;">View Details</a>
+                                <span style="font-size:0.75rem;color:#6b7280;white-space:nowrap;flex-shrink:0;">✓ All items reviewed</span>
+                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="order-action-btn" style="font-size:0.75rem;white-space:nowrap;flex-shrink:0;text-decoration:none;color:#fff !important;background:#2563eb;padding:1px 5px;">View Details</a>
                             </div>
                         </div>
                     @endforeach
@@ -198,7 +198,7 @@
                                     <strong style="color:#dc2626;">{{ $order->order_number }}</strong>
                                     <p class="text-muted" style="margin:2px 0 0;">{{ $order->placed_at->format('F j, Y') }}</p>
                                     @if($order->cancelled_at)
-                                        <p style="margin:2px 0 0;font-size:0.65rem;color:#991b1b;">Cancelled on {{ $order->cancelled_at->format('M d, Y') }}</p>
+                                        <p style="margin:2px 0 0;font-size:0.75rem;color:#991b1b;">Cancelled on {{ $order->cancelled_at->format('M d, Y') }}</p>
                                     @endif
                                 </div>
                                 <div style="text-align:right;">
@@ -211,12 +211,12 @@
 
                             @if($order->cancellation_reason)
                                 <div style="margin-top:8px;padding:8px 12px;background:#fee2e2;border-radius:8px;">
-                                    <p style="margin:0;font-size:0.7rem;color:#991b1b;"><strong>Reason:</strong> {{ $order->cancellation_reason }}</p>
+                                    <p style="margin:0;font-size:0.8rem;color:#991b1b;"><strong>Reason:</strong> {{ $order->cancellation_reason }}</p>
                                 </div>
                             @endif
 
                             <div style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
-                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="order-action-btn" style="font-size:0.65rem;white-space:nowrap;flex-shrink:0;text-decoration:none;color:#fff !important;background:#6b7280;padding:1px 5px;">View Details</a>
+                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="order-action-btn" style="font-size:0.75rem;white-space:nowrap;flex-shrink:0;text-decoration:none;color:#fff !important;background:#6b7280;padding:1px 5px;">View Details</a>
                             </div>
                         </div>
                     @endforeach
@@ -292,9 +292,9 @@
                                             <strong style="color:${upStatusColor};">
                                                 ${update.status === 'shipped' ? '🚚 Shipped' : (update.status === 'delivered' ? '✅ Delivered' : update.status.charAt(0).toUpperCase() + update.status.slice(1))}
                                             </strong>
-                                            <span style="font-size:0.8rem;color:#9ca3af;">${new Date(update.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                            <span style="font-size:0.9rem;color:#9ca3af;">${new Date(update.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
-                                        ${update.note ? `<p style="margin:6px 0 0;font-size:0.9rem;color:#374151;">${update.note}</p>` : ''}
+                                        ${update.note ? `<p style="margin:6px 0 0;font-size:1rem;color:#374151;">${update.note}</p>` : ''}
                                     </div>
                                 </div>
                             `;
@@ -305,7 +305,7 @@
                             <div style="background:#f9fafb;padding:12px;border-radius:12px;border:1px solid #e5e7eb;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                                     <strong style="color:#6b7280;">📦 Order Placed</strong>
-                                    <span style="font-size:0.8rem;color:#9ca3af;">${new Date(order.placed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                    <span style="font-size:0.9rem;color:#9ca3af;">${new Date(order.placed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             </div>
                         </div>
@@ -327,20 +327,20 @@
                         <h2 style="margin:0;">${order.order_number}</h2>
                         <p style="margin:4px 0 0;color:#6b7280;">${new Date(order.placed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                     </div>
-                    <button onclick="closeOrderModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#6b7280;">&times;</button>
+                    <button onclick="closeOrderModal()" style="background:none;border:none;font-size:1.6rem;cursor:pointer;color:#6b7280;">&times;</button>
                 </div>
 
                 <div style="margin-bottom:16px;padding:14px;background:#f9fafb;border-radius:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
                     <div>
-                        <p style="margin:0;font-size:0.85rem;color:#6b7280;">Status</p>
+                        <p style="margin:0;font-size:0.95rem;color:#6b7280;">Status</p>
                         <p style="margin:2px 0 0;font-weight:700;color:${statusColor};">${statusLabel}</p>
                     </div>
                     <div style="text-align:right;">
-                        <p style="margin:0;font-size:0.85rem;color:#6b7280;">Total</p>
+                        <p style="margin:0;font-size:0.95rem;color:#6b7280;">Total</p>
                         <p style="margin:2px 0 0;font-weight:700;">UGX${Math.round(order.total).toLocaleString('en-US')}</p>
                     </div>
                     <div style="text-align:right;">
-                        <p style="margin:0;font-size:0.85rem;color:#6b7280;">Items</p>
+                        <p style="margin:0;font-size:0.95rem;color:#6b7280;">Items</p>
                         <p style="margin:2px 0 0;font-weight:700;">${order.items ? order.items.length : 0}</p>
                     </div>
                 </div>
@@ -350,13 +350,13 @@
 
                 ${unreviewedItems > 0 ? `
                     <div style="margin-top:16px;padding:12px;background:#fef2f2;border-radius:12px;border:1px solid #fecaca;">
-                        <p style="margin:0;font-size:0.85rem;color:#dc2626;">${unreviewedItems} item(s) pending your review.</p>
+                        <p style="margin:0;font-size:0.95rem;color:#dc2626;">${unreviewedItems} item(s) pending your review.</p>
                     </div>
                 ` : ''}
 
                 <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
-                    <a href="{{ route('orders.show', $order) }}" class="btn btn-secondary" style="padding:8px 16px;font-size:0.9rem;">Full Details</a>
-                    <button onclick="closeOrderModal()" class="btn" style="background:#6b7280;padding:8px 16px;font-size:0.9rem;">Close</button>
+                    <a href="{{ route('orders.show', $order) }}" class="btn btn-secondary" style="padding:8px 16px;font-size:1rem;">Full Details</a>
+                    <button onclick="closeOrderModal()" class="btn" style="background:#6b7280;padding:8px 16px;font-size:1rem;">Close</button>
                 </div>
             `;
 
