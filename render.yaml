@@ -34,8 +34,6 @@ services:
         value: smtp.gmail.com
       - key: MAIL_PORT
         value: "587"
-      - key: MAIL_SCHEME
-        value: tls
       - key: MAIL_USERNAME
         value: elroyresins@gmail.com
       - key: MAIL_PASSWORD
@@ -68,6 +66,8 @@ services:
       mkdir -p bootstrap/cache
       touch database/database.sqlite
       php artisan config:clear
+      php artisan config:cache
+      php artisan route:clear
       php artisan cache:clear
       php artisan view:clear
       php artisan storage:link --force
