@@ -41,7 +41,7 @@ services:
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
-        value: josephinenakalembe33@gmail.com
+        value: elroyresins@gmail.com
       - key: MAIL_FROM_NAME
         value: ROI Store
       - key: FILESYSTEM_DISK
