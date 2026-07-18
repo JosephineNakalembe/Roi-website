@@ -37,9 +37,9 @@ services:
       - key: MAIL_SCHEME
         value: tls
       - key: MAIL_USERNAME
-        sync: false
+        value: elroyresins@gmail.com
       - key: MAIL_PASSWORD
-        sync: false
+        value: mksahkuoinmoylha
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
