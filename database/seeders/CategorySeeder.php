@@ -11,8 +11,8 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Men\'s Clothing',
-            'Women\'s Clothing',
+            'Men',
+            'Women',
             'Kids\' Clothing',
             'Shoes & Footwear',
             'Bags & Accessories',

@@ -21,6 +21,7 @@
         </div>
         <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:10px;">
             <a class="btn" href="{{ route('admin.products.index') }}">Manage Products</a>
+            <a class="btn btn-secondary" href="{{ route('admin.categories.index') }}">Manage Categories</a>
             <a class="btn" href="{{ route('admin.orders.index') }}">Manage Orders</a>
             <a class="btn" href="{{ route('admin.users.index') }}">Manage Users</a>
             <a class="btn btn-secondary" href="{{ route('admin.support.index') }}">View Messages</a>

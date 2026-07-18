@@ -98,7 +98,10 @@ Route::delete('/cart/{product}', [CartController::class, 'remove'])->name('cart.
 
 Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
     Route::post('categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
+    Route::patch('categories/{category}', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
+    Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
     Route::get('products/next-id', [AdminProductController::class, 'nextId'])->name('admin.products.next-id');
     Route::post('products/{product}/add-stock', [AdminProductController::class, 'addStock'])->name('admin.products.add-stock');
     Route::delete('products/media/{media}', [AdminProductController::class, 'destroyMedia'])->name('admin.products.destroy-media');
