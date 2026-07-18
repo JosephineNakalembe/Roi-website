@@ -195,6 +195,7 @@ class CheckoutController extends Controller
 
         // Send order confirmation email
         try {
+            \Illuminate\Support\Facades\Log::info('MAIL DEBUG: mailer=' . config('mail.default') . ' host=' . config('mail.mailers.smtp.host') . ' username=' . config('mail.mailers.smtp.username'));
             Mail::to($user->email)->send(new OrderConfirmedMail($order));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send order confirmation email: ' . $e->getMessage());
