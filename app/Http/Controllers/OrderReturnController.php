@@ -150,7 +150,7 @@ class OrderReturnController extends Controller
         $imagePaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('returns', 'public');
+                $path = $image->store('returns', 'r2');
                 $imagePaths[] = $path;
             }
         }

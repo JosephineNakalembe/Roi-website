@@ -9,6 +9,6 @@ if (!function_exists('media_url')) {
             return '';
         }
 
-        return Storage::disk('public')->url($path);
+        return Storage::disk('r2')->url($path);
     }
 }

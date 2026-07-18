@@ -129,7 +129,7 @@ class ProductController extends Controller
         $globalImageIndex = 0;
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('products', 'public');
+                $path = $image->store('products', 'r2');
                 $product->images()->create([
                     'path' => $path,
                     'media_type' => 'image',
@@ -149,7 +149,7 @@ class ProductController extends Controller
             $color = trim($color);
             if ($request->hasFile("color_images_$i")) {
                 foreach ($request->file("color_images_$i") as $image) {
-                    $path = $image->store('products', 'public');
+                    $path = $image->store('products', 'r2');
                     $product->images()->create([
                         'path' => $path,
                         'media_type' => 'image',
@@ -166,7 +166,7 @@ class ProductController extends Controller
         // Handle video upload
         if ($request->hasFile('video')) {
             $video = $request->file('video');
-            $path = $video->store('products/videos', 'public');
+            $path = $video->store('products/videos', 'r2');
             $product->images()->create([
                 'path' => $path,
                 'media_type' => 'video',
@@ -267,7 +267,7 @@ class ProductController extends Controller
         $orderCounter = $existingImageCount;
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('products', 'public');
+                $path = $image->store('products', 'r2');
                 $product->images()->create([
                     'path' => $path,
                     'media_type' => 'image',
@@ -287,7 +287,7 @@ class ProductController extends Controller
             $color = trim($color);
             if ($request->hasFile("color_images_$i")) {
                 foreach ($request->file("color_images_$i") as $image) {
-                    $path = $image->store('products', 'public');
+                    $path = $image->store('products', 'r2');
                     $product->images()->create([
                         'path' => $path,
                         'media_type' => 'image',
@@ -304,7 +304,7 @@ class ProductController extends Controller
         // Handle video upload
         if ($request->hasFile('video')) {
             $video = $request->file('video');
-            $path = $video->store('products/videos', 'public');
+            $path = $video->store('products/videos', 'r2');
             $product->images()->create([
                 'path' => $path,
                 'media_type' => 'video',
@@ -362,8 +362,8 @@ class ProductController extends Controller
     public function destroyMedia(ProductImage $media)
     {
         // Delete the file from storage
-        if (Storage::disk('public')->exists($media->path)) {
-            Storage::disk('public')->delete($media->path);
+        if (Storage::disk('r2')->exists($media->path)) {
+            Storage::disk('r2')->delete($media->path);
         }
 
         // Delete the database record
