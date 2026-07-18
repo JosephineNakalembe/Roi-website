@@ -82,7 +82,11 @@
                             <!-- Checkbox -->
                             <form method="POST" action="{{ route('cart.toggle-select') }}" class="flex-shrink">
                                 @csrf
-                                <input type="hidden" name="cart_item_id" value="{{ $item['cart_key'] }}">
+                                @if(auth()->check())
+                                    <input type="hidden" name="cart_item_id" value="{{ $item['cart_key'] }}">
+                                @else
+                                    <input type="hidden" name="cart_key" value="{{ $item['cart_key'] }}">
+                                @endif
                                 <input type="hidden" name="selected" value="{{ $item['selected'] ? '0' : '1' }}">
                                 <input type="checkbox" onchange="this.closest('form').submit();" {{ $item['selected'] ? 'checked' : '' }} class="checkbox" style="accent-color:#1a1a2e;">
                             </form>
@@ -146,7 +150,14 @@
                     </div>
                     <div class="flex-row flex-gap-small">
                         <a class="btn btn-secondary" href="{{ route('shop.index') }}">Continue Shopping</a>
-                        <a class="btn" href="{{ route('checkout.show') }}" style="{{ $subtotal > 0 ? '' : 'opacity:0.5;pointer-events:none;' }}">Checkout</a>
+                        @if(auth()->check())
+                            <a class="btn" href="{{ route('checkout.show') }}" style="{{ $subtotal > 0 ? '' : 'opacity:0.5;pointer-events:none;' }}">Checkout</a>
+                        @else
+                            <a class="btn" href="{{ route('login') }}" style="position:relative;">
+                                Login to Checkout
+                                <span style="position:absolute;top:-6px;right:-6px;background:#c9a96e;color:#1a1a2e;font-size:0.65rem;font-weight:700;padding:1px 5px;border-radius:999px;">{{ $totalQuantity }}</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
             @endif

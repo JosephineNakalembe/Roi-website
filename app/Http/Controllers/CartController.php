@@ -11,18 +11,82 @@ use Illuminate\Support\Facades\Cache;
 
 class CartController extends Controller
 {
+    protected function getGuestCart(Request $request): array
+    {
+        return $request->session()->get('guest_cart', []);
+    }
+
+    protected function setGuestCart(Request $request, array $cart): void
+    {
+        $request->session()->put('guest_cart', $cart);
+    }
+
+    protected function guestCartKey(Product $product, ?string $color, ?string $size): string
+    {
+        return $product->id . '|' . ($color ?: '') . '|' . ($size ?: '');
+    }
+
     public function index(Request $request)
     {
+        $frequentCategorySlugs = Cache::get('frequent_categories', []);
+        $popularCategoryIds = Category::whereIn('slug', array_keys($frequentCategorySlugs))->pluck('id');
+
         if (!Auth::check()) {
-            // Guest users see empty cart with message to login
-            return view('cart.index', [
-                'availableItems' => collect(),
-                'outOfStockItems' => collect(),
-                'subtotal' => 0,
-                'totalQuantity' => 0,
-                'suggestions' => collect(),
-                'suggestedCategories' => collect(),
-            ]);
+            $guestCart = $this->getGuestCart($request);
+
+            if (empty($guestCart)) {
+                return view('cart.index', [
+                    'availableItems' => collect(),
+                    'outOfStockItems' => collect(),
+                    'subtotal' => 0,
+                    'totalQuantity' => 0,
+                    'suggestions' => collect(),
+                    'suggestedCategories' => collect(),
+                ]);
+            }
+
+            $productIds = array_column($guestCart, 'product_id');
+            $products = Product::with('primaryImage')->whereIn('id', $productIds)->get()->keyBy('id');
+
+            $items = collect();
+            foreach ($guestCart as $index => $cartItem) {
+                $product = $products->get($cartItem['product_id']);
+                if (!$product) continue;
+
+                $unitPrice = $product->priceForColor($cartItem['color']);
+                $items->push([
+                    'product' => $product,
+                    'color' => $cartItem['color'],
+                    'size' => $cartItem['size'],
+                    'quantity' => $cartItem['quantity'],
+                    'cart_key' => $index,
+                    'selected' => $cartItem['selected'],
+                    'unit_price' => $unitPrice,
+                    'total' => $unitPrice * $cartItem['quantity'],
+                ]);
+            }
+
+            $availableItems = $items->filter(fn($item) => $item['product']->stock > 0);
+            $outOfStockItems = $items->filter(fn($item) => $item['product']->stock < 1);
+            $selectedItems = $availableItems->filter(fn($item) => $item['selected']);
+            $subtotal = $selectedItems->sum('total');
+            $totalQuantity = $selectedItems->sum('quantity');
+
+            $suggestions = Product::with('primaryImage')
+                ->where('is_active', true)
+                ->whereNotIn('id', $productIds)
+                ->when($popularCategoryIds->isNotEmpty(), function ($q) use ($popularCategoryIds) {
+                    $q->whereIn('category_id', $popularCategoryIds);
+                })
+                ->inRandomOrder()
+                ->take(4)
+                ->get();
+
+            $suggestedCategories = Category::whereIn('slug', array_keys($frequentCategorySlugs))
+                ->take(5)
+                ->get();
+
+            return view('cart.index', compact('availableItems', 'outOfStockItems', 'subtotal', 'totalQuantity', 'suggestions', 'suggestedCategories'));
         }
 
         $user = Auth::user();
@@ -51,10 +115,6 @@ class CartController extends Controller
         $subtotal = $selectedItems->sum('total');
         $totalQuantity = $selectedItems->sum('quantity');
 
-        // Get suggestions based on popular categories
-        $frequentCategorySlugs = Cache::get('frequent_categories', []);
-        $popularCategoryIds = Category::whereIn('slug', array_keys($frequentCategorySlugs))->pluck('id');
-
         $suggestions = Product::with('primaryImage')
             ->where('is_active', true)
             ->whereNotIn('id', $items->pluck('product.id')->filter()->values())
@@ -65,7 +125,6 @@ class CartController extends Controller
             ->take(4)
             ->get();
 
-        // Also get suggested categories shown as tags
         $suggestedCategories = Category::whereIn('slug', array_keys($frequentCategorySlugs))
             ->take(5)
             ->get();
@@ -83,9 +142,37 @@ class CartController extends Controller
         $size = $request->input('size');
         $data = $request->validate(['quantity' => ['required', 'integer', 'min:1']]);
 
+        if (!Auth::check()) {
+            $cart = $this->getGuestCart($request);
+            $key = $this->guestCartKey($product, $color, $size);
+
+            $found = false;
+            foreach ($cart as &$item) {
+                if (($item['product_id'] . '|' . ($item['color'] ?? '') . '|' . ($item['size'] ?? '')) === $key) {
+                    $item['quantity'] = min($product->stock, $item['quantity'] + $data['quantity']);
+                    $item['selected'] = true;
+                    $found = true;
+                    break;
+                }
+            }
+            unset($item);
+
+            if (!$found) {
+                $cart[] = [
+                    'product_id' => $product->id,
+                    'quantity' => min($product->stock, $data['quantity']),
+                    'color' => $color ?: null,
+                    'size' => $size ?: null,
+                    'selected' => true,
+                ];
+            }
+
+            $this->setGuestCart($request, $cart);
+            return back()->with('success', 'Product added to cart.');
+        }
+
         $user = Auth::user();
 
-        // Check if this product variant already exists in the user's cart
         $existingItem = $user->cartItems()
             ->where('product_id', $product->id)
             ->where('color', $color ?: null)
@@ -120,9 +207,53 @@ class CartController extends Controller
         $oldSize = $request->input('old_size');
         $data = $request->validate(['quantity' => ['required', 'integer', 'min:1']]);
 
+        if (!Auth::check()) {
+            $cart = $this->getGuestCart($request);
+            $oldKey = $this->guestCartKey($product, $oldColor, $oldSize);
+            $newKey = $this->guestCartKey($product, $color, $size);
+
+            $foundIndex = null;
+            foreach ($cart as $index => $item) {
+                $itemKey = $item['product_id'] . '|' . ($item['color'] ?? '') . '|' . ($item['size'] ?? '');
+                if ($itemKey === $oldKey) {
+                    $foundIndex = $index;
+                    break;
+                }
+            }
+
+            if ($foundIndex === null) {
+                return back()->withErrors(['Item not found in cart.']);
+            }
+
+            if ($oldKey !== $newKey) {
+                $mergeIndex = null;
+                foreach ($cart as $index => $item) {
+                    if ($index === $foundIndex) continue;
+                    $itemKey = $item['product_id'] . '|' . ($item['color'] ?? '') . '|' . ($item['size'] ?? '');
+                    if ($itemKey === $newKey) {
+                        $mergeIndex = $index;
+                        break;
+                    }
+                }
+
+                if ($mergeIndex !== null) {
+                    $cart[$mergeIndex]['quantity'] = min($product->stock, $cart[$mergeIndex]['quantity'] + $data['quantity']);
+                    array_splice($cart, $foundIndex, 1);
+                } else {
+                    $cart[$foundIndex]['color'] = $color ?: null;
+                    $cart[$foundIndex]['size'] = $size ?: null;
+                    $cart[$foundIndex]['quantity'] = min($product->stock, $data['quantity']);
+                }
+            } else {
+                $cart[$foundIndex]['quantity'] = min($product->stock, $data['quantity']);
+            }
+
+            $this->setGuestCart($request, array_values($cart));
+            return back();
+        }
+
         $user = Auth::user();
 
-        // Find the old cart item
         $oldItem = $user->cartItems()
             ->where('product_id', $product->id)
             ->where('color', $oldColor ?: null)
@@ -133,9 +264,7 @@ class CartController extends Controller
             return back()->withErrors(['Item not found in cart.']);
         }
 
-        // If color/size changed, delete old and create new
         if ($oldColor !== $color || $oldSize !== $size) {
-            // Check if the new variant already exists in cart
             $existingItem = $user->cartItems()
                 ->where('product_id', $product->id)
                 ->where('color', $color ?: null)
@@ -143,7 +272,6 @@ class CartController extends Controller
                 ->first();
 
             if ($existingItem) {
-                // Merge quantities, then delete old
                 $existingItem->update([
                     'quantity' => min($product->stock, $existingItem->quantity + $data['quantity']),
                 ]);
@@ -169,6 +297,19 @@ class CartController extends Controller
         $color = $request->input('color');
         $size = $request->input('size');
 
+        if (!Auth::check()) {
+            $cart = $this->getGuestCart($request);
+            $removeKey = $this->guestCartKey($product, $color, $size);
+
+            $cart = array_values(array_filter($cart, function ($item) use ($removeKey, $product) {
+                $itemKey = $item['product_id'] . '|' . ($item['color'] ?? '') . '|' . ($item['size'] ?? '');
+                return $itemKey !== $removeKey;
+            }));
+
+            $this->setGuestCart($request, $cart);
+            return back();
+        }
+
         $user = Auth::user();
         $user->cartItems()
             ->where('product_id', $product->id)
@@ -182,11 +323,23 @@ class CartController extends Controller
     public function toggleSelect(Request $request)
     {
         $data = $request->validate([
-            'cart_item_id' => ['required', 'exists:cart_items,id'],
             'selected' => ['required', 'boolean'],
         ]);
 
-        $item = CartItem::findOrFail($data['cart_item_id']);
+        if (!Auth::check()) {
+            $cartKey = $request->input('cart_key');
+            $cart = $this->getGuestCart($request);
+
+            if (isset($cart[$cartKey])) {
+                $cart[$cartKey]['selected'] = (bool) $data['selected'];
+                $this->setGuestCart($request, $cart);
+            }
+
+            return back();
+        }
+
+        $cartItemId = $request->input('cart_item_id');
+        $item = CartItem::findOrFail($cartItemId);
         if ($item->user_id !== Auth::id()) {
             abort(403);
         }
@@ -200,6 +353,24 @@ class CartController extends Controller
         $data = $request->validate([
             'selected' => ['required', 'boolean'],
         ]);
+
+        if (!Auth::check()) {
+            $cart = $this->getGuestCart($request);
+
+            $productIds = array_column($cart, 'product_id');
+            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+            foreach ($cart as &$item) {
+                $product = $products->get($item['product_id']);
+                if ($product && $product->stock > 0) {
+                    $item['selected'] = (bool) $data['selected'];
+                }
+            }
+            unset($item);
+
+            $this->setGuestCart($request, $cart);
+            return back();
+        }
 
         Auth::user()->cartItems()
             ->whereHas('product', fn($q) => $q->where('stock', '>', 0))

@@ -64,12 +64,6 @@ Route::middleware(['auth', PreventAdminAccess::class])->group(function () {
     Route::get('/profile/payments', [ProfileController::class, 'paymentMethods'])->name('profile.payments');
     Route::post('/profile/payments', [ProfileController::class, 'savePaymentMethod'])->name('profile.payment.save');
 
-    Route::post('/cart/toggle-select', [CartController::class, 'toggleSelect'])->name('cart.toggle-select');
-    Route::post('/cart/toggle-select-all', [CartController::class, 'toggleSelectAll'])->name('cart.toggle-select-all');
-    Route::post('/cart/{product}', [CartController::class, 'add'])->name('cart.add');
-    Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
-    Route::delete('/cart/{product}', [CartController::class, 'remove'])->name('cart.remove');
-
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
 
@@ -94,8 +88,13 @@ Route::middleware(['auth', PreventAdminAccess::class])->group(function () {
     Route::post('/profile/delete-account', [ProfileController::class, 'deleteAccount'])->name('profile.delete-account');
 });
 
-// Cart accessible to guests
+// Cart routes accessible to guests and logged-in users
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/toggle-select', [CartController::class, 'toggleSelect'])->name('cart.toggle-select');
+Route::post('/cart/toggle-select-all', [CartController::class, 'toggleSelectAll'])->name('cart.toggle-select-all');
+Route::post('/cart/{product}', [CartController::class, 'add'])->name('cart.add');
+Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/{product}', [CartController::class, 'remove'])->name('cart.remove');
 
 Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
