@@ -385,6 +385,8 @@ img {
 body {
     overflow-x: hidden;
     min-width: 320px;
+    background: #0e0e1a;
+    color: #e8e4df;
 }
 
 /* Improve touch targets on mobile */
