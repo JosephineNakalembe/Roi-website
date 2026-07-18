@@ -79,12 +79,14 @@ class ProductController extends Controller
         $colorPrices = [];
         for ($i = 0; $i < 100; $i++) {
             $color = $request->input("color_$i");
+            $colorName = $request->input("color_name_$i");
             $size = $request->input("size_$i");
             $quantity = $request->input("quantity_$i");
             $colorPrice = $request->input("price_$i");
             if ($color && $quantity) {
                 $color = trim($color);
-                $key = $size ? "$color ($size)" : $color;
+                $colorValue = $colorName ? "$color:" . trim($colorName) : $color;
+                $key = $size ? "$colorValue ($size)" : $colorValue;
                 $colorStock[$key] = (int)$quantity;
                 $totalStock += (int)$quantity;
                 // Collect unique sizes
@@ -92,12 +94,12 @@ class ProductController extends Controller
                     $collectedSizes[] = $size;
                 }
                 // Collect unique colors
-                if (!in_array($color, $collectedColors)) {
-                    $collectedColors[] = $color;
+                if (!in_array($colorValue, $collectedColors)) {
+                    $collectedColors[] = $colorValue;
                 }
                 // Collect per-color price (first non-empty wins for a given color)
-                if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$color])) {
-                    $colorPrices[$color] = (float)$colorPrice;
+                if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$colorValue])) {
+                    $colorPrices[$colorValue] = (float)$colorPrice;
                 }
             }
         }
@@ -143,17 +145,19 @@ class ProductController extends Controller
         // Handle per-color images
         for ($i = 0; $i < 100; $i++) {
             $color = $request->input("color_$i");
+            $colorName = $request->input("color_name_$i");
             if (!$color) {
                 continue;
             }
             $color = trim($color);
+            $colorValue = $colorName ? "$color:" . trim($colorName) : $color;
             if ($request->hasFile("color_images_$i")) {
                 foreach ($request->file("color_images_$i") as $image) {
                     $path = $image->store('products', 'r2');
                     $product->images()->create([
                         'path' => $path,
                         'media_type' => 'image',
-                        'color' => $color,
+                        'color' => $colorValue,
                         'is_primary' => $globalImageIndex === 0,
                         'order' => $globalImageIndex,
                     ]);
@@ -218,12 +222,14 @@ class ProductController extends Controller
         $colorPrices = [];
         for ($i = 0; $i < 100; $i++) {
             $color = $request->input("color_$i");
+            $colorName = $request->input("color_name_$i");
             $size = $request->input("size_$i");
             $quantity = $request->input("quantity_$i");
             $colorPrice = $request->input("price_$i");
             if ($color && $quantity) {
                 $color = trim($color);
-                $key = $size ? "$color ($size)" : $color;
+                $colorValue = $colorName ? "$color:" . trim($colorName) : $color;
+                $key = $size ? "$colorValue ($size)" : $colorValue;
                 $colorStock[$key] = (int)$quantity;
                 $totalStock += (int)$quantity;
                 // Collect unique sizes
@@ -231,12 +237,12 @@ class ProductController extends Controller
                     $collectedSizes[] = $size;
                 }
                 // Collect unique colors
-                if (!in_array($color, $collectedColors)) {
-                    $collectedColors[] = $color;
+                if (!in_array($colorValue, $collectedColors)) {
+                    $collectedColors[] = $colorValue;
                 }
                 // Collect per-color price (first non-empty wins for a given color)
-                if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$color])) {
-                    $colorPrices[$color] = (float)$colorPrice;
+                if ($colorPrice !== null && $colorPrice !== '' && !isset($colorPrices[$colorValue])) {
+                    $colorPrices[$colorValue] = (float)$colorPrice;
                 }
             }
         }
@@ -281,17 +287,19 @@ class ProductController extends Controller
         // Handle per-color images
         for ($i = 0; $i < 100; $i++) {
             $color = $request->input("color_$i");
+            $colorName = $request->input("color_name_$i");
             if (!$color) {
                 continue;
             }
             $color = trim($color);
+            $colorValue = $colorName ? "$color:" . trim($colorName) : $color;
             if ($request->hasFile("color_images_$i")) {
                 foreach ($request->file("color_images_$i") as $image) {
                     $path = $image->store('products', 'r2');
                     $product->images()->create([
                         'path' => $path,
                         'media_type' => 'image',
-                        'color' => $color,
+                        'color' => $colorValue,
                         'is_primary' => $orderCounter === 0,
                         'order' => $orderCounter,
                     ]);

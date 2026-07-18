@@ -109,7 +109,19 @@
                 <h2>Items</h2>
                 @foreach($order->items as $item)
                     <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7eb;">
-                        <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
+                        <div>
+                            <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
+                            @php
+                                $colorParts = explode(':', $item->color ?? '');
+                                $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
+                            @endphp
+                            @if($colorDisplayName || $item->size)
+                                <p style="font-size:0.9rem;color:#6b7280;margin:2px 0 0;">
+                                    @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
+                                    @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
+                                </p>
+                            @endif
+                        </div>
                         <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
                     </div>
                 @endforeach

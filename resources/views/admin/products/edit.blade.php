@@ -252,6 +252,19 @@
             row.style.display = 'grid';
             row.style.gap = '10px';
             row.style.background = '#fafafa';
+            row.classList.add('color-row');
+
+            // Parse existing color which may be "#hex:Name" or plain text
+            let hexCode = '#000000';
+            let colorName = color;
+            if (color && color.includes(':')) {
+                const parts = color.split(':');
+                hexCode = parts[0];
+                colorName = parts[1] || '';
+            } else if (color && /^#[0-9a-fA-F]{6}$/.test(color)) {
+                hexCode = color;
+                colorName = '';
+            }
 
             // Prefill price for this color if it exists
             const priceVal = (color && existingColorPrices[color] != null) ? existingColorPrices[color] : '';
@@ -265,8 +278,11 @@
             }
 
             row.innerHTML = `
-                <div style="display:grid;grid-template-columns:repeat(2, 1fr) 80px auto;gap:8px;align-items:center;">
-                    <input type="text" class="input" name="color_${index}" placeholder="Color (e.g., Red)" value="${color}" style="padding:6px;font-size:1rem;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px;align-items:center;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="color" name="color_${index}" value="${hexCode}" style="width:50px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:0;flex-shrink:0;">
+                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" value="${colorName}" style="flex:1;padding:6px;font-size:1rem;">
+                </div>
                     <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" value="${size}" style="padding:6px;font-size:1rem;">
                     <input type="number" class="input" name="quantity_${index}" placeholder="Qty" min="1" value="${quantity}" style="padding:6px;font-size:1rem;">
                     <button type="button" class="btn btn-secondary" onclick="this.closest('div[style*=border]').remove(); updateColors();" style="padding:4px 8px;font-size:0.95rem;">Remove</button>
@@ -311,10 +327,17 @@
 
         function updateColors() {
             const container = document.getElementById('colorQuantityContainer');
-            const colors = Array.from(container.querySelectorAll('input[type="text"]'))
-                .map(el => el.value)
-                .filter(val => val.trim());
-            document.getElementById('colorsHidden').value = colors.join(', ');
+            const colorNames = [];
+            container.querySelectorAll('.color-row').forEach(row => {
+                const colorInput = row.querySelector('input[type="color"]');
+                const nameInput = row.querySelector('input[name^="color_name_"]');
+                if (colorInput && nameInput && nameInput.value.trim()) {
+                    colorNames.push(colorInput.value + ':' + nameInput.value.trim());
+                } else if (colorInput && colorInput.value) {
+                    colorNames.push(colorInput.value);
+                }
+            });
+            document.getElementById('colorsHidden').value = JSON.stringify(colorNames);
         }
 
                 // Load existing color stock
