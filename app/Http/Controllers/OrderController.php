@@ -9,6 +9,7 @@ use App\Models\OrderItemReturn;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -57,7 +58,12 @@ class OrderController extends Controller
         ]);
 
         // Send delivery confirmation email
-        Mail::to($order->user->email)->send(new OrderDeliveredMail($order));
+        try {
+            $order->load('user', 'items');
+            Mail::to($order->user->email)->send(new OrderDeliveredMail($order));
+        } catch (\Exception $e) {
+            Log::error('Failed to send delivery email: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'You have confirmed receipt of your items. Please leave a review for the products.');
     }
@@ -170,7 +176,12 @@ class OrderController extends Controller
         ]);
 
         // Send cancellation email
-        Mail::to($order->user->email)->send(new OrderCancelledMail($order));
+        try {
+            $order->load('user', 'items');
+            Mail::to($order->user->email)->send(new OrderCancelledMail($order));
+        } catch (\Exception $e) {
+            Log::error('Failed to send cancellation email: ' . $e->getMessage());
+        }
 
         return response()->json(['success' => true, 'message' => 'Order cancelled successfully']);
     }

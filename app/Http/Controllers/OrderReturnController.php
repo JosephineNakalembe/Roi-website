@@ -9,6 +9,7 @@ use App\Models\OrderReturnUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class OrderReturnController extends Controller
@@ -193,7 +194,12 @@ class OrderReturnController extends Controller
         ]);
 
         // Send return requested email
-        Mail::to($order->user->email)->send(new ReturnRequestedMail($return));
+        try {
+            $order->load('user');
+            Mail::to($order->user->email)->send(new ReturnRequestedMail($return));
+        } catch (\Exception $e) {
+            Log::error('Failed to send return request email: ' . $e->getMessage());
+        }
 
         return redirect()->route('returns.track', $return)
             ->with('success', "Return request {$returnNumber} has been submitted successfully. You can track the progress below.");

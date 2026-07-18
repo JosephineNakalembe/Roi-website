@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -83,10 +84,14 @@ class OrderController extends Controller
         $emailMap = [
             'shipped' => OrderShippedMail::class,
             'delivered' => OrderDeliveredMail::class,
-            'cancelled' => OrderCancelledMail::class,
         ];
         if (isset($emailMap[$data['status']])) {
-            Mail::to($order->user->email)->send(new $emailMap[$data['status']]($order));
+            try {
+                $order->load('user', 'items');
+                Mail::to($order->user->email)->send(new $emailMap[$data['status']]($order));
+            } catch (\Exception $e) {
+                Log::error('Failed to send order email (' . $data['status'] . '): ' . $e->getMessage());
+            }
         }
 
         return back()->with('success', 'Order status updated and tracking history saved.');

@@ -8,6 +8,7 @@ use App\Models\OrderReturn;
 use App\Models\OrderReturnUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ReturnController extends Controller
@@ -82,7 +83,12 @@ class ReturnController extends Controller
         ]);
 
         // Send return status update email to customer
-        Mail::to($orderReturn->user->email)->send(new ReturnStatusMail($orderReturn));
+        try {
+            $orderReturn->load('user', 'order');
+            Mail::to($orderReturn->user->email)->send(new ReturnStatusMail($orderReturn));
+        } catch (\Exception $e) {
+            Log::error('Failed to send return status email: ' . $e->getMessage());
+        }
 
         return back()->with('success', "Return {$orderReturn->return_number} has been updated to " . ucfirst($data['status']) . ".");
     }
