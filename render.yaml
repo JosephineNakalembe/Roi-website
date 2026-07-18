@@ -43,9 +43,9 @@ services:
       - key: AWS_BUCKET
         sync: false
       - key: AWS_ENDPOINT
-        sync: false
+        value: https://95dd5686e04670432108ce1fc3c30a4e.r2.cloudflarestorage.com
       - key: AWS_URL
-        sync: false
+        value: https://pub-043ec220a975448bb9ee3c917e2bc278.r2.dev
     startCommand: |
       mkdir -p storage/framework/{sessions,views,cache}
       mkdir -p storage/logs
