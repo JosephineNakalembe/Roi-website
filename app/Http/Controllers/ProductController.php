@@ -43,11 +43,11 @@ class ProductController extends Controller
             ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
             ->when($categorySlug && $categorySlug !== 'all', fn ($q) => $q->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug)));
 
-        $allProducts = $query->latest()->get();
+        $allProducts = $query->get();
 
-        $inStockProducts = $allProducts->where('stock', '>', 0);
+        $inStockProducts = $allProducts->where('stock', '>', 0)->shuffle();
         $outOfStockProducts = $allProducts->where('stock', '<=', 0);
-        $products = $inStockProducts->concat($outOfStockProducts);
+        $products = $inStockProducts->concat($outOfStockProducts)->values();
 
         $categories = Category::orderBy('name')->get();
 
