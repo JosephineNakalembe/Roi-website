@@ -73,7 +73,7 @@
     </div>
 
     @php
-        $defaults = ['all' => 'All', 'women' => 'Women', 'men' => 'Men', 'beauty-personal-care' => 'Beauty'];
+        $defaults = ['all' => 'All', 'women' => 'Women', 'men' => 'Men', 'beauty' => 'Beauty'];
         $otherCategories = $categories->filter(fn($c) => !in_array($c->slug, array_keys($defaults)));
         $hasMore = $otherCategories->isNotEmpty();
     @endphp

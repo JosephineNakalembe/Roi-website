@@ -19,7 +19,7 @@ class CategorySeeder extends Seeder
             'Jewelry & Watches',
             'Electronics',
             'Sports & Outdoors',
-            'Beauty & Personal Care',
+            'Beauty',
             'Home & Living',
             'Books & Stationery',
             'Toys & Games',

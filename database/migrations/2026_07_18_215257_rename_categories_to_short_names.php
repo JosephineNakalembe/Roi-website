@@ -10,6 +10,7 @@ return new class extends Migration
         $renames = [
             "Women's Clothing" => ['name' => 'Women', 'slug' => 'women'],
             "Men's Clothing" => ['name' => 'Men', 'slug' => 'men'],
+            "Beauty & Personal Care" => ['name' => 'Beauty', 'slug' => 'beauty'],
         ];
 
         foreach ($renames as $oldName => $new) {
@@ -24,6 +25,7 @@ return new class extends Migration
         $renames = [
             'Women' => ['name' => "Women's Clothing", 'slug' => 'womens-clothing'],
             'Men' => ['name' => "Men's Clothing", 'slug' => 'mens-clothing'],
+            'Beauty' => ['name' => "Beauty & Personal Care", 'slug' => 'beauty-personal-care'],
         ];
 
         foreach ($renames as $oldName => $new) {

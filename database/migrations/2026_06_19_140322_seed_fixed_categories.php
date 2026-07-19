@@ -12,7 +12,7 @@ return new class extends Migration
             'Fashion & Apparel',
             'Accessories',
             'Home & Lifestyle',
-            'Beauty & Personal Care',
+            'Beauty',
             'Electronics & Gadgets',
             'Fitness & Sportswear',
             'Pet Supplies',
