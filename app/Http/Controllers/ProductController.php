@@ -73,6 +73,7 @@ class ProductController extends Controller
             ]);
         }
 
+        $products = $paginator;
         $categories = Category::orderBy('name')->get();
 
         $frequentCategorySlugs = Cache::get('frequent_categories', []);
