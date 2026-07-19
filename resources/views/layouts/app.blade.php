@@ -474,12 +474,15 @@
             }
         });
 
-        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobileMenu');
-            const overlay = document.getElementById('mobileMenuOverlay');
-            mobileMenu.classList.remove('hidden');
-            overlay.classList.remove('hidden');
-        });
+        var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                const mobileMenu = document.getElementById('mobileMenu');
+                const overlay = document.getElementById('mobileMenuOverlay');
+                mobileMenu.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+            });
+        }
 
         document.getElementById('closeMobileMenu').addEventListener('click', function() {
             const mobileMenu = document.getElementById('mobileMenu');

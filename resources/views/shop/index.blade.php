@@ -124,6 +124,8 @@
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 
+    <div id="scrollSentinel" style="height:1px;"></div>
+
     <script>
         function toggleCategories() {
             const extra = document.getElementById('extraCategories');
@@ -137,12 +139,6 @@
             }
         }
 
-        function addAjaxParam(url) {
-            if (!url) return null;
-            const sep = url.includes('?') ? '&' : '?';
-            return url + sep + '_ajax=1';
-        }
-
         let nextPageUrl = @json($products->nextPageUrl());
         let isLoading = false;
         let hasMore = {{ $products->hasMorePages() ? 'true' : 'false' }};
@@ -153,19 +149,11 @@
             document.getElementById('loadingState').style.display = 'block';
 
             try {
-                const url = addAjaxParam(nextPageUrl);
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    hasMore = false;
-                    document.getElementById('loadingState').style.display = 'none';
-                    document.getElementById('endState').style.display = 'block';
-                    isLoading = false;
-                    return;
-                }
+                const sep = nextPageUrl.includes('?') ? '&' : '?';
+                const url = nextPageUrl + sep + '_ajax=1';
+                const response = await fetch(url, { credentials: 'same-origin' });
 
-                const contentType = response.headers.get('content-type') || '';
-                if (!contentType.includes('application/json')) {
+                if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
                     hasMore = false;
                     document.getElementById('loadingState').style.display = 'none';
                     document.getElementById('endState').style.display = 'block';
@@ -174,16 +162,17 @@
                 }
 
                 const data = await response.json();
-                
+
                 if (data.html) {
                     const temp = document.createElement('div');
                     temp.innerHTML = data.html;
                     const cards = temp.querySelectorAll('.product-card');
-                    cards.forEach(card => document.getElementById('productGrid').appendChild(card));
+                    const grid = document.getElementById('productGrid');
+                    cards.forEach(card => grid.appendChild(card));
                 }
-                
+
                 nextPageUrl = data.next_page_url || null;
-                
+
                 if (!nextPageUrl) {
                     hasMore = false;
                     document.getElementById('endState').style.display = 'block';
@@ -199,20 +188,19 @@
             isLoading = false;
         }
 
-        // Infinite scroll with debounce
-        let scrollTimeout;
-        window.addEventListener('scroll', () => {
-            if (scrollTimeout) clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+        document.addEventListener('DOMContentLoaded', () => {
+            const sentinel = document.getElementById('scrollSentinel');
+            if (!sentinel) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
                     loadMoreProducts();
                 }
-            }, 100);
-        });
+            }, { rootMargin: '800px' });
 
-        // Also load more when page is near bottom on load
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+            observer.observe(sentinel);
+
+            if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 800) {
                 loadMoreProducts();
             }
         });
