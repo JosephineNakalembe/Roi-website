@@ -8,10 +8,32 @@ use Illuminate\Support\Facades\Auth;
 
 class WishlistController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $items = Auth::user()->wishlistItems()->with('product.primaryImage')->get();
-        return view('wishlist.index', compact('items'));
+        $items = Auth::user()->wishlistItems()->with('product.primaryImage', 'product.category');
+        $perPage = 12;
+        $page = (int) $request->get('page', 1);
+        $total = $items->count();
+        $pagedItems = $items->skip(($page - 1) * $perPage)->take($perPage)->get();
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $pagedItems,
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        $isAjax = $request->header('X-Requested-With') === 'XMLHttpRequest';
+
+        if ($isAjax) {
+            return response()->json([
+                'html' => view('wishlist.partials.wishlist_cards', ['items' => $pagedItems])->render(),
+                'next_page_url' => $paginator->nextPageUrl(),
+            ]);
+        }
+
+        return view('wishlist.index', ['items' => $pagedItems, 'paginator' => $paginator]);
     }
 
     public function toggle(Product $product)

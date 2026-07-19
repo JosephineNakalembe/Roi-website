@@ -59,10 +59,9 @@
             </div>
         </form>
 
-        <div style="display:grid;gap:14px;margin-top:16px;">
+        <div id="productList" style="display:grid;gap:14px;margin-top:16px;">
             @forelse($products as $product)
                 <div class="product-item" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid #e5e7eb;border-radius:14px;">
-                    <!-- Display Picture -->
                     <div style="width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#f3f4f6;">
                         @if($product->primaryImage)
                             <img src="{{ media_url($product->primaryImage->path) }}" alt="" style="width:100%;height:100%;object-fit:cover;">
@@ -105,7 +104,67 @@
                 </div>
             @endforelse
         </div>
-    <div style="margin-top:20px;">{{ $products->withQueryString()->links() }}</div>
+
+        <div id="loadingState" style="display:none;text-align:center;margin-top:20px;padding:20px;">
+            <div style="display:inline-block;width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#1a1a2e;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+            <p style="margin-top:8px;color:#6b7280;">Loading more products…</p>
+        </div>
+        <div id="endState" style="display:none;text-align:center;margin-top:12px;color:#6b7280;padding:12px;">All products loaded.</div>
+
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+        <script>
+        let nextPageUrl = @json($products->nextPageUrl());
+        let isLoading = false;
+        let hasMore = {{ $products->hasMorePages() ? 'true' : 'false' }};
+
+        async function loadMoreProducts() {
+            if (!nextPageUrl || isLoading || !hasMore) return;
+            isLoading = true;
+            document.getElementById('loadingState').style.display = 'block';
+
+            try {
+                const response = await fetch(nextPageUrl, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                if (!response.ok) { hasMore = false; document.getElementById('loadingState').style.display = 'none'; document.getElementById('endState').style.display = 'block'; isLoading = false; return; }
+
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) { hasMore = false; document.getElementById('loadingState').style.display = 'none'; document.getElementById('endState').style.display = 'block'; isLoading = false; return; }
+
+                const data = await response.json();
+
+                if (data.html) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = data.html;
+                    const items = temp.querySelectorAll('.product-item');
+                    items.forEach(item => document.getElementById('productList').appendChild(item));
+                }
+
+                nextPageUrl = data.next_page_url || null;
+                if (!nextPageUrl) { hasMore = false; document.getElementById('endState').style.display = 'block'; }
+            } catch (e) {
+                console.error('Infinite scroll error:', e);
+                hasMore = false;
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('endState').style.display = 'block';
+            }
+
+            document.getElementById('loadingState').style.display = 'none';
+            isLoading = false;
+        }
+
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
+                    loadMoreProducts();
+                }
+            }, 100);
+        });
+        </script>
     </div>
 
     <!-- Add Stock Modal -->
@@ -153,5 +212,3 @@
     });
     </script>
 @endsection
-
-</write_to_file>
