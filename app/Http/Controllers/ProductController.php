@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -17,8 +18,8 @@ class ProductController extends Controller
         $page = (int) $request->get('page', 1);
         $perPage = 12;
         $isAjax = $request->header('X-Requested-With') === 'XMLHttpRequest';
+        $shuffleId = $request->query('sid');
 
-        // Track frequently searched terms (store in cache, max 100)
         if ($search) {
             $frequentSearches = Cache::get('frequent_searches', []);
             $term = strtolower(trim($search));
@@ -31,7 +32,6 @@ class ProductController extends Controller
             Cache::forever('frequent_searches', $frequentSearches);
         }
 
-        // Track frequently viewed categories
         if ($categorySlug) {
             $frequentCategories = Cache::get('frequent_categories', []);
             if (!isset($frequentCategories[$categorySlug])) {
@@ -50,12 +50,33 @@ class ProductController extends Controller
 
         $allProducts = $query->latest()->get();
 
-        // Separate in-stock and out-of-stock products, in-stock first
         $inStockProducts = $allProducts->where('stock', '>', 0);
         $outOfStockProducts = $allProducts->where('stock', '<=', 0);
-        $products = $inStockProducts->concat($outOfStockProducts);
 
-        // Paginate
+        $useShuffle = !$search && (!$categorySlug || $categorySlug === 'all');
+
+        if ($useShuffle) {
+            // Fresh page load (not AJAX, page 1): create a new shuffle order
+            if (!$isAjax && $page <= 1 && !$shuffleId) {
+                $shuffleId = Str::random(16);
+                $shuffledIds = $inStockProducts->pluck('id')->shuffle()->values()->toArray();
+                $oosIds = $outOfStockProducts->pluck('id')->values()->toArray();
+                Cache::put("shop_order_{$shuffleId}", array_merge($shuffledIds, $oosIds), 3600);
+            }
+
+            if ($shuffleId && Cache::has("shop_order_{$shuffleId}")) {
+                $orderedIds = Cache::get("shop_order_{$shuffleId}");
+                $allMap = $allProducts->keyBy('id');
+                $products = collect($orderedIds)->filter(fn($id) => $allMap->has($id))->map(fn($id) => $allMap[$id])->values();
+            } else {
+                // Fallback: no cached order, use in-stock first then out-of-stock
+                $products = $inStockProducts->concat($outOfStockProducts);
+            }
+        } else {
+            // For search/category: in-stock first (latest order), then out-of-stock
+            $products = $inStockProducts->concat($outOfStockProducts);
+        }
+
         $total = $products->count();
         $slicedProducts = $products->slice(($page - 1) * $perPage, $perPage);
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
@@ -87,7 +108,7 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories'));
+        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories', 'shuffleId'));
     }
 
     public function show($slug)
