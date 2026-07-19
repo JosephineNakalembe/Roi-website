@@ -14,6 +14,9 @@ class ProductController extends Controller
     {
         $search = $request->query('search');
         $categorySlug = $request->query('category');
+        $page = (int) $request->get('page', 1);
+        $perPage = 12;
+        $isAjax = $request->header('X-Requested-With') === 'XMLHttpRequest';
 
         // Track frequently searched terms (store in cache, max 100)
         if ($search) {
@@ -23,7 +26,6 @@ class ProductController extends Controller
                 $frequentSearches[$term] = 0;
             }
             $frequentSearches[$term]++;
-            // Keep only top 100
             arsort($frequentSearches);
             $frequentSearches = array_slice($frequentSearches, 0, 100);
             Cache::forever('frequent_searches', $frequentSearches);
@@ -46,79 +48,33 @@ class ProductController extends Controller
             ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
             ->when($categorySlug && $categorySlug !== 'all', fn ($q) => $q->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug)));
 
-        // Separate in-stock and out-of-stock products
-        if (!$search && (!$categorySlug || $categorySlug === 'all')) {
-            // Get all products first to separate them
-            $allProducts = $query->get();
-            $inStockProducts = $allProducts->where('stock', '>', 0);
-            $outOfStockProducts = $allProducts->where('stock', '<=', 0);
+        $allProducts = $query->latest()->get();
 
-            // Shuffle only in-stock products
-            $shuffledInStock = $inStockProducts->shuffle();
+        // Separate in-stock and out-of-stock products, in-stock first
+        $inStockProducts = $allProducts->where('stock', '>', 0);
+        $outOfStockProducts = $allProducts->where('stock', '<=', 0);
+        $products = $inStockProducts->concat($outOfStockProducts);
 
-            // Combine: shuffled in-stock first, then out-of-stock
-            $products = $shuffledInStock->concat($outOfStockProducts);
+        // Paginate
+        $total = $products->count();
+        $slicedProducts = $products->slice(($page - 1) * $perPage, $perPage);
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $slicedProducts,
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
-            // Create a paginator manually
-            $page = $request->get('page', 1);
-            $perPage = 12;
-            $offset = ($page - 1) * $perPage;
-            $slicedProducts = $products->slice($offset, $perPage);
-            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-                $slicedProducts,
-                $products->count(),
-                $perPage,
-                $page,
-                ['path' => $request->url(), 'query' => $request->query()]
-            );
-
-            // If AJAX request, return only the product cards HTML + next page URL
-            if ($request->ajax()) {
-                $html = view('shop.partials.product_cards', compact('paginator'))->render();
-                return response()->json([
-                    'html' => $html,
-                    'next_page_url' => $paginator->nextPageUrl(),
-                ]);
-            }
-
-            $products = $paginator;
-        } else {
-            // For filtered views, use latest order but still push out-of-stock to bottom
-            $allProducts = $query->latest()->get();
-            $inStockProducts = $allProducts->where('stock', '>', 0);
-            $outOfStockProducts = $allProducts->where('stock', '<=', 0);
-
-            // Combine: in-stock first (latest order), then out-of-stock (latest order)
-            $products = $inStockProducts->concat($outOfStockProducts);
-
-            // Create a paginator manually
-            $page = $request->get('page', 1);
-            $perPage = 12;
-            $offset = ($page - 1) * $perPage;
-            $slicedProducts = $products->slice($offset, $perPage);
-            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-                $slicedProducts,
-                $products->count(),
-                $perPage,
-                $page,
-                ['path' => $request->url(), 'query' => $request->query()]
-            );
-
-            // If AJAX request, return only the product cards HTML + next page URL
-            if ($request->ajax()) {
-                $html = view('shop.partials.product_cards', compact('paginator'))->render();
-                return response()->json([
-                    'html' => $html,
-                    'next_page_url' => $paginator->nextPageUrl(),
-                ]);
-            }
-
-            $products = $paginator;
+        if ($isAjax) {
+            return response()->json([
+                'html' => view('shop.partials.product_cards', compact('paginator'))->render(),
+                'next_page_url' => $paginator->nextPageUrl(),
+            ]);
         }
 
         $categories = Category::orderBy('name')->get();
 
-        // Get frequently searched categories for suggestions
         $frequentCategorySlugs = Cache::get('frequent_categories', []);
         $frequentSlugs = array_keys($frequentCategorySlugs);
         $suggestedCategories = collect();
@@ -142,18 +98,15 @@ class ProductController extends Controller
             $inWishlist = Auth::user()->wishlistItems()->where('product_id', $product->id)->exists();
         }
 
-        // Fetch reviews via OrderItem
         $orderItemIds = \App\Models\OrderItem::where('product_id', $product->id)->pluck('id');
         $reviews = \App\Models\OrderItemReview::whereIn('order_item_id', $orderItemIds)
             ->with('user')
             ->latest()
             ->get();
 
-        // Calculate average rating
         $avgRating = $reviews->avg('rating');
         $reviewCount = $reviews->count();
 
-        // Get suggested products from same category
         $suggestedProducts = Product::with('primaryImage')
             ->where('is_active', true)
             ->where('id', '!=', $product->id)

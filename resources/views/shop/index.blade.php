@@ -139,7 +139,7 @@
 
         let nextPageUrl = @json($products->nextPageUrl());
         let isLoading = false;
-        let hasMore = true;
+        let hasMore = {{ $products->hasMorePages() ? 'true' : 'false' }};
 
         async function loadMoreProducts() {
             if (!nextPageUrl || isLoading || !hasMore) return;
@@ -149,12 +149,20 @@
             try {
                 const response = await fetch(nextPageUrl, { 
                     headers: { 
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
+                        'X-Requested-With': 'XMLHttpRequest'
                     } 
                 });
                 
                 if (!response.ok) {
+                    hasMore = false;
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('endState').style.display = 'block';
+                    isLoading = false;
+                    return;
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
                     hasMore = false;
                     document.getElementById('loadingState').style.display = 'none';
                     document.getElementById('endState').style.display = 'block';
@@ -178,8 +186,9 @@
                     document.getElementById('endState').style.display = 'block';
                 }
             } catch (e) {
+                console.error('Infinite scroll error:', e);
                 hasMore = false;
-                document.getElementById('endState').textContent = 'Error loading products.';
+                document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('endState').style.display = 'block';
             }
 
