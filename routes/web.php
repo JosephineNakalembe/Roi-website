@@ -51,7 +51,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.reset.post');
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/shop', [ProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{slug}', [ProductController::class, 'show'])->name('shop.show');
