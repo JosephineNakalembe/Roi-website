@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ROI Store</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     @if (class_exists(\Illuminate\Support\Facades\Vite::class) && file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/css/responsive.css', 'resources/js/app.js'])

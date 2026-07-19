@@ -68,7 +68,8 @@ class ProductController extends Controller
 
         // Convert comma-separated strings to arrays (if colors input exists)
         if (isset($data['colors'])) {
-            $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
+            $decoded = json_decode($data['colors'], true);
+            $data['colors'] = is_array($decoded) ? $decoded : ($data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null);
         }
     
         // Process color-size-quantity combinations and auto-collect sizes
@@ -212,7 +213,8 @@ class ProductController extends Controller
         $data['product_id'] = $product->product_id;
 
         // Convert comma-separated strings to arrays
-        $data['colors'] = $data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null;
+        $decoded = json_decode($data['colors'], true);
+        $data['colors'] = is_array($decoded) ? $decoded : ($data['colors'] ? array_filter(array_map('trim', explode(',', $data['colors']))) : null);
     
         // Process color-size-quantity combinations and auto-collect sizes
         $colorStock = [];
