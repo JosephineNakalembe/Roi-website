@@ -114,18 +114,6 @@
         @endforelse
     </div>
 
-    <div id="loadingState" style="display:none;text-align:center;margin-top:20px;padding:20px;">
-        <div style="display:inline-block;width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#1a1a2e;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-        <p style="margin-top:8px;color:#6b7280;">Loading more products…</p>
-    </div>
-    <div id="endState" style="display:none;text-align:center;margin-top:20px;color:#6b7280;padding:20px;">No more products to show.</div>
-
-    <style>
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
-
-    <div id="scrollSentinel" style="height:1px;"></div>
-
     <script>
         function toggleCategories() {
             const extra = document.getElementById('extraCategories');
@@ -138,71 +126,5 @@
                 btn.textContent = 'Show less';
             }
         }
-
-        let nextPageUrl = @json($products->nextPageUrl());
-        let isLoading = false;
-        let hasMore = {{ $products->hasMorePages() ? 'true' : 'false' }};
-
-        async function loadMoreProducts() {
-            if (!nextPageUrl || isLoading || !hasMore) return;
-            isLoading = true;
-            document.getElementById('loadingState').style.display = 'block';
-
-            try {
-                const sep = nextPageUrl.includes('?') ? '&' : '?';
-                const url = nextPageUrl + sep + '_ajax=1';
-                const response = await fetch(url, { credentials: 'same-origin' });
-
-                if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
-                    hasMore = false;
-                    document.getElementById('loadingState').style.display = 'none';
-                    document.getElementById('endState').style.display = 'block';
-                    isLoading = false;
-                    return;
-                }
-
-                const data = await response.json();
-
-                if (data.html) {
-                    const temp = document.createElement('div');
-                    temp.innerHTML = data.html;
-                    const cards = temp.querySelectorAll('.product-card');
-                    const grid = document.getElementById('productGrid');
-                    cards.forEach(card => grid.appendChild(card));
-                }
-
-                nextPageUrl = data.next_page_url || null;
-
-                if (!nextPageUrl) {
-                    hasMore = false;
-                    document.getElementById('endState').style.display = 'block';
-                }
-            } catch (e) {
-                console.error('Infinite scroll error:', e);
-                hasMore = false;
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('endState').style.display = 'block';
-            }
-
-            document.getElementById('loadingState').style.display = 'none';
-            isLoading = false;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const sentinel = document.getElementById('scrollSentinel');
-            if (!sentinel) return;
-
-            const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting) {
-                    loadMoreProducts();
-                }
-            }, { rootMargin: '800px' });
-
-            observer.observe(sentinel);
-
-            if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 800) {
-                loadMoreProducts();
-            }
-        });
     </script>
 @endsection

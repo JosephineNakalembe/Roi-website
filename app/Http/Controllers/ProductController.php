@@ -7,7 +7,6 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -15,10 +14,6 @@ class ProductController extends Controller
     {
         $search = $request->query('search');
         $categorySlug = $request->query('category');
-        $page = max(1, (int) $request->get('page', 1));
-        $perPage = 12;
-        $isAjax = $request->boolean('_ajax');
-        $shuffleId = $request->query('sid');
 
         if ($search) {
             $frequentSearches = Cache::get('frequent_searches', []);
@@ -52,52 +47,8 @@ class ProductController extends Controller
 
         $inStockProducts = $allProducts->where('stock', '>', 0);
         $outOfStockProducts = $allProducts->where('stock', '<=', 0);
+        $products = $inStockProducts->concat($outOfStockProducts);
 
-        $useShuffle = !$search && (!$categorySlug || $categorySlug === 'all');
-
-        if ($useShuffle) {
-            if (!$isAjax && $page <= 1 && !$shuffleId) {
-                $shuffleId = Str::random(16);
-                $shuffledIds = $inStockProducts->pluck('id')->shuffle()->values()->toArray();
-                $oosIds = $outOfStockProducts->pluck('id')->values()->toArray();
-                Cache::put("shop_order_{$shuffleId}", array_merge($shuffledIds, $oosIds), 3600);
-            }
-
-            if ($shuffleId && Cache::has("shop_order_{$shuffleId}")) {
-                $orderedIds = Cache::get("shop_order_{$shuffleId}");
-                $allMap = $allProducts->keyBy('id');
-                $products = collect($orderedIds)->filter(fn($id) => $allMap->has($id))->map(fn($id) => $allMap[$id])->values();
-            } else {
-                $products = $inStockProducts->concat($outOfStockProducts);
-            }
-        } else {
-            $products = $inStockProducts->concat($outOfStockProducts);
-        }
-
-        $total = $products->count();
-        $slicedProducts = $products->slice(($page - 1) * $perPage, $perPage);
-
-        $queryParams = array_filter($request->query(), fn($v, $k) => $k !== '_ajax', ARRAY_FILTER_USE_BOTH);
-        if ($shuffleId) {
-            $queryParams['sid'] = $shuffleId;
-        }
-
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $slicedProducts,
-            $total,
-            $perPage,
-            $page,
-            ['path' => $request->url(), 'query' => $queryParams]
-        );
-
-        if ($isAjax) {
-            return response()->json([
-                'html' => view('shop.partials.product_cards', compact('paginator'))->render(),
-                'next_page_url' => $paginator->nextPageUrl(),
-            ]);
-        }
-
-        $products = $paginator;
         $categories = Category::orderBy('name')->get();
 
         $frequentCategorySlugs = Cache::get('frequent_categories', []);
@@ -111,7 +62,7 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories', 'shuffleId'));
+        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories'));
     }
 
     public function show($slug)
