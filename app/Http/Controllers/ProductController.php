@@ -15,9 +15,9 @@ class ProductController extends Controller
     {
         $search = $request->query('search');
         $categorySlug = $request->query('category');
-        $page = (int) $request->get('page', 1);
+        $page = max(1, (int) $request->get('page', 1));
         $perPage = 12;
-        $isAjax = $request->header('X-Requested-With') === 'XMLHttpRequest';
+        $isAjax = $request->boolean('_ajax');
         $shuffleId = $request->query('sid');
 
         if ($search) {
@@ -56,7 +56,6 @@ class ProductController extends Controller
         $useShuffle = !$search && (!$categorySlug || $categorySlug === 'all');
 
         if ($useShuffle) {
-            // Fresh page load (not AJAX, page 1): create a new shuffle order
             if (!$isAjax && $page <= 1 && !$shuffleId) {
                 $shuffleId = Str::random(16);
                 $shuffledIds = $inStockProducts->pluck('id')->shuffle()->values()->toArray();
@@ -69,22 +68,26 @@ class ProductController extends Controller
                 $allMap = $allProducts->keyBy('id');
                 $products = collect($orderedIds)->filter(fn($id) => $allMap->has($id))->map(fn($id) => $allMap[$id])->values();
             } else {
-                // Fallback: no cached order, use in-stock first then out-of-stock
                 $products = $inStockProducts->concat($outOfStockProducts);
             }
         } else {
-            // For search/category: in-stock first (latest order), then out-of-stock
             $products = $inStockProducts->concat($outOfStockProducts);
         }
 
         $total = $products->count();
         $slicedProducts = $products->slice(($page - 1) * $perPage, $perPage);
+
+        $queryParams = array_filter($request->query(), fn($v, $k) => $k !== '_ajax', ARRAY_FILTER_USE_BOTH);
+        if ($shuffleId) {
+            $queryParams['sid'] = $shuffleId;
+        }
+
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
             $slicedProducts,
             $total,
             $perPage,
             $page,
-            ['path' => $request->url(), 'query' => $request->query()]
+            ['path' => $request->url(), 'query' => $queryParams]
         );
 
         if ($isAjax) {

@@ -137,6 +137,12 @@
             }
         }
 
+        function addAjaxParam(url) {
+            if (!url) return null;
+            const sep = url.includes('?') ? '&' : '?';
+            return url + sep + '_ajax=1';
+        }
+
         let nextPageUrl = @json($products->nextPageUrl());
         let isLoading = false;
         let hasMore = {{ $products->hasMorePages() ? 'true' : 'false' }};
@@ -147,11 +153,8 @@
             document.getElementById('loadingState').style.display = 'block';
 
             try {
-                const response = await fetch(nextPageUrl, { 
-                    headers: { 
-                        'X-Requested-With': 'XMLHttpRequest'
-                    } 
-                });
+                const url = addAjaxParam(nextPageUrl);
+                const response = await fetch(url);
                 
                 if (!response.ok) {
                     hasMore = false;

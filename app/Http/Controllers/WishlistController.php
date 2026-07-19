@@ -24,7 +24,7 @@ class WishlistController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        $isAjax = $request->header('X-Requested-With') === 'XMLHttpRequest';
+        $isAjax = $request->boolean('_ajax');
 
         if ($isAjax) {
             return response()->json([

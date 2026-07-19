@@ -34,9 +34,10 @@ class ProductController extends Controller
         $products = $query->latest()->paginate(15);
         $categories = Category::orderBy('name')->get();
 
-        $isAjax = $request->header('X-Requested-With') === 'XMLHttpRequest';
+        $isAjax = $request->boolean('_ajax');
 
         if ($isAjax) {
+            $queryParams = array_filter($request->query(), fn($v, $k) => $k !== '_ajax', ARRAY_FILTER_USE_BOTH);
             return response()->json([
                 'html' => view('admin.products.partials.product_rows', compact('products'))->render(),
                 'next_page_url' => $products->nextPageUrl(),
