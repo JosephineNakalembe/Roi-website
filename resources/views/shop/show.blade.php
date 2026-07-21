@@ -203,7 +203,6 @@
                                 <button class="btn btn-secondary" type="submit">{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}</button>
                             </form>
                         @endif
-                    @endif
 
                     <!-- Reviews Section -->
                     <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e9ecef;">
