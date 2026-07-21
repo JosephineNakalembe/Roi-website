@@ -66,13 +66,11 @@ class ProductController extends Controller
             'stock' => ['required', 'integer', 'min:0'],
             'size_guide' => ['nullable', 'string'],
             'size_guide_type' => ['nullable', 'string', 'in:clothing,shoes'],
-            'colors' => ['required', 'string'],
+            'colors' => ['nullable', 'string'],
             'sizes' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
             'images.*' => ['nullable', 'image', 'max:5120'],
             'video' => ['nullable', 'mimes:mp4,mov,avi,wmv', 'max:51200'],
-        ], [
-            'colors.required' => 'Please select at least one color for this product.',
         ]);
 
         // Auto-generate product_id
