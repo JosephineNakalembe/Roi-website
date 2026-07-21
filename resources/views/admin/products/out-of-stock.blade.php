@@ -5,59 +5,31 @@
         <div class="header-content header-content-between">
             <div class="header-title-row">
                 @include('partials.back-button', ['fallback' => route('admin.dashboard')])
-                <h1 class="mb-0">Products</h1>
+                <h1 class="mb-0">Out of Stock</h1>
             </div>
-            <div style="display:flex;gap:8px;align-items:center;">
-                <a class="btn" href="{{ route('admin.products.out-of-stock') }}" style="background:#dc2626;color:#fff;">Out of Stock</a>
-                <a class="btn" href="{{ route('admin.products.create') }}">Add Product</a>
-            </div>
+            <a class="btn" href="{{ route('admin.products.index') }}">All Products</a>
         </div>
     </div>
     <div class="card">
         <style>
             @media (max-width: 768px) {
-                .admin-header {
-                    flex-direction: column !important;
-                    align-items: flex-start !important;
-                }
-                .admin-search-form {
-                    width: 100% !important;
-                }
-                .admin-search-form > div {
-                    flex: 1 !important;
-                    min-width: 100% !important;
-                }
-                .product-item {
-                    flex-direction: column !important;
-                    align-items: flex-start !important;
-                }
-                .product-item > div:first-child {
-                    width: 100% !important;
-                    height: 120px !important;
-                }
-                .product-item > div:last-child {
-                    width: 100% !important;
-                    flex-wrap: wrap !important;
-                }
+                .admin-search-form { width: 100% !important; }
+                .admin-search-form > div { flex: 1 !important; min-width: 100% !important; }
+                .product-item { flex-direction: column !important; align-items: flex-start !important; }
+                .product-item > div:first-child { width: 100% !important; height: 120px !important; }
+                .product-item > div:last-child { width: 100% !important; flex-wrap: wrap !important; }
             }
         </style>
 
-        <!-- Search & Filter Bar -->
-        <form class="admin-search-form" method="GET" action="{{ route('admin.products.index') }}" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;padding:16px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
+        <p class="text-muted" style="margin-top:12px;">Products that need restocking.</p>
+
+        <form class="admin-search-form" method="GET" action="{{ route('admin.products.out-of-stock') }}" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;padding:16px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
             <div style="flex:1;min-width:200px;">
                 <input type="text" name="search" class="input" placeholder="Search by name or product ID..." value="{{ request('search') }}" style="width:100%;">
             </div>
-            <div style="min-width:180px;">
-                <select name="category" class="input" style="width:100%;">
-                    <option value="">All Categories</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                    @endforeach
-                </select>
-            </div>
             <div style="display:flex;gap:8px;">
-                @if(request('search') || request('category'))
-                    <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Clear</a>
+                @if(request('search'))
+                    <a href="{{ route('admin.products.out-of-stock') }}" class="btn btn-secondary">Clear</a>
                 @endif
             </div>
         </form>
@@ -76,6 +48,7 @@
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                             <strong style="font-size:1.1rem;">{{ $product->name }}</strong>
                             <span style="font-size:0.9rem;color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:4px;">{{ $product->product_id }}</span>
+                            <span style="font-size:0.8rem;color:#fff;background:#dc2626;padding:2px 8px;border-radius:4px;">Out of Stock</span>
                         </div>
                         <div class="text-muted" style="font-size:0.95rem;margin-top:2px;">
                             @if($product->categories->isNotEmpty())
@@ -85,25 +58,17 @@
                             @else
                                 Uncategorized
                             @endif
-                            • UGX{{ number_format($product->price, 2) }} • Stock {{ $product->stock }}
+                            • UGX{{ number_format($product->price, 2) }}
                         </div>
                     </div>
                     <div style="display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;">
                         <button class="btn btn-secondary" onclick="openStockModal('{{ $product->id }}', '{{ addslashes($product->name) }}', '{{ $product->stock }}')" style="padding:6px 14px;font-size:0.95rem;background:#059669;color:#fff;border:none;">+ Stock</button>
                         <a class="btn btn-secondary" href="{{ route('admin.products.edit', $product) }}" style="padding:6px 14px;font-size:0.95rem;">Edit</a>
-                        <form method="POST" action="{{ route('admin.products.destroy', $product) }}" style="margin:0;" onsubmit="return confirm('Delete this product?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn" style="background:#ef4444;color:#fff;padding:6px 14px;font-size:0.95rem;">Delete</button>
-                        </form>
                     </div>
                 </div>
             @empty
                 <div style="text-align:center;padding:40px;color:#9ca3af;">
-                    <p style="font-size:1.2rem;">No products found.</p>
-                    @if(request('search') || request('category'))
-                        <a href="{{ route('admin.products.index') }}" class="btn btn-secondary" style="margin-top:12px;">Clear Filters</a>
-                    @endif
+                    <p style="font-size:1.2rem;">All products are in stock!</p>
                 </div>
             @endforelse
         </div>
@@ -112,7 +77,7 @@
             <div style="display:inline-block;width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#1a1a2e;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
             <p style="margin-top:8px;color:#6b7280;">Loading more products…</p>
         </div>
-        <div id="endState" style="display:none;text-align:center;margin-top:12px;color:#6b7280;padding:12px;">All products loaded.</div>
+        <div id="endState" style="display:none;text-align:center;margin-top:12px;color:#6b7280;padding:12px;">All out-of-stock products loaded.</div>
 
         <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
@@ -135,30 +100,23 @@
             try {
                 const url = addAjaxParam(nextPageUrl);
                 const response = await fetch(url);
-
                 if (!response.ok) { hasMore = false; document.getElementById('loadingState').style.display = 'none'; document.getElementById('endState').style.display = 'block'; isLoading = false; return; }
-
                 const contentType = response.headers.get('content-type') || '';
                 if (!contentType.includes('application/json')) { hasMore = false; document.getElementById('loadingState').style.display = 'none'; document.getElementById('endState').style.display = 'block'; isLoading = false; return; }
-
                 const data = await response.json();
-
                 if (data.html) {
                     const temp = document.createElement('div');
                     temp.innerHTML = data.html;
                     const items = temp.querySelectorAll('.product-item');
                     items.forEach(item => document.getElementById('productList').appendChild(item));
                 }
-
                 nextPageUrl = data.next_page_url || null;
                 if (!nextPageUrl) { hasMore = false; document.getElementById('endState').style.display = 'block'; }
             } catch (e) {
-                console.error('Infinite scroll error:', e);
                 hasMore = false;
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('endState').style.display = 'block';
             }
-
             document.getElementById('loadingState').style.display = 'none';
             isLoading = false;
         }
@@ -167,9 +125,7 @@
         window.addEventListener('scroll', () => {
             if (scrollTimeout) clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
-                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
-                    loadMoreProducts();
-                }
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) { loadMoreProducts(); }
             }, 100);
         });
         </script>
@@ -187,7 +143,7 @@
                     <input type="number" class="input" name="quantity" min="1" value="1" required style="padding:10px;font-size:1.1rem;">
                 </div>
                 <div>
-                    <label>New Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.9rem;">— optional, for profit reports</span></label>
+                    <label>New Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.9rem;">— optional</span></label>
                     <input type="number" class="input" name="cost_price" step="0.01" min="0" placeholder="Leave blank to keep current" style="padding:10px;font-size:1.1rem;">
                 </div>
                 <div>
@@ -210,11 +166,9 @@
         document.getElementById('stockForm').action = '{{ route("admin.products.add-stock", "__ID__") }}'.replace('__ID__', id);
         document.getElementById('stockModal').style.display = 'flex';
     }
-
     function closeStockModal() {
         document.getElementById('stockModal').style.display = 'none';
     }
-
     document.getElementById('stockModal').addEventListener('click', function(e) {
         if (e.target === this) closeStockModal();
     });

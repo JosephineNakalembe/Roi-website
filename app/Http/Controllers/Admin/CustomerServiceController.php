@@ -7,6 +7,7 @@ use App\Models\CustomerMessage;
 use App\Mail\SupportReplyMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class CustomerServiceController extends Controller
 {
@@ -43,8 +44,13 @@ class CustomerServiceController extends Controller
         ]);
 
         // Send email notification with the full chat history to the customer's signup email
-        Mail::to($message->user->email, $message->user->name)
-            ->send(new SupportReplyMail($message));
+        try {
+            $message->load('user');
+            Mail::to($message->user->email, $message->user->name)
+                ->send(new SupportReplyMail($message));
+        } catch (\Exception $e) {
+            Log::error('Failed to send support reply email: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Reply sent. Email notification sent to ' . $message->user->email);
     }

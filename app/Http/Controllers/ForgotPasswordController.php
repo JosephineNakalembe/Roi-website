@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ForgotPasswordController extends Controller
@@ -43,10 +44,15 @@ class ForgotPasswordController extends Controller
         ]);
 
         // Send email with the code
-        Mail::send('emails.password-reset-code', ['code' => $code, 'user' => $user], function ($message) use ($user) {
-            $message->to($user->email)
-                ->subject('Password Reset Code');
-        });
+        try {
+            Mail::send('emails.password-reset-code', ['code' => $code, 'user' => $user], function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Password Reset Code');
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to send password reset email: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Failed to send verification email. Please try again.']);
+        }
 
         return redirect()->route('password.verify-code', ['email' => $user->email])
             ->with('success', 'A verification code has been sent to your email.');

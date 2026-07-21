@@ -66,11 +66,13 @@ class ProductController extends Controller
             'stock' => ['required', 'integer', 'min:0'],
             'size_guide' => ['nullable', 'string'],
             'size_guide_type' => ['nullable', 'string', 'in:clothing,shoes'],
-            'colors' => ['nullable', 'string'],
+            'colors' => ['required', 'string'],
             'sizes' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
             'images.*' => ['nullable', 'image', 'max:5120'],
             'video' => ['nullable', 'mimes:mp4,mov,avi,wmv', 'max:51200'],
+        ], [
+            'colors.required' => 'Please select at least one color for this product.',
         ]);
 
         // Auto-generate product_id
@@ -371,6 +373,32 @@ class ProductController extends Controller
         return response()->json([
             'product_id' => $this->generateNextProductId(),
         ]);
+    }
+
+    public function outOfStock(Request $request)
+    {
+        $query = Product::with('categories', 'category', 'primaryImage')->where('stock', '<=', 0);
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('product_id', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->latest()->paginate(15);
+        $categories = Category::orderBy('name')->get();
+
+        $isAjax = $request->boolean('_ajax');
+
+        if ($isAjax) {
+            return response()->json([
+                'html' => view('admin.products.partials.product_rows', compact('products'))->render(),
+                'next_page_url' => $products->nextPageUrl(),
+            ]);
+        }
+
+        return view('admin.products.out-of-stock', compact('products', 'categories'));
     }
 
     public function destroy(Product $product)

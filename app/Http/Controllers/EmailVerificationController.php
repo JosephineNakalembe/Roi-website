@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -49,10 +50,15 @@ class EmailVerificationController extends Controller
 
         $verificationUrl = route('verification.verify', $token);
 
-        Mail::send('emails.verify', ['verificationUrl' => $verificationUrl, 'user' => $user], function ($message) use ($user) {
-            $message->to($user->email)
-                ->subject('Verify Your Email Address');
-        });
+        try {
+            Mail::send('emails.verify', ['verificationUrl' => $verificationUrl, 'user' => $user], function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Verify Your Email Address');
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to send verification email: ' . $e->getMessage());
+            return back()->with('error', 'Failed to send verification email. Please try again.');
+        }
 
         return back()->with('success', 'Verification email sent successfully!');
     }

@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Admin\CustomerServiceController as AdminCustomerServiceController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\ExpenditureController as AdminExpenditureController;
 use App\Http\Controllers\Admin\ReturnController as AdminReturnController;
 use App\Http\Controllers\OrderReturnController;
 use App\Http\Controllers\ForgotPasswordController;
@@ -103,6 +104,7 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::patch('categories/{category}', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
     Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
     Route::get('products/next-id', [AdminProductController::class, 'nextId'])->name('admin.products.next-id');
+    Route::get('products/out-of-stock', [AdminProductController::class, 'outOfStock'])->name('admin.products.out-of-stock');
     Route::post('products/{product}/add-stock', [AdminProductController::class, 'addStock'])->name('admin.products.add-stock');
     Route::delete('products/media/{media}', [AdminProductController::class, 'destroyMedia'])->name('admin.products.destroy-media');
     Route::resource('products', AdminProductController::class)->names('admin.products')->except(['show']);
@@ -118,4 +120,7 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::get('returns', [AdminReturnController::class, 'index'])->name('admin.returns.index');
     Route::get('returns/{orderReturn}', [AdminReturnController::class, 'show'])->name('admin.returns.show');
     Route::patch('returns/{orderReturn}', [AdminReturnController::class, 'update'])->name('admin.returns.update');
+    Route::get('expenditures', [AdminExpenditureController::class, 'index'])->name('admin.expenditures.index');
+    Route::post('expenditures', [AdminExpenditureController::class, 'store'])->name('admin.expenditures.store');
+    Route::delete('expenditures/{expenditure}', [AdminExpenditureController::class, 'destroy'])->name('admin.expenditures.destroy');
 });

@@ -123,7 +123,17 @@
                     <h1 style="font-size:0.975rem;">{{ $product->name }}</h1>
                     <p class="text-muted">{{ $product->category?->name ?? 'Uncategorized' }}</p>
                     <p id="productPrice" style="font-size:1.2rem;font-weight:700;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
-                    <p style="font-size:0.975rem;">{{ $product->description }}</p>
+                    @if($product->description)
+                        <div style="margin-top:4px;">
+                            <button type="button" onclick="toggleDescription()" id="descToggle" style="background:none;border:none;cursor:pointer;font-size:0.975rem;font-weight:600;color:#333;padding:0;display:flex;align-items:center;gap:6px;">
+                                <span>Description</span>
+                                <span id="descArrow" style="transition:transform 0.2s;">&#9660;</span>
+                            </button>
+                            <div id="descContent" style="display:none;margin-top:8px;font-size:0.975rem;line-height:1.6;">
+                                {!! nl2br(e($product->description)) !!}
+                            </div>
+                        </div>
+                    @endif
 
                     @if($product->stock > 0 && $product->stock <= 2)
                         <p style="color:#dc2626;font-weight:600;margin-top:4px;font-size:0.975rem;">
@@ -131,8 +141,9 @@
                         </p>
                     @endif
 
-                    @if($product->stock > 0)
-                        @if(auth()->check() && auth()->user()->isAdmin())
+                    @if($product->stock <= 0)
+                        <p style="color:#dc2626;font-weight:600;margin-top:16px;font-size:0.975rem;">Out of Stock</p>
+                    @elseif(auth()->check() && auth()->user()->isAdmin())
                             <p style="margin-top:16px;color:#4b5563;font-size:0.975rem;">Admin users cannot add products to the cart. Use the admin dashboard for inventory and order management.</p>
                         @else
                             <form method="POST" action="{{ route('cart.add', $product) }}" style="margin-top:16px;display:grid;gap:12px;">
@@ -192,8 +203,6 @@
                                 <button class="btn btn-secondary" type="submit">{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}</button>
                             </form>
                         @endif
-                    @else
-                        <p style="color:#dc2626;font-weight:600;margin-top:16px;font-size:0.975rem;">Out of Stock</p>
                     @endif
 
                     <!-- Reviews Section -->
@@ -517,6 +526,14 @@
 
         function changeSlide(direction) {
             showSlide(currentSlide + direction);
+        }
+
+        function toggleDescription() {
+            const content = document.getElementById('descContent');
+            const arrow = document.getElementById('descArrow');
+            const isOpen = content.style.display === 'block';
+            content.style.display = isOpen ? 'none' : 'block';
+            arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         }
 
         function toggleReviews() {
