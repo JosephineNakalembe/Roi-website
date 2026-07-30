@@ -29,10 +29,20 @@
                 <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                     <h2>Select Items to Return</h2>
                     @foreach($order->items as $item)
-                        <label style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:8px;background:#fff;cursor:pointer;">
-                            <input type="checkbox" name="items[]" value="{{ $item->id }}" style="width:18px;height:18px;">
+                        @php
+                            $isNonReturnable = $item->product && $item->product->non_returnable;
+                            $isCancelled = $item->cancelled_at;
+                            $disabled = $isNonReturnable || $isCancelled;
+                        @endphp
+                        <label style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid {{ $disabled ? '#fecaca' : '#e5e7eb' }};border-radius:12px;margin-bottom:8px;background:{{ $disabled ? '#fef2f2' : '#fff' }};cursor:{{ $disabled ? 'not-allowed' : 'pointer' }};">
+                            <input type="checkbox" name="items[]" value="{{ $item->id }}" style="width:18px;height:18px;"{{ $disabled ? ' disabled' : '' }}>
                             <div>
                                 <span style="font-weight:600;">{{ $item->product_name }}</span>
+                                @if($isNonReturnable)
+                                    <span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:0.85rem;font-weight:600;background:#fee2e2;color:#991b1b;">Non-returnable</span>
+                                @elseif($isCancelled)
+                                    <span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:0.85rem;font-weight:600;background:#fee2e2;color:#991b1b;">Cancelled</span>
+                                @endif
                                 <p style="margin:2px 0 0;font-size:0.95rem;color:#6b7280;">
                                     Qty: {{ $item->quantity }} • UGX{{ number_format($item->total_price, 2) }}
                                     @if($item->color || $item->size)

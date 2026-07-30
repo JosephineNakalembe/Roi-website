@@ -7,6 +7,7 @@ use App\Mail\OrderCancelledMail;
 use App\Mail\OrderDeliveredMail;
 use App\Mail\OrderShippedMail;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\OrderUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -95,5 +96,30 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'Order status updated and tracking history saved.');
+    }
+
+    public function cancelItem(Request $request, Order $order, OrderItem $item)
+    {
+        if ($item->order_id !== $order->id) {
+            abort(404);
+        }
+
+        if ($item->cancelled_at) {
+            return back()->withErrors(['This item has already been cancelled.']);
+        }
+
+        $item->update([
+            'cancelled_at' => now(),
+            'cancellation_reason' => 'Out of stock',
+        ]);
+
+        // Add a timeline entry for the cancellation
+        $order->updates()->create([
+            'order_id' => $order->id,
+            'status' => $order->status,
+            'note' => "Item \"{$item->product_name}\" was cancelled by admin — Out of stock.",
+        ]);
+
+        return back()->with('success', "Item \"{$item->product_name}\" has been cancelled (Out of stock).");
     }
 }

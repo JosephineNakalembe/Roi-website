@@ -144,9 +144,19 @@ class OrderReturnController extends Controller
         }
 
         // Verify selected items belong to this order
-        $orderItems = $order->items()->whereIn('id', $data['items'])->pluck('id')->toArray();
-        if (count($orderItems) !== count($data['items'])) {
+        $orderItems = $order->items()->whereIn('id', $data['items'])->get();
+        if ($orderItems->count() !== count($data['items'])) {
             return back()->withErrors(['items' => 'Invalid items selected.'])->withInput();
+        }
+
+        // Check that no selected items are non-returnable or cancelled
+        foreach ($orderItems as $orderItem) {
+            if ($orderItem->cancelled_at) {
+                return back()->withErrors(['items' => 'Cannot return a cancelled item.'])->withInput();
+            }
+            if ($orderItem->product && $orderItem->product->non_returnable) {
+                return back()->withErrors(['items' => "Item \"{$orderItem->product_name}\" is non-returnable."])->withInput();
+            }
         }
 
         // Handle image uploads

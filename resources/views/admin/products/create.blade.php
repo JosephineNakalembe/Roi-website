@@ -118,6 +118,9 @@
             
             <input type="hidden" name="stock" value="0">
             <label style="display:none;"><input type="checkbox" name="is_active" value="1" checked> Published</label>
+            <label style="display:flex;align-items:center;gap:8px;font-weight:500;margin-top:8px;">
+                <input type="checkbox" name="non_returnable" value="1"> Non-returnable
+            </label>
             
             <label style="font-weight:700;">Product Images</label>
             <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Upload multiple images. Drag to reorder, click × to remove.</p>

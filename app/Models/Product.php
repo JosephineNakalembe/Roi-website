@@ -25,12 +25,14 @@ class Product extends Model
         'color_stock',
         'color_prices',
         'is_active',
+        'non_returnable',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'cost_price' => 'decimal:2',
         'is_active' => 'boolean',
+        'non_returnable' => 'boolean',
         'colors' => 'array',
         'sizes' => 'array',
         'color_stock' => 'array',

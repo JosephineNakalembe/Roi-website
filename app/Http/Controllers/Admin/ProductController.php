@@ -69,6 +69,7 @@ class ProductController extends Controller
             'colors' => ['nullable', 'string'],
             'sizes' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+            'non_returnable' => ['nullable', 'boolean'],
             'images.*' => ['nullable', 'image', 'max:5120'],
             'video' => ['nullable', 'mimes:mp4,mov,avi,wmv', 'max:51200'],
         ]);
@@ -127,7 +128,7 @@ class ProductController extends Controller
             $data['slug'] = $originalSlug . '-' . $suffix++;
         }
 
-        $product = Product::create(array_merge($data, ['is_active' => $request->boolean('is_active')]));
+        $product = Product::create(array_merge($data, ['is_active' => $request->boolean('is_active'), 'non_returnable' => $request->boolean('non_returnable')]));
 
         // Attach selected categories (many-to-many)
         $categoryIds = $request->input('categories', []);
@@ -215,6 +216,7 @@ class ProductController extends Controller
             'colors' => ['nullable', 'string'],
             'sizes' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+            'non_returnable' => ['nullable', 'boolean'],
             'images.*' => ['nullable', 'image', 'max:5120'],
             'video' => ['nullable', 'mimes:mp4,mov,avi,wmv', 'max:51200'],
         ]);
@@ -271,7 +273,7 @@ class ProductController extends Controller
             $data['slug'] = $originalSlug . '-' . $suffix++;
         }
 
-        $product->update(array_merge($data, ['is_active' => $request->boolean('is_active')]));
+        $product->update(array_merge($data, ['is_active' => $request->boolean('is_active'), 'non_returnable' => $request->boolean('non_returnable')]));
 
         // Sync categories (many-to-many)
         $categoryIds = $request->input('categories', []);

@@ -18,12 +18,25 @@ class OrderItem extends Model
         'total_price',
         'color',
         'size',
+        'cancelled_at',
+        'cancellation_reason',
     ];
 
     protected $casts = [
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'cancelled_at' => 'datetime',
     ];
+
+    public function scopeCancelled($query)
+    {
+        return $query->whereNotNull('cancelled_at');
+    }
+
+    public function scopeNotCancelled($query)
+    {
+        return $query->whereNull('cancelled_at');
+    }
 
     public function order()
     {

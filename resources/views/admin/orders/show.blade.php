@@ -108,7 +108,7 @@
             <div>
                 <h2>Items</h2>
                 @foreach($order->items as $item)
-                    <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7eb;">
+                    <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7eb;{{ $item->cancelled_at ? 'opacity:0.6;' : '' }}">
                         <div>
                             <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
                             @php
@@ -121,8 +121,21 @@
                                     @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
                                 </p>
                             @endif
+                            @if($item->cancelled_at)
+                                <p style="margin:4px 0 0;font-size:0.9rem;color:#dc2626;font-weight:600;">
+                                    Cancelled — {{ $item->cancellation_reason }}
+                                </p>
+                            @endif
                         </div>
-                        <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
+                        <div style="text-align:right;">
+                            <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
+                            @if(!$item->cancelled_at)
+                                <form method="POST" action="{{ route('admin.orders.items.cancel', [$order, $item]) }}" onsubmit="return confirm('Cancel this item as Out of Stock?');" style="margin-top:4px;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-secondary" style="padding:2px 8px;font-size:0.85rem;background:#dc2626;color:#fff;border:none;border-radius:6px;cursor:pointer;">Cancel Item</button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
                 @endforeach
             </div>

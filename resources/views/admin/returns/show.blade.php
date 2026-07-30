@@ -52,6 +52,9 @@
                         @php $item = $returnItem->orderItem; @endphp
                         <div style="padding:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;">
                             <strong>{{ $item->product_name }}</strong>
+                            @if($item->product && $item->product->non_returnable)
+                                <span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:0.85rem;font-weight:600;background:#fee2e2;color:#991b1b;">Non-returnable</span>
+                            @endif
                             <p style="margin:2px 0 0;font-size:0.95rem;color:#6b7280;">
                                 Quantity: {{ $item->quantity }} • UGX{{ number_format($item->total_price, 2) }}
                                 @if($item->color || $item->size)

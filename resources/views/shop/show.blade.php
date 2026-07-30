@@ -135,6 +135,11 @@
                         </div>
                     @endif
 
+                    @if($product->non_returnable)
+                        <p style="color:#991b1b;font-weight:600;margin-top:4px;font-size:0.975rem;">
+                            Non-returnable
+                        </p>
+                    @endif
                     @if($product->stock > 0 && $product->stock <= 2)
                         <p style="color:#dc2626;font-weight:600;margin-top:4px;font-size:0.975rem;">
                             Only {{ $product->stock }} left in stock!

@@ -167,6 +167,9 @@
                         <input type="hidden" name="colors" id="colorsHidden">
             <input type="hidden" name="stock" value="0">
             <label style="display:none;"><input type="checkbox" name="is_active" value="1"{{ $product->is_active ? ' checked' : '' }}> Published</label>
+            <label style="display:flex;align-items:center;gap:8px;font-weight:500;margin-top:8px;">
+                <input type="checkbox" name="non_returnable" value="1"{{ $product->non_returnable ? ' checked' : '' }}> Non-returnable
+            </label>
             
             <label style="font-weight:700;">Add More Images</label>
             <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Upload additional images (JPG, PNG, max 5MB each)</p>

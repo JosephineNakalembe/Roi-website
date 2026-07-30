@@ -111,6 +111,7 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::get('orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
     Route::patch('orders/{order}', [AdminOrderController::class, 'update'])->name('admin.orders.update');
+    Route::post('orders/{order}/items/{item}/cancel', [AdminOrderController::class, 'cancelItem'])->name('admin.orders.items.cancel');
     Route::get('users', [AdminUserController::class, 'index'])->name('admin.users.index');
     Route::patch('users/{user}/status', [AdminUserController::class, 'updateStatus'])->name('admin.users.status');
     Route::get('support', [AdminCustomerServiceController::class, 'index'])->name('admin.support.index');
