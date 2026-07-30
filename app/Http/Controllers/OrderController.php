@@ -6,6 +6,7 @@ use App\Mail\OrderCancelledMail;
 use App\Mail\OrderDeliveredMail;
 use App\Models\Order;
 use App\Models\OrderItemReturn;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -159,6 +160,14 @@ class OrderController extends Controller
 
         if (!in_array($order->status, ['pending', 'processing'])) {
             return response()->json(['success' => false, 'message' => 'This order cannot be cancelled'], 400);
+        }
+
+        // Restore stock for each item in the order
+        $order->load('items.product');
+        foreach ($order->items as $item) {
+            if ($item->product) {
+                $item->product->increment('stock', $item->quantity);
+            }
         }
 
         // Update order status to cancelled
