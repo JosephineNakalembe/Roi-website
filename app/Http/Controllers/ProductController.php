@@ -41,7 +41,12 @@ class ProductController extends Controller
         $query = Product::with('primaryImage', 'category')
             ->where('is_active', true)
             ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
-            ->when($categorySlug && $categorySlug !== 'all', fn ($q) => $q->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug)));
+            ->when($categorySlug && $categorySlug !== 'all', function ($q) use ($categorySlug) {
+                $q->where(function ($sub) use ($categorySlug) {
+                    $sub->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug))
+                        ->orWhereHas('categories', fn ($cq) => $cq->where('slug', $categorySlug));
+                });
+            });
 
         $allProducts = $query->get();
 
