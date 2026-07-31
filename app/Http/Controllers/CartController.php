@@ -29,7 +29,7 @@ class CartController extends Controller
     public function index(Request $request)
     {
         $frequentCategorySlugs = Cache::get('frequent_categories', []);
-        $popularCategoryIds = Category::whereIn('slug', array_keys($frequentCategorySlugs))->pluck('id');
+        $recommendations = app(\App\Services\RecommendationService::class);
 
         if (!Auth::check()) {
             $guestCart = $this->getGuestCart($request);
@@ -40,7 +40,7 @@ class CartController extends Controller
                     'outOfStockItems' => collect(),
                     'subtotal' => 0,
                     'totalQuantity' => 0,
-                    'suggestions' => collect(),
+                    'suggestions' => $recommendations->trending(4),
                     'suggestedCategories' => collect(),
                 ]);
             }
@@ -72,15 +72,7 @@ class CartController extends Controller
             $subtotal = $selectedItems->sum('total');
             $totalQuantity = $selectedItems->sum('quantity');
 
-            $suggestions = Product::with('primaryImage')
-                ->where('is_active', true)
-                ->whereNotIn('id', $productIds)
-                ->when($popularCategoryIds->isNotEmpty(), function ($q) use ($popularCategoryIds) {
-                    $q->whereIn('category_id', $popularCategoryIds);
-                })
-                ->inRandomOrder()
-                ->take(4)
-                ->get();
+            $suggestions = $this->buildSuggestions($recommendations, collect($productIds));
 
             $suggestedCategories = Category::whereIn('slug', array_keys($frequentCategorySlugs))
                 ->take(5)
@@ -115,21 +107,32 @@ class CartController extends Controller
         $subtotal = $selectedItems->sum('total');
         $totalQuantity = $selectedItems->sum('quantity');
 
-        $suggestions = Product::with('primaryImage')
-            ->where('is_active', true)
-            ->whereNotIn('id', $items->pluck('product.id')->filter()->values())
-            ->when($popularCategoryIds->isNotEmpty(), function ($q) use ($popularCategoryIds) {
-                $q->whereIn('category_id', $popularCategoryIds);
-            })
-            ->inRandomOrder()
-            ->take(4)
-            ->get();
+        $suggestions = $this->buildSuggestions($recommendations, $items->pluck('product.id')->filter()->values());
 
         $suggestedCategories = Category::whereIn('slug', array_keys($frequentCategorySlugs))
             ->take(5)
             ->get();
 
         return view('cart.index', compact('availableItems', 'outOfStockItems', 'subtotal', 'totalQuantity', 'suggestions', 'suggestedCategories'));
+    }
+
+    protected function buildSuggestions(\App\Services\RecommendationService $recommendations, $excludeIds, int $limit = 4)
+    {
+        $excludeIds = $excludeIds->flatten()->filter()->unique();
+
+        $suggestions = $recommendations->personalizedFor(Auth::id(), request()->session()->getId(), $limit + 4)
+            ->reject(fn($p) => $excludeIds->contains($p->id))
+            ->take($limit)
+            ->values();
+
+        if ($suggestions->isEmpty()) {
+            $suggestions = $recommendations->trending($limit + 4)
+                ->reject(fn($p) => $excludeIds->contains($p->id))
+                ->take($limit)
+                ->values();
+        }
+
+        return $suggestions;
     }
 
     public function add(Request $request, Product $product)

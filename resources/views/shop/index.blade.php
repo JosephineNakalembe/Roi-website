@@ -95,20 +95,41 @@
     </div>
     @endif
 
+    @if($searchCorrection && $search)
+        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.85rem;color:#795548;">
+            No exact match for <strong>"{{ $search }}"</strong>. Showing closest results for <strong>"{{ $searchCorrection }}"</strong>.
+        </div>
+    @endif
+
+    @if($recommended->isNotEmpty())
+        <div style="margin-bottom:24px;">
+            <h2 style="font-size:0.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                <span>Recommended for You</span>
+            </h2>
+            <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
+                @foreach($recommended as $product)
+                    @include('shop.partials.product-card', ['product' => $product])
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    @if($trending->isNotEmpty())
+        <div style="margin-bottom:24px;">
+            <h2 style="font-size:0.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                <span>Trending Now</span>
+            </h2>
+            <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
+                @foreach($trending as $product)
+                    @include('shop.partials.product-card', ['product' => $product])
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <div id="productGrid" style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
         @forelse($products as $product)
-            <a href="{{ route('shop.show', $product->slug) }}" class="product-card" style="display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9ecef;border-radius:10px;overflow:hidden;cursor:pointer;transition:box-shadow 0.2s, transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.08)';this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='';this.style.transform='';">
-                <img src="{{ optional($product->primaryImage)->path ? media_url($product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $product->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
-                <div style="padding:10px 12px 12px;">
-                    <h2 style="font-size:0.75rem;font-weight:600;margin-bottom:2px;">{{ $product->name }}</h2>
-                    <p style="font-weight:900;font-size:0.95rem;">UGX{{ number_format($product->price, 0) }}</p>
-                    @if($product->stock <= 0)
-                        <span class="badge badge-red">Out of Stock</span>
-                    @elseif($product->stock <= 2)
-                        <span style="font-size:0.7rem;color:#c62828;">Only {{ $product->stock }} left</span>
-                    @endif
-                </div>
-            </a>
+            @include('shop.partials.product-card', ['product' => $product])
         @empty
             <div class="card" style="grid-column:1/-1;">No products found.</div>
         @endforelse

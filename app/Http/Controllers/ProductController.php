@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, RecommendationService $recommendations)
     {
         $search = $request->query('search');
         $categorySlug = $request->query('category');
@@ -38,21 +39,36 @@ class ProductController extends Controller
             Cache::forever('frequent_categories', $frequentCategories);
         }
 
-        $query = Product::with('primaryImage', 'category')
-            ->where('is_active', true)
-            ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
-            ->when($categorySlug && $categorySlug !== 'all', function ($q) use ($categorySlug) {
-                $q->where(function ($sub) use ($categorySlug) {
-                    $sub->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug))
-                        ->orWhereHas('categories', fn ($cq) => $cq->where('slug', $categorySlug));
+        $userId = Auth::id();
+        $guestId = $request->session()->getId();
+        $searchCorrection = null;
+
+        if ($search) {
+            $result = $recommendations->search($search, $categorySlug, $userId, $guestId);
+            $products = $result['products'];
+            $searchCorrection = $result['bestMatch'];
+        } else {
+            $query = Product::with('primaryImage', 'category')
+                ->where('is_active', true)
+                ->when($categorySlug && $categorySlug !== 'all', function ($q) use ($categorySlug) {
+                    $q->where(function ($sub) use ($categorySlug) {
+                        $sub->whereHas('category', fn ($cq) => $cq->where('slug', $categorySlug))
+                            ->orWhereHas('categories', fn ($cq) => $cq->where('slug', $categorySlug));
+                    });
                 });
-            });
 
-        $allProducts = $query->get();
+            $products = $recommendations->orderProducts($query->get(), $userId, $guestId);
+        }
 
-        $inStockProducts = $allProducts->where('stock', '>', 0)->shuffle();
-        $outOfStockProducts = $allProducts->where('stock', '<=', 0);
-        $products = $inStockProducts->concat($outOfStockProducts)->values();
+        $recommended = collect();
+        $trending = collect();
+        if (!$search && (!$categorySlug || $categorySlug === 'all')) {
+            if ($recommendations->hasProfile($userId, $guestId)) {
+                $recommended = $recommendations->personalizedFor($userId, $guestId, 6);
+                $products = $products->whereNotIn('id', $recommended->pluck('id'))->values();
+            }
+            $trending = $recommendations->trending(6);
+        }
 
         $categories = Category::orderBy('name')->get();
 
@@ -71,12 +87,15 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories'));
+        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories', 'recommended', 'trending', 'searchCorrection'));
     }
 
-    public function show($slug)
+    public function show($slug, Request $request, RecommendationService $recommendations)
     {
         $product = Product::with('images', 'category')->where('slug', $slug)->where('is_active', true)->firstOrFail();
+
+        $recommendations->trackView($product->id, Auth::id(), $request->session()->getId());
+
         $inWishlist = false;
 
         if (Auth::check()) {
@@ -92,17 +111,7 @@ class ProductController extends Controller
         $avgRating = $reviews->avg('rating');
         $reviewCount = $reviews->count();
 
-        $suggestedProducts = Product::with('primaryImage')
-            ->where('is_active', true)
-            ->where('id', '!=', $product->id)
-            ->where(function ($q) use ($product) {
-                if ($product->category_id) {
-                    $q->where('category_id', $product->category_id);
-                }
-            })
-            ->inRandomOrder()
-            ->take(4)
-            ->get();
+        $suggestedProducts = $recommendations->relatedFor($product, 4);
 
         return view('shop.show', compact('product', 'inWishlist', 'reviews', 'avgRating', 'reviewCount', 'suggestedProducts'));
     }
