@@ -329,71 +329,71 @@ class RecommendationService
         }
 
         $since = now()->subDays((int) config('recommendations.trend_days', 30));
-        $decay = number_format((float) config('recommendations.decay_per_day', 0.06), 4, '.', '');
-        $decaySql = "EXP(-TIMESTAMPDIFF(DAY, created_at, NOW()) * {$decay})";
+        $decayPerDay = (float) config('recommendations.decay_per_day', 0.06);
         $weights = config('recommendations.trend_weights');
 
         $scores = [];
 
-        $apply = function (iterable $rows, float $weight) use (&$scores) {
+        // Recency decay is computed in PHP so the engine works on any
+        // database (MySQL, SQLite, Postgres).
+        $decayed = function ($createdAt, float $multiplier = 1.0) use ($decayPerDay) {
+            $ageSeconds = max(0, now()->getTimestamp() - $createdAt->getTimestamp());
+
+            return exp(-($ageSeconds / 86400) * $decayPerDay) * $multiplier;
+        };
+
+        $apply = function (iterable $rows, float $weight) use (&$scores, $decayed) {
             foreach ($rows as $row) {
                 if (!$row->product_id) {
                     continue;
                 }
-                $scores[$row->product_id] = ($scores[$row->product_id] ?? 0) + ((float) $row->s * $weight);
+                $scores[$row->product_id] = ($scores[$row->product_id] ?? 0)
+                    + $decayed($row->created_at) * $weight;
             }
         };
 
         $apply(
-            ProductView::where('created_at', '>=', $since)
-                ->selectRaw("product_id, SUM({$decaySql}) AS s")
-                ->groupBy('product_id')
-                ->get(),
+            ProductView::where('created_at', '>=', $since)->get(['product_id', 'created_at']),
             (float) ($weights['view'] ?? 1)
         );
 
         $apply(
-            WishlistItem::where('created_at', '>=', $since)
-                ->selectRaw("product_id, SUM({$decaySql}) AS s")
-                ->groupBy('product_id')
-                ->get(),
+            WishlistItem::where('created_at', '>=', $since)->get(['product_id', 'created_at']),
             (float) ($weights['wishlist'] ?? 2.5)
         );
 
         $apply(
-            CartItem::where('created_at', '>=', $since)
-                ->selectRaw("product_id, SUM({$decaySql}) AS s")
-                ->groupBy('product_id')
-                ->get(),
+            CartItem::where('created_at', '>=', $since)->get(['product_id', 'created_at']),
             (float) ($weights['cart'] ?? 3)
         );
 
-        $apply(
+        // Order items scale by quantity.
+        foreach (
             OrderItem::where('created_at', '>=', $since)
                 ->whereHas('order', fn ($q) => $q->where('status', '!=', 'cancelled'))
-                ->selectRaw("product_id, SUM({$decaySql} * quantity) AS s")
-                ->groupBy('product_id')
-                ->get(),
-            (float) ($weights['order'] ?? 5)
-        );
+                ->get(['product_id', 'created_at', 'quantity']) as $row
+        ) {
+            $scores[$row->product_id] = ($scores[$row->product_id] ?? 0)
+                + $decayed($row->created_at, max(1, (int) $row->quantity)) * (float) ($weights['order'] ?? 5);
+        }
 
         // Most-searched terms mapped onto products whose name contains them.
-        $terms = UserSearchLog::where('created_at', '>=', $since)
-            ->selectRaw("LOWER(TRIM(query)) AS q, SUM({$decaySql}) AS s")
-            ->groupBy('q')
-            ->orderByDesc('s')
-            ->limit(100)
-            ->get();
-
-        $searchWeight = (float) ($weights['search'] ?? 3);
-        foreach ($terms as $term) {
-            $query = $term->q;
-            if ($query === '') {
+        $termScores = [];
+        foreach (UserSearchLog::where('created_at', '>=', $since)->get(['query', 'created_at']) as $log) {
+            $term = mb_strtolower(trim((string) $log->query));
+            if ($term === '') {
                 continue;
             }
+            $termScores[$term] = ($termScores[$term] ?? 0) + $decayed($log->created_at);
+        }
+        arsort($termScores);
+        $termScores = array_slice($termScores, 0, 100, true);
+
+        $searchWeight = (float) ($weights['search'] ?? 3);
+        foreach ($termScores as $term => $termScore) {
             foreach ($this->corpus() as $product) {
-                if (mb_stripos((string) $product->name, $query) !== false) {
-                    $scores[$product->id] = ($scores[$product->id] ?? 0) + ((float) $term->s * $searchWeight);
+                if (mb_stripos((string) $product->name, $term) !== false) {
+                    $scores[$product->id] = ($scores[$product->id] ?? 0) + ($termScore * $searchWeight);
                 }
             }
         }
