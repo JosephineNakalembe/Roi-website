@@ -66,8 +66,8 @@ class CartController extends Controller
                 ]);
             }
 
-            $availableItems = $items->filter(fn($item) => $item['product']->stock > 0);
-            $outOfStockItems = $items->filter(fn($item) => $item['product']->stock < 1);
+            $availableItems = $items->filter(fn($item) => $item['product']->getVariantStock($item['color'], $item['size']) > 0);
+            $outOfStockItems = $items->filter(fn($item) => $item['product']->getVariantStock($item['color'], $item['size']) < 1);
             $selectedItems = $availableItems->filter(fn($item) => $item['selected']);
             $subtotal = $selectedItems->sum('total');
             $totalQuantity = $selectedItems->sum('quantity');
@@ -109,8 +109,8 @@ class CartController extends Controller
             ];
         })->filter();
 
-        $availableItems = $items->filter(fn($item) => $item['product']->stock > 0);
-        $outOfStockItems = $items->filter(fn($item) => $item['product']->stock < 1);
+        $availableItems = $items->filter(fn($item) => $item['product']->getVariantStock($item['color'], $item['size']) > 0);
+        $outOfStockItems = $items->filter(fn($item) => $item['product']->getVariantStock($item['color'], $item['size']) < 1);
         $selectedItems = $availableItems->filter(fn($item) => $item['selected']);
         $subtotal = $selectedItems->sum('total');
         $totalQuantity = $selectedItems->sum('quantity');
@@ -134,13 +134,15 @@ class CartController extends Controller
 
     public function add(Request $request, Product $product)
     {
-        if ($product->stock < 1) {
-            return back()->withErrors(['This product is out of stock and cannot be added to the cart.']);
-        }
-
         $color = $request->input('color');
         $size = $request->input('size');
         $data = $request->validate(['quantity' => ['required', 'integer', 'min:1']]);
+
+        // Check per-variant stock
+        $maxStock = $product->getVariantStock($color, $size);
+        if ($maxStock < 1) {
+            return back()->withErrors(['This product variant is out of stock and cannot be added to the cart.']);
+        }
 
         if (!Auth::check()) {
             $cart = $this->getGuestCart($request);
@@ -149,7 +151,7 @@ class CartController extends Controller
             $found = false;
             foreach ($cart as &$item) {
                 if (($item['product_id'] . '|' . ($item['color'] ?? '') . '|' . ($item['size'] ?? '')) === $key) {
-                    $item['quantity'] = min($product->stock, $item['quantity'] + $data['quantity']);
+                    $item['quantity'] = min($maxStock, $item['quantity'] + $data['quantity']);
                     $item['selected'] = true;
                     $found = true;
                     break;
@@ -160,7 +162,7 @@ class CartController extends Controller
             if (!$found) {
                 $cart[] = [
                     'product_id' => $product->id,
-                    'quantity' => min($product->stock, $data['quantity']),
+                    'quantity' => min($maxStock, $data['quantity']),
                     'color' => $color ?: null,
                     'size' => $size ?: null,
                     'selected' => true,
@@ -182,14 +184,14 @@ class CartController extends Controller
         if ($existingItem) {
             $newQty = $existingItem->quantity + $data['quantity'];
             $existingItem->update([
-                'quantity' => min($product->stock, $newQty),
+                'quantity' => min($maxStock, $newQty),
                 'selected' => true,
             ]);
         } else {
             CartItem::create([
                 'user_id' => $user->id,
                 'product_id' => $product->id,
-                'quantity' => min($product->stock, $data['quantity']),
+                'quantity' => min($maxStock, $data['quantity']),
                 'color' => $color ?: null,
                 'size' => $size ?: null,
                 'selected' => true,
@@ -206,6 +208,12 @@ class CartController extends Controller
         $oldColor = $request->input('old_color');
         $oldSize = $request->input('old_size');
         $data = $request->validate(['quantity' => ['required', 'integer', 'min:1']]);
+
+        // Check new variant stock
+        $maxStock = $product->getVariantStock($color, $size);
+        if ($maxStock < 1) {
+            return back()->withErrors(['This product variant is out of stock.']);
+        }
 
         if (!Auth::check()) {
             $cart = $this->getGuestCart($request);
@@ -237,15 +245,15 @@ class CartController extends Controller
                 }
 
                 if ($mergeIndex !== null) {
-                    $cart[$mergeIndex]['quantity'] = min($product->stock, $cart[$mergeIndex]['quantity'] + $data['quantity']);
+                    $cart[$mergeIndex]['quantity'] = min($maxStock, $cart[$mergeIndex]['quantity'] + $data['quantity']);
                     array_splice($cart, $foundIndex, 1);
                 } else {
                     $cart[$foundIndex]['color'] = $color ?: null;
                     $cart[$foundIndex]['size'] = $size ?: null;
-                    $cart[$foundIndex]['quantity'] = min($product->stock, $data['quantity']);
+                    $cart[$foundIndex]['quantity'] = min($maxStock, $data['quantity']);
                 }
             } else {
-                $cart[$foundIndex]['quantity'] = min($product->stock, $data['quantity']);
+                $cart[$foundIndex]['quantity'] = min($maxStock, $data['quantity']);
             }
 
             $this->setGuestCart($request, array_values($cart));
@@ -273,19 +281,19 @@ class CartController extends Controller
 
             if ($existingItem) {
                 $existingItem->update([
-                    'quantity' => min($product->stock, $existingItem->quantity + $data['quantity']),
+                    'quantity' => min($maxStock, $existingItem->quantity + $data['quantity']),
                 ]);
                 $oldItem->delete();
             } else {
                 $oldItem->update([
                     'color' => $color ?: null,
                     'size' => $size ?: null,
-                    'quantity' => min($product->stock, $data['quantity']),
+                    'quantity' => min($maxStock, $data['quantity']),
                 ]);
             }
         } else {
             $oldItem->update([
-                'quantity' => min($product->stock, $data['quantity']),
+                'quantity' => min($maxStock, $data['quantity']),
             ]);
         }
 
@@ -362,7 +370,7 @@ class CartController extends Controller
 
             foreach ($cart as &$item) {
                 $product = $products->get($item['product_id']);
-                if ($product && $product->stock > 0) {
+                if ($product && $product->getVariantStock($item['color'] ?? null, $item['size'] ?? null) > 0) {
                     $item['selected'] = (bool) $data['selected'];
                 }
             }
@@ -373,8 +381,10 @@ class CartController extends Controller
         }
 
         Auth::user()->cartItems()
-            ->whereHas('product', fn($q) => $q->where('stock', '>', 0))
-            ->update(['selected' => $data['selected']]);
+            ->with('product')
+            ->get()
+            ->filter(fn($item) => $item->product && $item->product->getVariantStock($item->color, $item->size) > 0)
+            ->each(fn($item) => $item->update(['selected' => $data['selected']]));
 
         return back();
     }

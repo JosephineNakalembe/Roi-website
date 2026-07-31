@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Admin\CustomerServiceController as AdminCustomerServiceController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\DeliveryAreaController as AdminDeliveryAreaController;
 use App\Http\Controllers\Admin\ExpenditureController as AdminExpenditureController;
 use App\Http\Controllers\Admin\ReturnController as AdminReturnController;
 use App\Http\Controllers\OrderReturnController;
@@ -124,4 +125,8 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::get('expenditures', [AdminExpenditureController::class, 'index'])->name('admin.expenditures.index');
     Route::post('expenditures', [AdminExpenditureController::class, 'store'])->name('admin.expenditures.store');
     Route::delete('expenditures/{expenditure}', [AdminExpenditureController::class, 'destroy'])->name('admin.expenditures.destroy');
+    Route::get('delivery-areas', [AdminDeliveryAreaController::class, 'index'])->name('admin.delivery-areas.index');
+    Route::post('delivery-areas', [AdminDeliveryAreaController::class, 'store'])->name('admin.delivery-areas.store');
+    Route::patch('delivery-areas/{deliveryArea}', [AdminDeliveryAreaController::class, 'update'])->name('admin.delivery-areas.update');
+    Route::delete('delivery-areas/{deliveryArea}', [AdminDeliveryAreaController::class, 'destroy'])->name('admin.delivery-areas.destroy');
 });

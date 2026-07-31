@@ -62,93 +62,23 @@
             <!-- Items -->
             <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                 <h2>Items</h2>
-                @if($order->status === 'delivered' && $order->items->contains(fn($item) => !$item->review))
+                @php
+                    $showReviews = $order->status === 'delivered' && $order->items->contains(fn($item) => !$item->review);
+                @endphp
+                @if($showReviews)
                     <form method="POST" action="{{ route('orders.bulk-review', $order) }}" style="display:grid;gap:16px;">
                         @csrf
                         @foreach($order->items as $item)
-                            <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
-                                <div style="min-width:220px;flex:1;">
-                                    <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
-                                    @if($item->color || $item->size)
-                                        @php
-                                            $colorParts = explode(':', $item->color ?? '');
-                                            $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
-                                        @endphp
-                                        <p style="font-size:0.95rem;color:#6b7280;margin-top:2px;">
-                                            @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
-                                            @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
-                                        </p>
-                                    @endif
-                                    @if($item->review)
-                                        <div style="margin-top:8px;padding:12px;background:#f3f4f6;border-radius:12px;">
-                                            <p style="margin:0 0 4px;font-weight:700;">Your review</p>
-                                            <p style="margin:0;font-size:1.05rem;">Rating: {{ $item->review->rating }}/5</p>
-                                            @if($item->review->comment)
-                                                <p style="margin:6px 0 0;font-size:1.05rem;color:#374151;">"{{ $item->review->comment }}"</p>
-                                            @endif
-                                        </div>
-                                    @else
-                                        <div style="margin-top:12px;display:grid;gap:10px;">
-                                            <label style="font-weight:700;">Leave a review (optional)</label>
-                                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                                                <select class="input" name="reviews[{{ $item->id }}][rating]" style="max-width:120px;">
-                                                    <option value="">Rating</option>
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        <option value="{{ $i }}">{{ $i }}</option>
-                                                    @endfor
-                                                </select>
-                                                <textarea class="input" name="reviews[{{ $item->id }}][comment]" rows="2" placeholder="Share how the product felt..." style="flex:1;"></textarea>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                </div>
-                                <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
-                            </div>
+                            @include('orders.partials.order-item-card', ['reviewMode' => true])
                         @endforeach
                         <div style="display:flex;justify-content:flex-end;margin-top:16px;">
                             <button class="btn" type="submit" style="padding:12px 24px;font-size:1.1rem;">Submit All Reviews</button>
                         </div>
                     </form>
                 @else
-@foreach($order->items as $item)
-    <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;padding:12px;border:1px solid {{ $item->cancelled_at ? '#fecaca' : '#e5e7eb' }};border-radius:12px;background:{{ $item->cancelled_at ? '#fef2f2' : '#fff' }};">
-        <div style="min-width:220px;flex:1;">
-            <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
-            @if($item->color || $item->size)
-                @php
-                    $colorParts = explode(':', $item->color ?? '');
-                    $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
-                @endphp
-                <p style="font-size:0.95rem;color:#6b7280;margin-top:2px;">
-                    @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
-                    @if($item->size)<span> | Size: {{ $item->size }}</span>@endif
-                </p>
-            @endif
-            @if($item->cancelled_at)
-                <p style="margin:4px 0 0;font-size:0.9rem;color:#dc2626;font-weight:600;">
-                    Cancelled — {{ $item->cancellation_reason }}
-                </p>
-            @endif
-            @if($item->product && $item->product->non_returnable && !$item->cancelled_at)
-                <p style="margin:4px 0 0;font-size:0.9rem;color:#991b1b;font-weight:600;">
-                    Non-returnable
-                </p>
-            @endif
-            @if($item->review)
-                <div style="margin-top:8px;padding:12px;background:#f3f4f6;border-radius:12px;">
-                    <p style="margin:0 0 4px;font-weight:700;">Your review</p>
-                    <p style="margin:0;font-size:1.05rem;">Rating: {{ $item->review->rating }}/5</p>
-                    @if($item->review->comment)
-                        <p style="margin:6px 0 0;font-size:1.05rem;color:#374151;">"{{ $item->review->comment }}"</p>
-                    @endif
-                </div>
-            @endif
-
-        </div>
-        <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
-    </div>
-@endforeach
+                    @foreach($order->items as $item)
+                        @include('orders.partials.order-item-card', ['reviewMode' => false])
+                    @endforeach
                 @endif
             </div>
 

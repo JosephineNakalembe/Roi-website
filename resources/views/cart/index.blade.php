@@ -74,7 +74,8 @@
                 <div class="form-grid" style="gap:14px;">
                     @foreach($availableItems as $item)
                         @php
-                            $lowStock = $item['product']->stock <= 2;
+                            $variantStock = $item['product']->getVariantStock($item['color'], $item['size']);
+                            $lowStock = $variantStock <= 2;
                             $colorParts = explode(':', $item['color'] ?? '');
                             $colorDisplayName = $colorParts[1] ?? $item['color'] ?? '';
                         @endphp
@@ -107,7 +108,7 @@
                                 <p class="text-muted" style="font-size:0.85rem;margin:2px 0 0;">{{ $item['quantity'] }} × UGX{{ number_format($item['unit_price'] ?? $item['product']->price, 0) }}</p>
                                 @if($lowStock)
                                     <p style="font-size:0.9rem;color:#dc2626;font-weight:600;margin:4px 0 0;">
-                                        Only {{ $item['product']->stock }} left
+                                        Only {{ $variantStock }} left
                                     </p>
                                 @endif
                             </div>
@@ -126,11 +127,11 @@
                                     </button>
                                     <div id="quantityDropdown_{{ $item['cart_key'] }}" style="display:none;position:absolute;top:100%;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:100;min-width:120px;max-height:250px;overflow-y:auto;margin-top:4px;padding:8px;">
                                         <div style="padding:4px 0 8px 0;border-bottom:1px solid #e5e7eb;margin-bottom:8px;">
-                                            <input type="number" min="1" max="{{ $item['product']->stock }}" value="{{ $item['quantity'] }}" id="quantityInput_{{ $item['cart_key'] }}" class="input-small" style="width:100%;" placeholder="Enter qty">
+                                            <input type="number" min="1" max="{{ $variantStock }}" value="{{ $item['quantity'] }}" id="quantityInput_{{ $item['cart_key'] }}" class="input-small" style="width:100%;" placeholder="Enter qty">
                                             <button type="button" onclick="updateQuantityFromInput('{{ $item['product']->id }}', '{{ $item['color'] ?? '' }}', '{{ $item['size'] ?? '' }}', '{{ $item['cart_key'] }}')" class="btn-blue btn-full" style="margin-top:6px;font-weight:600;">Update</button>
                                         </div>
                                         <div style="font-size:0.85rem;color:#6b7280;margin-bottom:4px;">Quick select:</div>
-                                        @for($i = 1; $i <= min($item['product']->stock, 10); $i++)
+                                        @for($i = 1; $i <= min($variantStock, 10); $i++)
                                             <button type="button" onclick="updateQuantity('{{ $item['product']->id }}', '{{ $item['color'] ?? '' }}', '{{ $item['size'] ?? '' }}', {{ $i }})" class="btn-outline btn-full" style="text-align:left;font-size:1rem;transition:background 0.15s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">
                                                 {{ $i }}
                                             </button>
@@ -234,6 +235,52 @@
     <script>
     const cartItemsData = @json($availableItems->concat($outOfStockItems)->values());
 
+    function getVariantStock(product, color, size) {
+        const colorStock = product.color_stock || {};
+        const key = size ? (color || '') + ' (' + size + ')' : (color || '');
+        if (!key) return product.stock || 0;
+        return colorStock[key] || 0;
+    }
+
+    function filterSizesByColor(product, color, currentSize) {
+        const sizeSelect = document.getElementById('editSizeSelect');
+        if (!sizeSelect) return;
+        const sizes = product.sizes || [];
+        const colorStock = product.color_stock || {};
+        let firstAvailable = null;
+
+        Array.from(sizeSelect.options).forEach(opt => {
+            if (opt.value === '') return;
+            const stock = getVariantStock(product, color, opt.value);
+            const available = stock > 0;
+            opt.style.display = available ? '' : 'none';
+            opt.disabled = !available;
+            if (available && !firstAvailable) firstAvailable = opt.value;
+        });
+
+        // If current selection is no longer available, switch to first available
+        if (currentSize) {
+            const currOpt = sizeSelect.querySelector('option[value="' + currentSize + '"]');
+            if (!currOpt || currOpt.style.display === 'none') {
+                if (firstAvailable) sizeSelect.value = firstAvailable;
+                else sizeSelect.value = '';
+            }
+        } else if (firstAvailable) {
+            sizeSelect.value = firstAvailable;
+        }
+
+        updateMaxQuantity(product, color, sizeSelect.value);
+    }
+
+    function updateMaxQuantity(product, color, size) {
+        const qtyInput = document.getElementById('editQuantity');
+        if (!qtyInput) return;
+        const stock = getVariantStock(product, color, size);
+        qtyInput.max = Math.max(1, stock);
+        qtyInput.nextElementSibling.textContent = 'Max: ' + Math.max(0, stock);
+        if (parseInt(qtyInput.value) > parseInt(qtyInput.max)) qtyInput.value = qtyInput.max;
+    }
+
     function confirmRemove(productId, color, size) {
         if (confirm('Are you sure you want to delete this item?')) {
             const form = document.createElement('form');
@@ -285,39 +332,50 @@
         document.getElementById('old_color').value = color || '';
         document.getElementById('old_size').value = size || '';
         
+        const product = item.product;
+        
         let formContent = `
             <div>
                 <label>Quantity</label>
-                <input class="input" type="number" name="quantity" value="${item.quantity}" min="1" max="${item.product.stock}" required>
-                <p style="font-size:0.95rem;color:#6b7280;margin-top:4px;">Max: ${item.product.stock}</p>
+                <input class="input" id="editQuantity" type="number" name="quantity" value="${item.quantity}" min="1" max="${getVariantStock(product, color, size)}" required>
+                <p style="font-size:0.95rem;color:#6b7280;margin-top:4px;">Max: ${getVariantStock(product, color, size)}</p>
             </div>
         `;
         
-        if (item.product.colors && item.product.colors.length > 0) {
+        if (product.colors && product.colors.length > 0) {
             formContent += `
                 <div>
                     <label>Color</label>
-                    <select class="input" name="color">
+                    <select class="input" id="editColorSelect" name="color" onchange="filterSizesByColor(window._editProduct, this.value, '${size || ''}')">
                         <option value="">None</option>
-                        ${item.product.colors.map(c => `<option value="${c}" ${item.color === c ? 'selected' : ''}>${c}</option>`).join('')}
+                        ${product.colors.map(c => `<option value="${c}" ${item.color === c ? 'selected' : ''}>${c}</option>`).join('')}
                     </select>
                 </div>
             `;
         }
         
-        if (item.product.sizes && item.product.sizes.length > 0) {
+        if (product.sizes && product.sizes.length > 0) {
             formContent += `
                 <div>
                     <label>Size</label>
-                    <select class="input" name="size">
+                    <select class="input" id="editSizeSelect" name="size" onchange="updateMaxQuantity(window._editProduct, document.getElementById('editColorSelect')?.value || '', this.value)">
                         <option value="">None</option>
-                        ${item.product.sizes.map(s => `<option value="${s}" ${item.size === s ? 'selected' : ''}>${s}</option>`).join('')}
+                        ${product.sizes.map(s => `<option value="${s}" ${item.size === s ? 'selected' : ''}>${s}</option>`).join('')}
                     </select>
                 </div>
             `;
         }
         
         document.getElementById('editFormContent').innerHTML = formContent;
+        
+        // Store product reference for filter callbacks
+        window._editProduct = product;
+        
+        // Apply size filter based on current color
+        if (product.colors && product.colors.length > 0) {
+            filterSizesByColor(product, color || '', size || '');
+        }
+        
         modal.style.display = 'flex';
     }
     

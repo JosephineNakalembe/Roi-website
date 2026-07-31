@@ -71,6 +71,14 @@ class Product extends Model
 
         return (float) $this->price;
     }
+
+    public function getVariantStock(?string $color, ?string $size): int
+    {
+        $colorStock = $this->color_stock ?? [];
+        $key = $size ? "$color ($size)" : ($color ?: '');
+        if (!$key) return $this->stock ?? 0;
+        return (int) ($colorStock[$key] ?? 0);
+    }
 }
 
 

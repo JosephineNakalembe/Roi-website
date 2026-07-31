@@ -32,7 +32,7 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $order->load('items.product', 'items.review', 'address', 'updates', 'returns.items.orderItem', 'returns.statusUpdates');
+        $order->load('items.product.primaryImage', 'items.review', 'address', 'updates', 'returns.items.orderItem', 'returns.statusUpdates');
         return view('orders.show', compact('order'));
     }
 
@@ -166,7 +166,18 @@ class OrderController extends Controller
         $order->load('items.product');
         foreach ($order->items as $item) {
             if ($item->product) {
-                $item->product->increment('stock', $item->quantity);
+                $product = $item->product;
+                $product->increment('stock', $item->quantity);
+                // Restore variant stock
+                if ($product->color_stock) {
+                    $colorStock = $product->color_stock;
+                    $key = $item->size ? "$item->color ($item->size)" : ($item->color ?: '');
+                    if ($key) {
+                        $colorStock[$key] = ($colorStock[$key] ?? 0) + $item->quantity;
+                        $product->color_stock = $colorStock;
+                        $product->saveQuietly();
+                    }
+                }
             }
         }
 

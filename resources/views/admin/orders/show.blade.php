@@ -108,13 +108,35 @@
             <div>
                 <h2>Items</h2>
                 @foreach($order->items as $item)
-                    <div style="display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7eb;{{ $item->cancelled_at ? 'opacity:0.6;' : '' }}">
-                        <div>
-                            <span>{{ $item->product_name }} × {{ $item->quantity }}</span>
-                            @php
-                                $colorParts = explode(':', $item->color ?? '');
-                                $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
-                            @endphp
+                    @php
+                        $colorParts = explode(':', $item->color ?? '');
+                        $colorDisplayName = $colorParts[1] ?? $item->color ?? '';
+                        $imgUrl = $item->product && $item->product->primaryImage
+                            ? media_url($item->product->primaryImage->path)
+                            : 'https://via.placeholder.com/80x80?text=No+Image';
+                        $productUrl = $item->product ? route('shop.show', $item->product->slug) : null;
+                    @endphp
+                    <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #e5e7eb;{{ $item->cancelled_at ? 'opacity:0.6;' : '' }}">
+                        <div style="flex-shrink:0;width:60px;height:60px;border-radius:6px;overflow:hidden;background:#f3f4f6;">
+                            @if($productUrl)
+                                <a href="{{ $productUrl }}" target="_blank">
+                                    <img src="{{ $imgUrl }}" alt="{{ $item->product_name }}" style="width:100%;height:100%;object-fit:cover;">
+                                </a>
+                            @else
+                                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#e5e7eb;color:#9ca3af;font-size:0.65rem;text-align:center;padding:2px;">
+                                    No Image
+                                </div>
+                            @endif
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            @if($productUrl)
+                                <a href="{{ $productUrl }}" target="_blank" style="font-weight:600;text-decoration:none;color:inherit;">
+                                    {{ $item->product_name }} × {{ $item->quantity }}
+                                </a>
+                            @else
+                                <span style="font-weight:600;">{{ $item->product_name }} × {{ $item->quantity }}</span>
+                                <p style="margin:2px 0 0;font-size:0.85rem;color:#dc2626;font-weight:600;">Item no longer sold</p>
+                            @endif
                             @if($colorDisplayName || $item->size)
                                 <p style="font-size:0.9rem;color:#6b7280;margin:2px 0 0;">
                                     @if($colorDisplayName)<span>Color: {{ $colorDisplayName }}</span>@endif
@@ -122,12 +144,12 @@
                                 </p>
                             @endif
                             @if($item->cancelled_at)
-                                <p style="margin:4px 0 0;font-size:0.9rem;color:#dc2626;font-weight:600;">
+                                <p style="margin:2px 0 0;font-size:0.85rem;color:#dc2626;font-weight:600;">
                                     Cancelled — {{ $item->cancellation_reason }}
                                 </p>
                             @endif
                         </div>
-                        <div style="text-align:right;">
+                        <div style="text-align:right;flex-shrink:0;">
                             <strong>UGX{{ number_format($item->total_price, 2) }}</strong>
                             @if(!$item->cancelled_at)
                                 <form method="POST" action="{{ route('admin.orders.items.cancel', [$order, $item]) }}" onsubmit="return confirm('Cancel this item as Out of Stock?');" style="margin-top:4px;">

@@ -364,6 +364,71 @@
             }
         }
 
+        function getPageKey() { return 'form_state_' + window.location.pathname + window.location.search; }
+
+        function saveFormState() {
+            const forms = document.querySelectorAll('form');
+            if (!forms.length) return;
+            const state = {};
+            forms.forEach((form, idx) => {
+                const formId = form.id || form.getAttribute('name') || 'f' + idx;
+                state[formId] = {};
+                const elements = form.querySelectorAll('input, select, textarea');
+                elements.forEach(el => {
+                    if (!el.name) return;
+                    if (el.type === 'password' || el.type === 'file') return;
+                    if (el.type === 'checkbox') state[formId][el.name] = el.checked ? '1' : '0';
+                    else if (el.type !== 'submit' && el.type !== 'button') {
+                        state[formId][el.name] = el.value;
+                    }
+                });
+                if (!Object.keys(state[formId]).length) delete state[formId];
+            });
+            sessionStorage.setItem(getPageKey(), JSON.stringify(state));
+        }
+
+        function restoreFormState() {
+            const saved = sessionStorage.getItem(getPageKey());
+            if (!saved) return;
+            try {
+                const state = JSON.parse(saved);
+                const forms = document.querySelectorAll('form');
+                Object.entries(state).forEach(([formId, fields]) => {
+                    let form = document.getElementById(formId);
+                    if (!form) form = document.querySelector('form[name="' + formId + '"]');
+                    if (!form && formId.startsWith('f')) {
+                        const idx = parseInt(formId.slice(1), 10);
+                        form = forms[idx];
+                    }
+                    if (!form) return;
+                    Object.entries(fields).forEach(([name, value]) => {
+                        const el = form.querySelector('[name="' + name + '"]');
+                        if (!el) return;
+                        if (el.type === 'checkbox') el.checked = value === '1';
+                        else el.value = value;
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                });
+            } catch(e) {}
+        }
+
+        function clearFormState() { sessionStorage.removeItem(getPageKey()); }
+
+        function setupFormPersistence() {
+            restoreFormState();
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('input', saveFormState);
+                form.addEventListener('change', saveFormState);
+                form.addEventListener('submit', function() { setTimeout(clearFormState, 100); });
+            });
+            window.addEventListener('beforeunload', saveFormState);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupFormPersistence);
+        } else { setupFormPersistence(); }
+
         function setupSearchBar(form) {
             const input = form.querySelector('input[name="search"]');
             const searchBtn = form.querySelector('button[type="submit"]');

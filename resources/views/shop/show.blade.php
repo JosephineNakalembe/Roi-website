@@ -444,8 +444,11 @@
         const colorImageMap = @json($colorImageMap);
         const generalMedia = @json($generalMedia);
         const colorPrices = @json($colorPrices);
+        const colorStock = @json($product->color_stock ?? []);
+        const allSizes = @json($product->sizes ?? []);
         const basePrice = {{ (float) $product->price }};
         let selectedColor = @json($defaultColor);
+        let selectedSize = '';
 
         let currentSlide = 0;
         let currentMedia = [];
@@ -551,6 +554,63 @@
             }
         }
 
+        function getVariantStock(color, size) {
+            const key = size ? color + ' (' + size + ')' : (color || '');
+            if (!key) return 0;
+            const stock = colorStock[key];
+            return (stock != null) ? parseInt(stock) : 0;
+        }
+
+        function updateSizeOptions(color) {
+            const sizeContainer = document.getElementById('sizeButtons');
+            const sizeInput = document.getElementById('selectedSize');
+            if (!sizeContainer) return;
+
+            const allBtns = sizeContainer.querySelectorAll('.size-pill');
+
+            if (allSizes.length === 0) {
+                const qtyInput = document.querySelector('input[name="quantity"]');
+                if (qtyInput) {
+                    const maxQty = getVariantStock(color, '') || 0;
+                    qtyInput.max = Math.max(1, maxQty);
+                    if (parseInt(qtyInput.value) > parseInt(qtyInput.max)) qtyInput.value = qtyInput.max;
+                }
+                return;
+            }
+
+            let firstAvailable = null;
+
+            allBtns.forEach(btn => {
+                const size = btn.dataset.size;
+                const stock = getVariantStock(color, size);
+                const available = stock > 0;
+                btn.style.display = available ? '' : 'none';
+                btn.disabled = !available;
+                btn.style.opacity = available ? '1' : '0.3';
+                btn.style.cursor = available ? 'pointer' : 'not-allowed';
+                if (available && !firstAvailable) firstAvailable = size;
+            });
+
+            // If current selection is no longer available, switch to first available
+            if (selectedSize) {
+                const currBtn = sizeContainer.querySelector('.size-pill[data-size="' + selectedSize + '"]');
+                if (!currBtn || currBtn.style.display === 'none') {
+                    selectSize(firstAvailable || '');
+                }
+            } else if (firstAvailable) {
+                selectSize(firstAvailable);
+            } else {
+                selectSize('');
+            }
+
+            const qtyInput = document.querySelector('input[name="quantity"]');
+            if (qtyInput) {
+                const maxQty = getVariantStock(color, selectedSize);
+                qtyInput.max = Math.max(1, maxQty);
+                if (parseInt(qtyInput.value) > parseInt(qtyInput.max)) qtyInput.value = qtyInput.max;
+            }
+        }
+
         function selectColor(color) {
             selectedColor = color;
 
@@ -581,9 +641,14 @@
             // Update slideshow for this color
             currentMedia = mediaForColor(color);
             renderSlides();
+
+            // Filter sizes and update quantity cap
+            updateSizeOptions(color);
         }
 
         function selectSize(size) {
+            selectedSize = size;
+
             // Update hidden field
             const hidden = document.getElementById('selectedSize');
             if (hidden) hidden.value = size;
@@ -600,6 +665,14 @@
                     btn.style.borderColor = '#d1d5db';
                 }
             });
+
+            // Update quantity cap
+            const qtyInput = document.querySelector('input[name="quantity"]');
+            if (qtyInput && selectedColor) {
+                const maxQty = getVariantStock(selectedColor, size);
+                qtyInput.max = Math.max(1, maxQty);
+                if (parseInt(qtyInput.value) > parseInt(qtyInput.max)) qtyInput.value = qtyInput.max;
+            }
         }
 
         // Initialize
@@ -609,12 +682,14 @@
             } else {
                 currentMedia = mediaForColor(null);
                 renderSlides();
-            }
 
-            // Initialize first size selection
-            const firstSizeBtn = document.querySelector('.size-pill');
-            if (firstSizeBtn) {
-                selectSize(firstSizeBtn.dataset.size);
+                // No colors but sizes exist: filter by empty color key
+                if (allSizes.length > 0) {
+                    updateSizeOptions('');
+                } else {
+                    const qtyInput = document.querySelector('input[name="quantity"]');
+                    if (qtyInput) qtyInput.max = Math.max(1, @json((int)$product->stock));
+                }
             }
         });
 
