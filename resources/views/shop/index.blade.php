@@ -101,32 +101,6 @@
         </div>
     @endif
 
-    @if($recommended->isNotEmpty())
-        <div style="margin-bottom:24px;">
-            <h2 style="font-size:0.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-                <span>Recommended for You</span>
-            </h2>
-            <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
-                @foreach($recommended as $product)
-                    @include('shop.partials.product-card', ['product' => $product])
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    @if($trending->isNotEmpty())
-        <div style="margin-bottom:24px;">
-            <h2 style="font-size:0.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-                <span>Trending Now</span>
-            </h2>
-            <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
-                @foreach($trending as $product)
-                    @include('shop.partials.product-card', ['product' => $product])
-                @endforeach
-            </div>
-        </div>
-    @endif
-
     <div id="productGrid" style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
         @forelse($products as $product)
             @include('shop.partials.product-card', ['product' => $product])

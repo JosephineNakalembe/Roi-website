@@ -60,16 +60,6 @@ class ProductController extends Controller
             $products = $recommendations->orderProducts($query->get(), $userId, $guestId);
         }
 
-        $recommended = collect();
-        $trending = collect();
-        if (!$search && (!$categorySlug || $categorySlug === 'all')) {
-            if ($recommendations->hasProfile($userId, $guestId)) {
-                $recommended = $recommendations->personalizedFor($userId, $guestId, 6);
-                $products = $products->whereNotIn('id', $recommended->pluck('id'))->values();
-            }
-            $trending = $recommendations->trending(6);
-        }
-
         $categories = Category::orderBy('name')->get();
 
         $frequentCategorySlugs = Cache::get('frequent_categories', []);
@@ -87,7 +77,7 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories', 'recommended', 'trending', 'searchCorrection'));
+        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories', 'searchCorrection'));
     }
 
     public function show($slug, Request $request, RecommendationService $recommendations)
