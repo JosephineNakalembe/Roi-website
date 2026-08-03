@@ -63,6 +63,9 @@
     </style>
     <div class="shop-header flex justify-between items-center gap-2 flex-wrap mb-2" style="margin-bottom:20px;">
         <h1 class="mb-0 flex gap-2 items-center flex-wrap">
+            @if($search)
+                @include('partials.back-button', ['fallback' => route('shop.index')])
+            @endif
             Shop
             <form method="GET" action="{{ route('shop.index') }}" class="flex gap-1.5 flex-wrap" style="max-width:1000px;margin:0;">
                 <div class="search-wrapper relative">
