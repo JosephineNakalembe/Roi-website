@@ -131,6 +131,16 @@
                             </button>
                             <div id="descContent" style="display:none;margin-top:8px;font-size:0.975rem;line-height:1.6;">
                                 {!! nl2br(e($product->description)) !!}
+                                @if($product->product_id)
+                                    <p style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                        <span>Product ID:</span>
+                                        <code id="productIdText" style="background:#f1f3f5;padding:2px 6px;border-radius:4px;font-size:0.9rem;font-weight:600;">{{ $product->product_id }}</code>
+                                        <button type="button" onclick="copyProductId()" title="Copy Product ID" style="border:none;background:none;cursor:pointer;padding:2px;color:#1a1a2e;display:inline-flex;align-items:center;">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                        </button>
+                                        <span id="productIdCopied" style="display:none;color:#16a34a;font-size:0.85rem;">Copied!</span>
+                                    </p>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -552,6 +562,40 @@
                     reviewsContent.style.display = 'none';
                 }
             }
+        }
+
+        function copyProductId() {
+            const textEl = document.getElementById('productIdText');
+            const copiedEl = document.getElementById('productIdCopied');
+            if (!textEl) return;
+
+            const text = textEl.textContent;
+            const done = () => {
+                if (copiedEl) {
+                    copiedEl.style.display = 'inline';
+                    setTimeout(() => copiedEl.style.display = 'none', 2000);
+                }
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+            } else {
+                fallbackCopy(text, done);
+            }
+        }
+
+        function fallbackCopy(text, done) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+            } catch (e) {}
+            document.body.removeChild(ta);
+            done();
         }
 
         function getVariantStock(color, size) {
