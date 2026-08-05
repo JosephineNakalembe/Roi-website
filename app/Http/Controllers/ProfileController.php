@@ -124,6 +124,6 @@ class ProfileController extends Controller
         // Log the user out since their account no longer exists
         Auth::logout();
 
-        return redirect()->route('home')->with('success', 'Your account has been permanently deleted. Your order history remains on record.');
+        return redirect()->route('home')->with('success', 'Your account has been permanently deleted.');
     }
 }
