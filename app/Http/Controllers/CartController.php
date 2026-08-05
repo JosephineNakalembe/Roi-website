@@ -40,7 +40,7 @@ class CartController extends Controller
                     'outOfStockItems' => collect(),
                     'subtotal' => 0,
                     'totalQuantity' => 0,
-                    'suggestions' => $recommendations->trending(4),
+                    'suggestions' => $recommendations->trending(4, Auth::user()?->gender),
                     'suggestedCategories' => collect(),
                 ]);
             }
@@ -120,13 +120,13 @@ class CartController extends Controller
     {
         $excludeIds = $excludeIds->flatten()->filter()->unique();
 
-        $suggestions = $recommendations->personalizedFor(Auth::id(), request()->session()->getId(), $limit + 4)
+        $suggestions = $recommendations->personalizedFor(Auth::id(), request()->session()->getId(), $limit + 4, Auth::user()?->gender)
             ->reject(fn($p) => $excludeIds->contains($p->id))
             ->take($limit)
             ->values();
 
         if ($suggestions->isEmpty()) {
-            $suggestions = $recommendations->trending($limit + 4)
+            $suggestions = $recommendations->trending($limit + 4, Auth::user()?->gender)
                 ->reject(fn($p) => $excludeIds->contains($p->id))
                 ->take($limit)
                 ->values();

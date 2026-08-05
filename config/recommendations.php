@@ -17,11 +17,17 @@ return [
         'order' => 5.0,
     ],
 
+    // Always-on boost applied to the store's core trendy verticals
+    // (beauty, fashion, personal care, etc.) so a cold shop shuffle
+    // surfaces attractive items even before behaviour data exists.
+    'base_vertical_boost' => 0.6,
+
     // Blend ratios used by the weighted shuffle.
     'shuffle' => [
-        'personalization' => 0.35,
-        'trend' => 0.35,
-        'randomness' => 0.30,
+        'personalization' => 0.30,
+        'trend' => 0.30,
+        'gender' => 0.25,
+        'randomness' => 0.15,
     ],
 
     // Fuzzy search tuning. Scores are normalised to roughly 0..1 per token.

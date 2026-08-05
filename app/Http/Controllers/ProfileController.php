@@ -24,6 +24,7 @@ class ProfileController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
+            'gender' => ['nullable', 'string', 'in:female,male,other'],
         ]);
 
         $user->update($data);

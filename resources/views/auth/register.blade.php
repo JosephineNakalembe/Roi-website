@@ -14,6 +14,13 @@
             <input class="input" type="text" name="name" value="{{ old('name') }}" required autofocus>
             <label>Email</label>
             <input class="input" type="email" name="email" value="{{ old('email') }}" required>
+            <label>Gender <small style="color:#6b7280;">(optional — helps us personalize your shop)</small></label>
+            <select class="input" name="gender">
+                <option value="">Prefer not to say</option>
+                <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
+                <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
+                <option value="other" {{ old('gender') === 'other' ? 'selected' : '' }}>Other</option>
+            </select>
             <label>Password</label>
             <input class="input" type="password" name="password" required>
             <label>Confirm Password</label>

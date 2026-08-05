@@ -57,7 +57,7 @@ class ProductController extends Controller
                     });
                 });
 
-            $products = $recommendations->orderProducts($query->get(), $userId, $guestId);
+            $products = $recommendations->orderProducts($query->get(), $userId, $guestId, Auth::user()?->gender);
         }
 
         $categories = Category::orderBy('name')->get();

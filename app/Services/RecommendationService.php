@@ -21,9 +21,78 @@ use Illuminate\Support\Facades\Cache;
  *   - personalizedFor(): content-based picks for a specific user/guest
  *   - orderProducts(): weighted shuffle that surfaces hot / relevant items
  *   - search(): typo-tolerant fuzzy product search
+ *
+ * The shuffle is also gender-aware: anonymous / new users get a core
+ * "trendy" vertical (beauty, fashion, personal care), and once a user
+ * provides their gender the ranking additionally biases toward that
+ * gender's global trend profile.
  */
 class RecommendationService
 {
+    /**
+     * Always-on boost multipliers per category slug, applied to the cold
+     * shop shuffle so beauty / fashion / personal-care items surface first.
+     */
+    private const CORE_VERTICAL_SLUGS = [
+        'beauty' => 3.0,
+        'fashion-apparel' => 2.5,
+        'women' => 2.0,
+        'men' => 2.0,
+        'health-wellness' => 2.0,
+        'accessories' => 1.5,
+        'jewelry' => 1.5,
+        'bags' => 1.5,
+        'shoes' => 1.5,
+        'fragrances' => 1.5,
+    ];
+
+    /**
+     * Category slug weights used to model the "global women's searches"
+     * trend profile for female shoppers.
+     */
+    private const FEMALE_SLUGS = [
+        'women' => 3.0,
+        'beauty' => 2.5,
+        'fashion-apparel' => 2.0,
+        'jewelry' => 2.0,
+        'bags' => 2.0,
+        'shoes' => 1.5,
+        'fragrances' => 1.5,
+        'accessories' => 1.5,
+        'health-wellness' => 1.5,
+    ];
+
+    /**
+     * Category slug weights used to model the "global men's searches"
+     * trend profile for male shoppers.
+     */
+    private const MALE_SLUGS = [
+        'men' => 3.0,
+        'electronics-gadgets' => 2.0,
+        'tech-smart-devices' => 2.0,
+        'fitness-sportswear' => 2.0,
+        'automotive-accessories' => 1.5,
+        'travel-outdoor' => 1.5,
+        'fashion-apparel' => 1.5,
+        'shoes' => 1.5,
+        'health-wellness' => 1.5,
+    ];
+
+    /** @var string[] Product-name tokens that read strongly female. */
+    private const FEMALE_TOKENS = [
+        'dress', 'gown', 'skirt', 'blouse', 'heels', 'flats', 'handbag',
+        'purse', 'clutch', 'earrings', 'necklace', 'bracelet', 'makeup',
+        'lipstick', 'mascara', 'eyeliner', 'foundation', 'skincare',
+        'serum', 'moisturizer', 'cleanser', 'perfume', 'jewelry',
+    ];
+
+    /** @var string[] Product-name tokens that read strongly male. */
+    private const MALE_TOKENS = [
+        'sneakers', 'watch', 'wallet', 'hoodie', 'jacket', 'boots', 'cap',
+        'gadget', 'headphones', 'speaker', 'razor', 'beard', 'grooming',
+        'cologne', 'suit', 'tie',
+    ];
+
     private ?Collection $corpus = null;
 
     /** @var array<int,float>|null */
@@ -108,10 +177,28 @@ class RecommendationService
      * Products that are trending right now, weighted by recent behaviour
      * with exponential decay so latest signals count more.
      */
-    public function trending(int $limit = 8): Collection
+    public function trending(int $limit = 8, ?string $gender = null): Collection
     {
-        return Cache::remember('rec_trending_'.$limit, config('recommendations.cache_ttl', 600), function () use ($limit) {
+        $cacheKey = 'rec_trending_'.$limit.'_'.($gender ?? 'all');
+
+        return Cache::remember($cacheKey, config('recommendations.cache_ttl', 600), function () use ($limit, $gender) {
             $scores = $this->trendScores();
+
+            if (in_array($gender, ['female', 'male'], true)) {
+                // Blend in the gender's global trend profile. Trend keeps
+                // 55% so genuinely hot items still surface; the gender
+                // profile lifts that gender's verticals even when their
+                // raw trend signal is still small.
+                $trendNorm = $this->normalize($scores);
+                $genderBoost = $this->normalize($this->genderProfileScores($gender));
+                $scores = [];
+                foreach ($trendNorm as $id => $v) {
+                    $scores[$id] = ($v * 0.55) + (($genderBoost[$id] ?? 0) * 0.45);
+                }
+                foreach ($genderBoost as $id => $v) {
+                    $scores[$id] = ($scores[$id] ?? 0) + ($v * 0.45);
+                }
+            }
 
             $items = [];
             foreach ($scores as $id => $score) {
@@ -150,12 +237,12 @@ class RecommendationService
      * Content-based recommendations for a specific user or guest.
      * Falls back to trending when there is no profile yet.
      */
-    public function personalizedFor(?int $userId, ?string $guestId, int $limit = 8): Collection
+    public function personalizedFor(?int $userId, ?string $guestId, int $limit = 8, ?string $gender = null): Collection
     {
         $scores = $this->personalScores($userId, $guestId);
 
         if (empty($scores)) {
-            return $this->trending($limit);
+            return $this->trending($limit, $gender);
         }
 
         arsort($scores);
@@ -179,7 +266,7 @@ class RecommendationService
      * Re-order a set of products so the hottest and most relevant items
      * surface first while keeping a shuffled feel.
      */
-    public function orderProducts(Collection $products, ?int $userId = null, ?string $guestId = null): Collection
+    public function orderProducts(Collection $products, ?int $userId = null, ?string $guestId = null, ?string $gender = null): Collection
     {
         if ($products->isEmpty()) {
             return $products;
@@ -187,13 +274,15 @@ class RecommendationService
 
         $trend = $this->normalize($this->trendScores());
         $personal = $this->normalize($this->personalScores($userId, $guestId));
+        $genderProfile = $this->normalize($this->genderProfileScores($gender));
         $blend = config('recommendations.shuffle');
 
         return $products
-            ->map(function (Product $product) use ($trend, $personal, $blend) {
-                $weight = ($blend['trend'] * ($trend[$product->id] ?? 0))
-                    + ($blend['personalization'] * ($personal[$product->id] ?? 0))
-                    + ($blend['randomness'] * (mt_rand(0, 1000) / 1000));
+            ->map(function (Product $product) use ($trend, $personal, $genderProfile, $blend) {
+                $weight = ($blend['trend'] ?? 0) * ($trend[$product->id] ?? 0)
+                    + ($blend['personalization'] ?? 0) * ($personal[$product->id] ?? 0)
+                    + ($blend['gender'] ?? 0) * ($genderProfile[$product->id] ?? 0)
+                    + ($blend['randomness'] ?? 0) * (mt_rand(0, 1000) / 1000);
 
                 return ['product' => $product, 'weight' => $weight, 'in_stock' => $product->stock > 0 ? 1 : 0];
             })
@@ -398,6 +487,22 @@ class RecommendationService
             }
         }
 
+        // Always-on vertical boost: keep the store's core trendy verticals
+        // (beauty, fashion, personal care) surfacing even when behaviour
+        // data is still sparse, so a cold shop shuffle never feels empty.
+        $boost = (float) config('recommendations.base_vertical_boost', 0.6);
+        if ($boost > 0) {
+            foreach ($this->corpus() as $product) {
+                $productBoost = 0.0;
+                foreach ($this->productSlugs($product) as $slug) {
+                    $productBoost += self::CORE_VERTICAL_SLUGS[$slug] ?? 0;
+                }
+                if ($productBoost > 0) {
+                    $scores[$product->id] = ($scores[$product->id] ?? 0) + ($boost * $productBoost);
+                }
+            }
+        }
+
         return $this->trendScoresCache = $scores;
     }
 
@@ -435,6 +540,46 @@ class RecommendationService
         }
 
         return $this->personalScoresCache[$key] = $scores;
+    }
+
+    /**
+     * Global gender trend profile: a product-id -> score map that models
+     * what "women search globally" or "men search globally". Used to bias
+     * the shuffle for users who provided their gender. Returns [] when no
+     * gender (or an unknown one) is given.
+     *
+     * @return array<int,float>
+     */
+    public function genderProfileScores(?string $gender): array
+    {
+        if (!in_array($gender, ['female', 'male'], true)) {
+            return [];
+        }
+
+        $slugWeights = $gender === 'female' ? self::FEMALE_SLUGS : self::MALE_SLUGS;
+        $tokens = $gender === 'female' ? self::FEMALE_TOKENS : self::MALE_TOKENS;
+
+        $scores = [];
+        foreach ($this->corpus() as $product) {
+            $score = 0.0;
+            foreach ($this->productSlugs($product) as $slug) {
+                $score += $slugWeights[$slug] ?? 0;
+            }
+            if ($score <= 0) {
+                continue;
+            }
+
+            $name = mb_strtolower((string) $product->name);
+            foreach ($tokens as $token) {
+                if (mb_strpos($name, $token) !== false) {
+                    $score += 1.0;
+                }
+            }
+
+            $scores[$product->id] = $score;
+        }
+
+        return $scores;
     }
 
     /**
@@ -644,6 +789,26 @@ class RecommendationService
         }
 
         return array_values(array_unique($ids));
+    }
+
+    /**
+     * All category slugs attached to a product (primary + multi-assigned).
+     *
+     * @return string[]
+     */
+    private function productSlugs(Product $product): array
+    {
+        $slugs = [];
+        if ($product->category && $product->category->slug) {
+            $slugs[] = $product->category->slug;
+        }
+        foreach ($product->categories as $category) {
+            if ($category->slug) {
+                $slugs[] = $category->slug;
+            }
+        }
+
+        return array_values(array_unique($slugs));
     }
 
     /**

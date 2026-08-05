@@ -32,6 +32,10 @@
                     <label class="form-label" style="font-size:0.85rem;color:#6b7280;">Phone</label>
                     <p style="margin:4px 0 0;font-weight:500;">{{ $user->phone ?? 'Not provided' }}</p>
                 </div>
+                <div>
+                    <label class="form-label" style="font-size:0.85rem;color:#6b7280;">Gender</label>
+                    <p style="margin:4px 0 0;font-weight:500;">{{ $user->gender ? ucfirst($user->gender) : 'Not provided' }}</p>
+                </div>
             </div>
             
             <!-- Edit Mode -->
@@ -48,6 +52,15 @@
                 <div class="form-group">
                     <label class="form-label">Phone</label>
                     <input class="input input-full" type="text" name="phone" value="{{ old('phone', $user->phone) }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <select class="input input-full" name="gender">
+                        <option value="">Prefer not to say</option>
+                        <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>Female</option>
+                        <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>Male</option>
+                        <option value="other" {{ old('gender', $user->gender) === 'other' ? 'selected' : '' }}>Other</option>
+                    </select>
                 </div>
                 <div style="display:flex;gap:8px;margin-top:8px;">
                     <button type="submit" class="btn">Save</button>
