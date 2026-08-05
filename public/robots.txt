@@ -1,2 +1,14 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /cart
+Disallow: /checkout
+Disallow: /customer-service
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /orders
+Disallow: /register
+Disallow: /returns
+Disallow: /wishlist
+
+Sitemap: https://www.roistore.shop/sitemap.xml

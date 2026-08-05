@@ -3,8 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROI Store</title>
+    <title>@yield('title', 'ROI Store')</title>
+    <meta name="description" content="@yield('meta_description', 'ROI Store — shop fashion, beauty, accessories, home and more in Uganda at affordable prices with fast delivery.')">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url()->current() }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ROI Store">
+    <meta property="og:title" content="@yield('og_title', 'ROI Store')">
+    <meta property="og:description" content="@yield('meta_description', 'ROI Store — shop fashion, beauty, accessories, home and more in Uganda at affordable prices with fast delivery.')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('favicon.png') }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="@yield('og_title', 'ROI Store')">
+    <meta name="twitter:description" content="@yield('meta_description', 'ROI Store — shop fashion, beauty, accessories, home and more in Uganda at affordable prices with fast delivery.')">
+    <meta name="twitter:image" content="{{ asset('favicon.png') }}">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "OnlineStore",
+      "name": "ROI Store",
+      "url": "https://www.roistore.shop",
+      "logo": "https://www.roistore.shop/favicon.png",
+      "image": "https://www.roistore.shop/favicon.png",
+      "description": "ROI Store — shop fashion, beauty, accessories, home and more in Uganda at affordable prices with fast delivery."
+    }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     @if (class_exists(\Illuminate\Support\Facades\Vite::class) && file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/css/responsive.css', 'resources/js/app.js'])

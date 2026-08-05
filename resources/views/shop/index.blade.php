@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', request()->routeIs('home') ? 'ROI Store' : 'Shop | ROI Store')
+@section('meta_description', 'Shop fashion, beauty, accessories, home and more at ROI Store — affordable prices across Uganda with fast delivery.')
+
 @section('content')
     <style>
         @media (max-width: 768px) {

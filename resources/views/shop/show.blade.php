@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('title', ($product->name ?? 'Product') . ' | ROI Store')
+@section('meta_description', \Illuminate\Support\Str::limit($product->description ?? 'ROI Store product page', 160))
+@section('og_title', ($product->name ?? 'Product') . ' | ROI Store')
+
 @section('content')
     @php
         // Build the media list with sorting by order

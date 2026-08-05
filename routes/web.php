@@ -26,6 +26,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ProductController::class, 'index'])->name('home');
 
+Route::get('/sitemap.xml', function () {
+    $products = \App\Models\Product::query()->where('is_active', true)->select('slug', 'updated_at')->get();
+    $categories = \App\Models\Category::query()->select('slug', 'updated_at')->get();
+
+    return response()->view('sitemap', compact('products', 'categories'))
+        ->header('Content-Type', 'application/xml');
+});
+
 Route::get('/test-email', function () {
     try {
         \Illuminate\Support\Facades\Mail::raw('Test email from ROI Store', function ($message) {
