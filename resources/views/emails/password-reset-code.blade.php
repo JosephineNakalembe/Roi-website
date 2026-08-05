@@ -50,6 +50,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://www.roistore.shop/favicon.png" alt="ROI Store" width="64" height="64" style="width:64px;height:64px;border-radius:50%;background:#ffffff;border:2px solid #eee;margin-bottom:12px;">
             <h1>Password Reset Code</h1>
         </div>
         <div class="content">
@@ -60,7 +61,7 @@
             <p>If you didn't request a password reset, you can safely ignore this email.</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} ROI Shop. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} ROI Store. All rights reserved.</p>
         </div>
     </div>
 </body>

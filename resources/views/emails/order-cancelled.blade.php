@@ -9,6 +9,7 @@
     <table role="presentation" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; margin-top: 20px; margin-bottom: 20px;">
         <tr>
             <td style="padding: 24px; background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                <img src="https://www.roistore.shop/favicon.png" alt="ROI Store" width="56" height="56" style="width:56px;height:56px;border-radius:50%;background:#ffffff;padding:6px;display:block;margin:0 0 12px;">
                 <h1 style="color: #ffffff; margin: 0; font-size: 26px;">Order Cancelled</h1>
                 <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 16px;">Order #{{ $order->order_number }}</p>
             </td>
@@ -51,7 +52,7 @@
         <tr>
             <td style="padding: 16px 24px; background: #f9fafb; border-top: 1px solid #e5e7eb;">
                 <p style="margin: 0; font-size: 14px; color: #9ca3af; text-align: center;">
-                    &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+                    &copy; {{ date('Y') }} ROI Store. All rights reserved.
                 </p>
             </td>
         </tr>
