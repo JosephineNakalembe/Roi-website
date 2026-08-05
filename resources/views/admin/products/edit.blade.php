@@ -57,112 +57,22 @@
 
             
             <label style="font-weight:700;margin-top:12px;">Size Guide (Optional)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Enter measurements for each size. Only filled fields will be displayed on the product page.</p>
-            <div style="overflow-x:auto;">
-                <table id="sizeGuideTable" style="width:100%;border-collapse:collapse;font-size:1rem;">
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Build a custom size chart — add columns (e.g. sizes) and rows (e.g. measurements) as needed. Only filled fields will be displayed on the product page.</p>
+
+            <div id="sizeGuideBuilder" style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:1rem;">
                     <thead>
-                        <tr style="background:#f3f4f6;">
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Measurement</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">XXS</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">XS</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">S</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">M</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">L</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">XL</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">2XL</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">3XL</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">4XL</th>
-                        </tr>
+                        <tr id="sizeGuideHeadRow" style="background:#f3f4f6;"></tr>
                     </thead>
-                    <tbody id="sizeGuideBody">
-                        <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Waist (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xxs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_s" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_m" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_l" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_2xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_3xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_4xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                        </tr>
-                        <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Hip (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_xxs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_xs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_s" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_m" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_l" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_2xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_3xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_4xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                        </tr>
-                        <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Length (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_xxs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_xs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_s" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_m" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_l" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_2xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_3xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_4xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                        </tr>
-                        <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Inseam (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_xxs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_xs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_s" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_m" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_l" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_2xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_3xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_4xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                        </tr>
-                        <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Thigh (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_xxs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_xs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_s" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_m" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_l" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_2xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_3xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_4xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                        </tr>
-                        <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Burst (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_xxs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_xs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_s" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_m" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_l" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_2xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_3xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_4xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                        </tr>
-                        <tr>
-                            <td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Shoulder (inches)</td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_xxs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_xs" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_s" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_m" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_l" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_2xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_3xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                            <td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_4xl" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="sizeGuideBody"></tbody>
                 </table>
             </div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" onclick="addSizeGuideColumn()">+ Add Column</button>
+                <button type="button" class="btn btn-secondary" onclick="addSizeGuideRow()">+ Add Row</button>
+            </div>
             <input type="hidden" name="size_guide" id="sizeGuideHidden">
+            <input type="hidden" name="size_guide_type" value="table">
             
                         <input type="hidden" name="colors" id="colorsHidden">
             <input type="hidden" name="stock" value="0">
@@ -370,51 +280,146 @@
                 // Initialize hidden field
                 updateColors();
 
-                // Load existing size guide into table
-                const existingSizeGuide = @json($product->size_guide ?? null);
-                if (existingSizeGuide) {
-                    try {
-                        const sizeData = typeof existingSizeGuide === 'string' ? JSON.parse(existingSizeGuide) : existingSizeGuide;
-                        const sizes = ['xxs', 'xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl'];
-                        const measurements = ['waist', 'hip', 'length', 'inseam', 'thigh', 'burst', 'shoulder'];
-                
-                        measurements.forEach(measurement => {
-                            if (sizeData[measurement]) {
-                                sizes.forEach(size => {
-                                    const sizeUpper = size.toUpperCase();
-                                    if (sizeData[measurement][sizeUpper]) {
-                                        const input = document.querySelector(`input[name="size_${measurement}_${size}"]`);
-                                        if (input) {
-                                            input.value = sizeData[measurement][sizeUpper];
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    } catch (e) {
-                        // If it's old format, ignore
-                        console.log('Size guide in old format');
+                // Size guide dynamic table builder
+                function esc(v) {
+                    return String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                }
+
+                function addSizeGuideColumn(title = '') {
+                    const headRow = document.getElementById('sizeGuideHeadRow');
+                    const body = document.getElementById('sizeGuideBody');
+                    const th = document.createElement('th');
+                    th.style.cssText = 'padding:6px;border:1px solid #e5e7eb;text-align:center;';
+                    th.innerHTML = `
+                        <div style="display:flex;align-items:center;justify-content:center;gap:4px;">
+                            <input type="text" class="input sg-col-input" value="${esc(title)}" placeholder="Size" style="padding:4px;font-size:0.95rem;text-align:center;width:80px;">
+                            <button type="button" onclick="removeSizeGuideColumn(this)" style="background:#ef4444;color:#fff;border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-weight:bold;font-size:0.95rem;line-height:1;flex-shrink:0;" title="Remove column">×</button>
+                        </div>
+                    `;
+                    headRow.appendChild(th);
+                    body.querySelectorAll('tr').forEach(tr => {
+                        const td = document.createElement('td');
+                        td.style.cssText = 'padding:4px;border:1px solid #e5e7eb;';
+                        td.innerHTML = `<input type="text" class="input sg-cell-input" style="padding:4px;font-size:0.95rem;text-align:center;width:100%;box-sizing:border-box;" placeholder="-">`;
+                        tr.appendChild(td);
+                    });
+                }
+
+                function removeSizeGuideColumn(btn) {
+                    const th = btn.closest('th');
+                    const idx = Array.from(th.parentElement.children).indexOf(th) - 1;
+                    th.remove();
+                    document.querySelectorAll('#sizeGuideBody tr').forEach(tr => {
+                        const cells = tr.querySelectorAll('.sg-cell-input');
+                        if (cells[idx]) cells[idx].closest('td').remove();
+                    });
+                }
+
+                function addSizeGuideRow(label = '', cells = []) {
+                    const body = document.getElementById('sizeGuideBody');
+                    const tr = document.createElement('tr');
+                    const labelTd = document.createElement('td');
+                    labelTd.style.cssText = 'padding:6px;border:1px solid #e5e7eb;';
+                    labelTd.innerHTML = `
+                        <div style="display:flex;align-items:center;gap:4px;">
+                            <input type="text" class="input sg-row-label" value="${esc(label)}" placeholder="Measurement" style="padding:4px;font-size:0.95rem;text-align:left;width:100%;box-sizing:border-box;">
+                            <button type="button" onclick="removeSizeGuideRow(this)" style="background:#ef4444;color:#fff;border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-weight:bold;font-size:0.95rem;line-height:1;flex-shrink:0;" title="Remove row">×</button>
+                        </div>
+                    `;
+                    tr.appendChild(labelTd);
+                    const colCount = document.querySelectorAll('#sizeGuideHeadRow .sg-col-input').length;
+                    for (let i = 0; i < colCount; i++) {
+                        const td = document.createElement('td');
+                        td.style.cssText = 'padding:4px;border:1px solid #e5e7eb;';
+                        td.innerHTML = `<input type="text" class="input sg-cell-input" value="${esc(cells[i] ?? '')}" style="padding:4px;font-size:0.95rem;text-align:center;width:100%;box-sizing:border-box;" placeholder="-">`;
+                        tr.appendChild(td);
                     }
+                    body.appendChild(tr);
+                }
+
+                function removeSizeGuideRow(btn) {
+                    btn.closest('tr').remove();
+                }
+
+                function collectSizeGuide() {
+                    const headerInputs = Array.from(document.querySelectorAll('#sizeGuideHeadRow .sg-col-input'));
+                    const keptIndexes = [];
+                    const columns = [];
+                    headerInputs.forEach((inp, idx) => {
+                        const v = inp.value.trim();
+                        if (v) { keptIndexes.push(idx); columns.push(v); }
+                    });
+                    const rows = [];
+                    document.querySelectorAll('#sizeGuideBody tr').forEach(tr => {
+                        const label = tr.querySelector('.sg-row-label').value.trim();
+                        const cellInputs = Array.from(tr.querySelectorAll('.sg-cell-input'));
+                        const cells = keptIndexes.map(idx => cellInputs[idx] ? cellInputs[idx].value.trim() : '');
+                        if (cells.some(c => c !== '')) {
+                            rows.push({label, cells});
+                        }
+                    });
+                    if (columns.length === 0 || rows.length === 0) return null;
+                    return {type: 'table', columns, rows};
+                }
+
+                function initSizeGuide() {
+                    ['S', 'M', 'L', 'XL'].forEach(c => addSizeGuideColumn(c));
+                    addSizeGuideRow('Waist', ['', '', '', '']);
+                    addSizeGuideRow('Length', ['', '', '', '']);
+                }
+
+                function loadExistingSizeGuide(raw) {
+                    let parsed = raw;
+                    if (typeof parsed === 'string') {
+                        if (!parsed.trim()) return false;
+                        try { parsed = JSON.parse(parsed); } catch (e) { return false; }
+                    }
+                    if (parsed && parsed.type === 'table' && Array.isArray(parsed.columns)) {
+                        parsed.columns.forEach(c => addSizeGuideColumn(c));
+                        (parsed.rows || []).forEach(r => addSizeGuideRow(r.label || '', (r.cells || []).slice()));
+                        return true;
+                    }
+                    if (parsed && Array.isArray(parsed.shoes)) {
+                        const shoeMeta = {
+                            baby: 'US Baby', toddler: 'US Toddler', kids: 'US Kids', youth: 'US Youth',
+                            mens: "US Men's", womens: "US Women's", uk: 'UK', eu: 'EU', cm: 'CM'
+                        };
+                        const fields = Object.keys(shoeMeta);
+                        const cols = fields.filter(f => parsed.shoes.some(r => r[f] !== undefined && r[f] !== ''));
+                        cols.forEach(f => addSizeGuideColumn(shoeMeta[f]));
+                        parsed.shoes.forEach((row, idx) => {
+                            const cells = cols.map(f => (row[f] !== undefined ? row[f] : '').toString());
+                            if (cells.some(c => c !== '')) addSizeGuideRow('Row ' + (idx + 1), cells);
+                        });
+                        return true;
+                    }
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        const labels = {waist:'Waist',hip:'Hip',length:'Length',inseam:'Inseam',thigh:'Thigh',burst:'Burst',shoulder:'Shoulder'};
+                        const allSizes = ['XXS','XS','S','M','L','XL','2XL','3XL','4XL'];
+                        const measurementKeys = Object.keys(parsed).filter(k => parsed[k] && typeof parsed[k] === 'object' && !Array.isArray(parsed[k]));
+                        if (measurementKeys.length) {
+                            const sizesWithData = allSizes.filter(sz => measurementKeys.some(m => parsed[m][sz] !== undefined && parsed[m][sz] !== ''));
+                            sizesWithData.forEach(sz => addSizeGuideColumn(sz));
+                            measurementKeys.forEach(m => {
+                                const cells = sizesWithData.map(sz => parsed[m][sz] !== undefined ? String(parsed[m][sz]) : '');
+                                addSizeGuideRow((labels[m] || m) + ' (inches)', cells);
+                            });
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                // Load existing size guide into the builder
+                const existingSizeGuide = @json($product->size_guide ?? null);
+                if (!loadExistingSizeGuide(existingSizeGuide)) {
+                    initSizeGuide();
                 }
 
                 // Update size guide hidden field before form submission
                 document.querySelector('form').addEventListener('submit', function(e) {
-                    const sizeGuideData = {};
-                    const sizes = ['xxs', 'xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl'];
-                    const measurements = ['waist', 'hip', 'length', 'inseam', 'thigh', 'burst', 'shoulder'];
-            
-                    measurements.forEach(measurement => {
-                        sizeGuideData[measurement] = {};
-                        sizes.forEach(size => {
-                            const input = document.querySelector(`input[name="size_${measurement}_${size}"]`);
-                            if (input && input.value.trim()) {
-                                sizeGuideData[measurement][size.toUpperCase()] = input.value.trim();
-                            }
-                        });
-                    });
-            
-                    // Convert to JSON and store in hidden field
-                    document.getElementById('sizeGuideHidden').value = JSON.stringify(sizeGuideData);
+                    const data = collectSizeGuide();
+                    document.getElementById('sizeGuideHidden').value = data ? JSON.stringify(data) : '';
                 });
 
         // Preview multiple images

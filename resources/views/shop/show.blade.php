@@ -311,7 +311,72 @@
                         ];
                     @endphp
 
-                    @if($guideType === 'clothing' && is_array($sizeGuide))
+                    @if(is_array($sizeGuide) && isset($sizeGuide['type']) && $sizeGuide['type'] === 'table' && isset($sizeGuide['columns']))
+                        @php
+                            $tableAllColumns = $sizeGuide['columns'] ?? [];
+                            $tableAllRows = $sizeGuide['rows'] ?? [];
+                            $tableColHasData = [];
+                            $tableColHeader = [];
+                            foreach ($tableAllColumns as $i => $c) {
+                                $tableColHeader[$i] = trim((string) $c) !== '';
+                                $tableColHasData[$i] = false;
+                            }
+                            foreach ($tableAllRows as $row) {
+                                $rowCells = $row['cells'] ?? [];
+                                foreach ($rowCells as $i => $cell) {
+                                    if (isset($tableColHasData[$i]) && trim((string) $cell) !== '') {
+                                        $tableColHasData[$i] = true;
+                                    }
+                                }
+                            }
+                            $tableKeptIdx = [];
+                            $tableColumns = [];
+                            foreach ($tableAllColumns as $i => $c) {
+                                if (($tableColHeader[$i] ?? false) && ($tableColHasData[$i] ?? false)) {
+                                    $tableKeptIdx[] = $i;
+                                    $tableColumns[] = $c;
+                                }
+                            }
+                            $tableRows = [];
+                            foreach ($tableAllRows as $row) {
+                                $rowCells = $row['cells'] ?? [];
+                                $keptCells = [];
+                                $hasData = false;
+                                foreach ($tableKeptIdx as $i) {
+                                    $v = $rowCells[$i] ?? '';
+                                    $keptCells[] = $v;
+                                    if (trim((string) $v) !== '') $hasData = true;
+                                }
+                                if ($hasData) {
+                                    $tableRows[] = ['label' => $row['label'] ?? '', 'cells' => $keptCells];
+                                }
+                            }
+                        @endphp
+                        @if(!empty($tableColumns) && !empty($tableRows))
+                            <div style="overflow-x:auto;">
+                                <table id="dynamicSizeTable" style="width:100%;border-collapse:collapse;font-size:1rem;margin-top:12px;">
+                                    <thead>
+                                        <tr style="background:#f3f4f6;">
+                                            <th style="padding:12px;border:1px solid #e5e7eb;text-align:left;font-weight:600;">Measurement</th>
+                                            @foreach($tableColumns as $col)
+                                                <th style="padding:12px;border:1px solid #e5e7eb;text-align:center;font-weight:600;">{{ $col }}</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($tableRows as $tableRow)
+                                            <tr>
+                                                <td style="padding:12px;border:1px solid #e5e7eb;font-weight:500;" class="measurement-label">{{ $tableRow['label'] }}</td>
+                                                @foreach($tableRow['cells'] as $cell)
+                                                    <td style="padding:12px;border:1px solid #e5e7eb;text-align:center;" class="size-value" data-value="{{ $cell }}">{{ $cell !== '' ? $cell : '-' }}</td>
+                                                @endforeach
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    @elseif($guideType === 'clothing' && is_array($sizeGuide))
                         @php
                             $sizesWithData = [];
                             foreach ($allSizes as $size) {
@@ -416,23 +481,10 @@
             function toggleUnit() {
                 const btn = document.getElementById('unitToggle');
                 usingInches = !usingInches;
-                btn.textContent = usingInches ? 'Switch to cm' : 'Switch to inches';
+                if (btn) btn.textContent = usingInches ? 'Switch to cm' : 'Switch to inches';
                 
-                // Update clothing table
-                document.querySelectorAll('#clothingSizeTable .size-row').forEach(row => {
-                    const unitLabel = row.querySelector('.unit-label');
-                    if (unitLabel) unitLabel.textContent = usingInches ? 'inches' : 'cm';
-                    
-                    row.querySelectorAll('.size-value').forEach(td => {
-                        const val = td.dataset.value;
-                        if (val && !isNaN(parseFloat(val))) {
-                            td.textContent = usingInches ? val : (parseFloat(val) * 2.54).toFixed(1);
-                        }
-                    });
-                });
-                
-                // Update shoe table (CM column toggles to inches)
-                document.querySelectorAll('#shoeSizeTable .size-value').forEach(td => {
+                // Update all numeric size values (clothing, shoe, and custom tables)
+                document.querySelectorAll('.size-value[data-value]').forEach(td => {
                     const val = td.dataset.value;
                     if (val && !isNaN(parseFloat(val))) {
                         td.textContent = usingInches ? val : (parseFloat(val) * 2.54).toFixed(1);

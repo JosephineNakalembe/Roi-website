@@ -53,68 +53,22 @@
 
             
             <label style="font-weight:700;margin-top:12px;">Size Guide (Optional)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Select the type and enter measurements. Only filled fields will be displayed on the product page.</p>
-            
-            <div style="display:flex;gap:12px;margin-bottom:12px;">
-                <label style="display:flex;align-items:center;gap:6px;font-weight:500;cursor:pointer;">
-                    <input type="radio" name="size_guide_type" value="clothing" checked onchange="toggleSizeGuideType()"> 👕 Clothing
-                </label>
-                <label style="display:flex;align-items:center;gap:6px;font-weight:500;cursor:pointer;">
-                    <input type="radio" name="size_guide_type" value="shoes" onchange="toggleSizeGuideType()"> 👟 Shoes
-                </label>
-            </div>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Build a custom size chart — add columns (e.g. sizes) and rows (e.g. measurements) as needed. Only filled fields will be displayed on the product page.</p>
 
-            <!-- Clothing Size Guide -->
-            <div id="clothingSizeGuide" style="overflow-x:auto;">
+            <div id="sizeGuideBuilder" style="overflow-x:auto;">
                 <table style="width:100%;border-collapse:collapse;font-size:1rem;">
                     <thead>
-                        <tr style="background:#f3f4f6;">
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Measurement</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">XXS</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">XS</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">S</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">M</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">L</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">XL</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">2XL</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">3XL</th>
-                            <th style="padding:8px;border:1px solid #e5e7eb;text-align:center;">4XL</th>
-                        </tr>
+                        <tr id="sizeGuideHeadRow" style="background:#f3f4f6;"></tr>
                     </thead>
-                    <tbody>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Waist (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_waist_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Hip (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_hip_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Length (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_length_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Inseam (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_inseam_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Thigh (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_thigh_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Burst (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_burst_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                        <tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:600;">Shoulder (inches)</td>@foreach(['xxs','xs','s','m','l','xl','2xl','3xl','4xl'] as $sz)<td style="padding:4px;border:1px solid #e5e7eb;"><input type="text" name="size_shoulder_{{ $sz }}" class="input size-guide-input" style="padding:4px;font-size:0.95rem;text-align:center;" placeholder="-"></td>@endforeach</tr>
-                    </tbody>
+                    <tbody id="sizeGuideBody"></tbody>
                 </table>
             </div>
-
-            <!-- Shoes Size Guide (Baby to Grown-up) -->
-            <div id="shoesSizeGuide" style="overflow-x:auto;display:none;">
-                <table style="width:100%;border-collapse:collapse;font-size:0.95rem;">
-                    <thead>
-                        <tr style="background:#f3f4f6;">
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">US Baby</th>
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">US Toddler</th>
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">US Kids</th>
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">US Youth</th>
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">US Men's</th>
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">US Women's</th>
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">UK</th>
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">EU</th>
-                            <th style="padding:6px;border:1px solid #e5e7eb;text-align:center;">CM</th>
-                        </tr>
-                    </thead>
-                    <tbody id="shoesSizeGuideBody">
-                        <!-- Populated by JavaScript -->
-                    </tbody>
-                </table>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" onclick="addSizeGuideColumn()">+ Add Column</button>
+                <button type="button" class="btn btn-secondary" onclick="addSizeGuideRow()">+ Add Row</button>
             </div>
             <input type="hidden" name="size_guide" id="sizeGuideHidden">
+            <input type="hidden" name="size_guide_type" value="table">
             
             <input type="hidden" name="stock" value="0">
             <label style="display:none;"><input type="checkbox" name="is_active" value="1" checked> Published</label>
@@ -152,69 +106,94 @@
         <script>
         let colorQuantityCount = 0;
 
-        // Predefined shoe size chart (baby to grown-up)
-        const shoeSizeData = [
-            {baby:'0-1',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'0',eu:'15',cm:'8.3'},
-            {baby:'1-2',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'0.5',eu:'16',cm:'8.9'},
-            {baby:'2-3',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'1',eu:'16.5',cm:'9.5'},
-            {baby:'3-4',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'1.5',eu:'17',cm:'10.2'},
-            {baby:'4-5',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'2',eu:'18',cm:'10.8'},
-            {baby:'5-6',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'2.5',eu:'18.5',cm:'11.4'},
-            {baby:'6-7',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'3',eu:'19',cm:'12.1'},
-            {baby:'7-8',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'3.5',eu:'20',cm:'12.7'},
-            {baby:'8-9',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'4',eu:'21',cm:'13.3'},
-            {baby:'9-10',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'4.5',eu:'22',cm:'14'},
-            {baby:'10-11',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'5',eu:'22.5',cm:'14.6'},
-            {baby:'11-12',toddler:'',kids:'',youth:'',mens:'',womens:'',uk:'5.5',eu:'23',cm:'15.2'},
-            {baby:'',toddler:'1',kids:'',youth:'',mens:'',womens:'',uk:'6',eu:'23.5',cm:'15.9'},
-            {baby:'',toddler:'2',kids:'',youth:'',mens:'',womens:'',uk:'6.5',eu:'24',cm:'16.5'},
-            {baby:'',toddler:'3',kids:'',youth:'',mens:'',womens:'',uk:'7',eu:'25',cm:'17.1'},
-            {baby:'',toddler:'4',kids:'',youth:'',mens:'',womens:'',uk:'7.5',eu:'25.5',cm:'17.8'},
-            {baby:'',toddler:'5',kids:'',youth:'',mens:'',womens:'',uk:'8',eu:'26',cm:'18.4'},
-            {baby:'',toddler:'',kids:'10',youth:'',mens:'',womens:'',uk:'8.5',eu:'27',cm:'19.1'},
-            {baby:'',toddler:'',kids:'11',youth:'',mens:'',womens:'',uk:'9',eu:'27.5',cm:'19.7'},
-            {baby:'',toddler:'',kids:'12',youth:'',mens:'',womens:'',uk:'9.5',eu:'28',cm:'20.3'},
-            {baby:'',toddler:'',kids:'13',youth:'',mens:'',womens:'',uk:'10',eu:'29',cm:'21'},
-            {baby:'',toddler:'',kids:'',youth:'1',mens:'',womens:'',uk:'10.5',eu:'29.5',cm:'21.6'},
-            {baby:'',toddler:'',kids:'',youth:'2',mens:'',womens:'',uk:'11',eu:'30',cm:'22.2'},
-            {baby:'',toddler:'',kids:'',youth:'3',mens:'',womens:'',uk:'11.5',eu:'31',cm:'22.9'},
-            {baby:'',toddler:'',kids:'',youth:'4',mens:'',womens:'',uk:'12',eu:'31.5',cm:'23.5'},
-            {baby:'',toddler:'',kids:'',youth:'5',mens:'',womens:'',uk:'12.5',eu:'32',cm:'24.1'},
-            {baby:'',toddler:'',kids:'',youth:'6',mens:'5',womens:'6.5',uk:'13',eu:'33',cm:'24.8'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'6',womens:'7.5',uk:'1',eu:'34',cm:'25.4'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'7',womens:'8.5',uk:'2',eu:'35',cm:'26'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'8',womens:'9.5',uk:'3',eu:'36',cm:'26.7'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'9',womens:'10.5',uk:'4',eu:'37',cm:'27.3'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'10',womens:'11.5',uk:'5',eu:'38',cm:'28'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'11',womens:'12.5',uk:'6',eu:'39',cm:'28.6'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'12',womens:'13.5',uk:'7',eu:'40',cm:'29.2'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'13',womens:'14.5',uk:'8',eu:'41',cm:'29.8'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'14',womens:'15.5',uk:'9',eu:'42',cm:'30.5'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'15',womens:'16.5',uk:'10',eu:'43',cm:'31.1'},
-            {baby:'',toddler:'',kids:'',youth:'',mens:'16',womens:'',uk:'11',eu:'44',cm:'31.8'},
-        ];
-        const shoeFields = ['baby','toddler','kids','youth','mens','womens','uk','eu','cm'];
+        function esc(v) {
+            return String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
 
-        function buildShoeTable() {
-            const tbody = document.getElementById('shoesSizeGuideBody');
-            tbody.innerHTML = '';
-            shoeSizeData.forEach((row, idx) => {
-                const tr = document.createElement('tr');
-                shoeFields.forEach(field => {
-                    const td = document.createElement('td');
-                    td.style.cssText = 'padding:4px;border:1px solid #e5e7eb;text-align:center;';
-                    td.innerHTML = `<input type="text" name="shoe_${idx}_${field}" class="input shoe-guide-input" value="${row[field]}" style="padding:4px;font-size:0.95rem;text-align:center;width:100%;box-sizing:border-box;" placeholder="-">`;
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
+        function addSizeGuideColumn(title = '') {
+            const headRow = document.getElementById('sizeGuideHeadRow');
+            const body = document.getElementById('sizeGuideBody');
+            const th = document.createElement('th');
+            th.style.cssText = 'padding:6px;border:1px solid #e5e7eb;text-align:center;';
+            th.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:center;gap:4px;">
+                    <input type="text" class="input sg-col-input" value="${esc(title)}" placeholder="Size" style="padding:4px;font-size:0.95rem;text-align:center;width:80px;">
+                    <button type="button" onclick="removeSizeGuideColumn(this)" style="background:#ef4444;color:#fff;border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-weight:bold;font-size:0.95rem;line-height:1;flex-shrink:0;" title="Remove column">×</button>
+                </div>
+            `;
+            headRow.appendChild(th);
+            body.querySelectorAll('tr').forEach(tr => {
+                const td = document.createElement('td');
+                td.style.cssText = 'padding:4px;border:1px solid #e5e7eb;';
+                td.innerHTML = `<input type="text" class="input sg-cell-input" style="padding:4px;font-size:0.95rem;text-align:center;width:100%;box-sizing:border-box;" placeholder="-">`;
+                tr.appendChild(td);
             });
         }
 
-        function toggleSizeGuideType() {
-            const type = document.querySelector('input[name="size_guide_type"]:checked').value;
-            document.getElementById('clothingSizeGuide').style.display = type === 'clothing' ? 'block' : 'none';
-            document.getElementById('shoesSizeGuide').style.display = type === 'shoes' ? 'block' : 'none';
+        function removeSizeGuideColumn(btn) {
+            const th = btn.closest('th');
+            const idx = Array.from(th.parentElement.children).indexOf(th) - 1;
+            th.remove();
+            document.querySelectorAll('#sizeGuideBody tr').forEach(tr => {
+                const cells = tr.querySelectorAll('.sg-cell-input');
+                if (cells[idx]) cells[idx].closest('td').remove();
+            });
         }
+
+        function addSizeGuideRow(label = '', cells = []) {
+            const body = document.getElementById('sizeGuideBody');
+            const tr = document.createElement('tr');
+            const labelTd = document.createElement('td');
+            labelTd.style.cssText = 'padding:6px;border:1px solid #e5e7eb;';
+            labelTd.innerHTML = `
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <input type="text" class="input sg-row-label" value="${esc(label)}" placeholder="Measurement" style="padding:4px;font-size:0.95rem;text-align:left;width:100%;box-sizing:border-box;">
+                    <button type="button" onclick="removeSizeGuideRow(this)" style="background:#ef4444;color:#fff;border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-weight:bold;font-size:0.95rem;line-height:1;flex-shrink:0;" title="Remove row">×</button>
+                </div>
+            `;
+            tr.appendChild(labelTd);
+            const colCount = document.querySelectorAll('#sizeGuideHeadRow .sg-col-input').length;
+            for (let i = 0; i < colCount; i++) {
+                const td = document.createElement('td');
+                td.style.cssText = 'padding:4px;border:1px solid #e5e7eb;';
+                td.innerHTML = `<input type="text" class="input sg-cell-input" value="${esc(cells[i] ?? '')}" style="padding:4px;font-size:0.95rem;text-align:center;width:100%;box-sizing:border-box;" placeholder="-">`;
+                tr.appendChild(td);
+            }
+            body.appendChild(tr);
+        }
+
+        function removeSizeGuideRow(btn) {
+            btn.closest('tr').remove();
+        }
+
+        function collectSizeGuide() {
+            const headerInputs = Array.from(document.querySelectorAll('#sizeGuideHeadRow .sg-col-input'));
+            const keptIndexes = [];
+            const columns = [];
+            headerInputs.forEach((inp, idx) => {
+                const v = inp.value.trim();
+                if (v) { keptIndexes.push(idx); columns.push(v); }
+            });
+            const rows = [];
+            document.querySelectorAll('#sizeGuideBody tr').forEach(tr => {
+                const label = tr.querySelector('.sg-row-label').value.trim();
+                const cellInputs = Array.from(tr.querySelectorAll('.sg-cell-input'));
+                const cells = keptIndexes.map(idx => cellInputs[idx] ? cellInputs[idx].value.trim() : '');
+                if (cells.some(c => c !== '')) {
+                    rows.push({label, cells});
+                }
+            });
+            if (columns.length === 0 || rows.length === 0) return null;
+            return {type: 'table', columns, rows};
+        }
+
+        function initSizeGuide() {
+            ['S', 'M', 'L', 'XL'].forEach(c => addSizeGuideColumn(c));
+            addSizeGuideRow('Waist', ['', '', '', '']);
+            addSizeGuideRow('Length', ['', '', '', '']);
+        }
+
+        initSizeGuide();
 
         // Fetch next product ID on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -225,7 +204,6 @@
                     document.getElementById('productIdHidden').value = data.product_id;
                 })
                 .catch(() => {});
-            buildShoeTable();
         });
 
         function addColorQuantityRow() {
@@ -311,40 +289,8 @@
         });
 
         document.querySelector('form').addEventListener('submit', function(e) {
-            const type = document.querySelector('input[name="size_guide_type"]:checked').value;
-            let sizeGuideData = {};
-
-            if (type === 'clothing') {
-                const sizes = ['xxs', 'xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl'];
-                const measurements = ['waist', 'hip', 'length', 'inseam', 'thigh', 'burst', 'shoulder'];
-                measurements.forEach(measurement => {
-                    sizeGuideData[measurement] = {};
-                    sizes.forEach(size => {
-                        const input = document.querySelector(`input[name="size_${measurement}_${size}"]`);
-                        if (input && input.value.trim()) {
-                            sizeGuideData[measurement][size.toUpperCase()] = input.value.trim();
-                        }
-                    });
-                });
-            } else {
-                // Shoes: collect all the shoe inputs
-                const shoeFields = ['baby','toddler','kids','youth','mens','womens','uk','eu','cm'];
-                sizeGuideData.shoes = [];
-                shoeSizeData.forEach((_, idx) => {
-                    const row = {};
-                    shoeFields.forEach(field => {
-                        const input = document.querySelector(`input[name="shoe_${idx}_${field}"]`);
-                        if (input && input.value.trim()) {
-                            row[field] = input.value.trim();
-                        }
-                    });
-                    if (Object.keys(row).length > 0) {
-                        sizeGuideData.shoes.push(row);
-                    }
-                });
-            }
-
-            document.getElementById('sizeGuideHidden').value = JSON.stringify(sizeGuideData);
+            const data = collectSizeGuide();
+            document.getElementById('sizeGuideHidden').value = data ? JSON.stringify(data) : '';
         });
 
         if (!document.querySelector('meta[name="csrf-token"]')) {
