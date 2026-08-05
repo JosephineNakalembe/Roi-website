@@ -20,7 +20,7 @@
     <meta name="twitter:image" content="{{ asset('favicon.png') }}">
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
+      "@@context": "https://schema.org",
       "@type": "OnlineStore",
       "name": "ROI Store",
       "url": "https://www.roistore.shop",
