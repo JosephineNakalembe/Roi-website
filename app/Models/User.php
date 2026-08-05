@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\Address;
 use App\Models\CustomerMessage;
 use App\Models\Order;
+use App\Models\OrderReturn;
 use App\Models\PaymentMethod;
 use App\Models\WishlistItem;
 
@@ -63,6 +64,11 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function returns()
+    {
+        return $this->hasMany(OrderReturn::class);
     }
 
     public function addresses()

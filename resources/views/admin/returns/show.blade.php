@@ -30,8 +30,8 @@
             <!-- Customer Info -->
             <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                 <h2>Customer</h2>
-                <p><strong>Name:</strong> {{ $orderReturn->user->name }}</p>
-                <p><strong>Email:</strong> {{ $orderReturn->user->email }}</p>
+                <p><strong>Name:</strong> {{ $orderReturn->user->name ?? 'Deleted account' }}</p>
+                <p><strong>Email:</strong> {{ $orderReturn->user->email ?? '—' }}</p>
             </div>
 
             <!-- Reason & Notes -->
@@ -40,7 +40,7 @@
                 <p><strong>Reason:</strong> {{ $orderReturn->reason }}</p>
                 <p><strong>Buyer's Explanation:</strong></p>
                 <div style="padding:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;">
-                    {{ $orderReturn->notes }}
+                    {{ $orderReturn->notes ?? '—' }}
                 </div>
             </div>
 
@@ -84,16 +84,16 @@
             <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                 <h2>Refund Details</h2>
                 <p><strong>Network:</strong> {{ $orderReturn->refund_network }}</p>
-                <p><strong>Name:</strong> {{ $orderReturn->refund_name }}</p>
-                <p><strong>Number:</strong> {{ $orderReturn->refund_number }}</p>
+                <p><strong>Name:</strong> {{ $orderReturn->refund_name ?? '—' }}</p>
+                <p><strong>Number:</strong> {{ $orderReturn->refund_number ?? '—' }}</p>
             </div>
 
             <!-- Pickup Details -->
             <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                 <h2>Pickup Details</h2>
                 <p><strong>Area:</strong> {{ $orderReturn->pickup_area }}</p>
-                <p><strong>Address:</strong> {{ $orderReturn->pickup_address }}</p>
-                <p><strong>Contact:</strong> {{ $orderReturn->pickup_contact }}</p>
+                <p><strong>Address:</strong> {{ $orderReturn->pickup_address ?? '—' }}</p>
+                <p><strong>Contact:</strong> {{ $orderReturn->pickup_contact ?? '—' }}</p>
                 <p><strong>Pickup Fee:</strong> UGX{{ number_format($orderReturn->pickup_fee, 0) }} (buyer pays)</p>
             </div>
 

@@ -66,7 +66,7 @@
                     <div style="border:1px solid #e9ecef;padding:16px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:#fff;">
                         <div>
                             <strong>{{ $order->order_number }}</strong>
-                            <p class="text-muted" style="margin:2px 0 0;">{{ $order->user->name }} — UGX{{ number_format($order->total, 2) }}</p>
+                            <p class="text-muted" style="margin:2px 0 0;">{{ $order->user->name ?? 'Deleted account' }} — UGX{{ number_format($order->total, 2) }}</p>
                             <p style="margin:4px 0 0;font-size:0.9rem;color:#9ca3af;">
                                 {{ $order->placed_at->format('M d, Y H:i') }} • 
                                 @if($isNew)

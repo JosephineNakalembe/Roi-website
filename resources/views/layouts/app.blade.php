@@ -415,6 +415,46 @@
 
         function clearFormState() { sessionStorage.removeItem(getPageKey()); }
 
+        function scrollKey() { return window.location.pathname + window.location.search; }
+
+        function saveScroll() {
+            try {
+                const map = JSON.parse(sessionStorage.getItem('saved_scrolls') || '{}');
+                map[scrollKey()] = window.scrollY || 0;
+                sessionStorage.setItem('saved_scrolls', JSON.stringify(map));
+            } catch(e) {}
+        }
+
+        function isBackForwardNavigation() {
+            try {
+                if (performance.getEntriesByType && performance.getEntriesByType('navigation').length) {
+                    return performance.getEntriesByType('navigation')[0].type === 'back_forward';
+                }
+                if (performance.navigation) return performance.navigation.type === 2;
+            } catch(e) {}
+            return false;
+        }
+
+        function restoreScroll() {
+            try {
+                const map = JSON.parse(sessionStorage.getItem('saved_scrolls') || '{}');
+                const y = map[scrollKey()];
+                if (y === undefined) return;
+                const apply = function() { setTimeout(function() { window.scrollTo(0, y || 0); }, 60); };
+                if (document.readyState === 'complete') apply();
+                else window.addEventListener('load', apply);
+            } catch(e) {}
+        }
+
+        function setupScrollPersistence() {
+            let timer = null;
+            window.addEventListener('scroll', function() {
+                if (timer) return;
+                timer = setTimeout(function() { timer = null; saveScroll(); }, 250);
+            });
+            if (isBackForwardNavigation()) restoreScroll();
+        }
+
         function setupFormPersistence() {
             restoreFormState();
             document.querySelectorAll('form').forEach(form => {
@@ -422,7 +462,9 @@
                 form.addEventListener('change', saveFormState);
                 form.addEventListener('submit', function() { setTimeout(clearFormState, 100); });
             });
-            window.addEventListener('beforeunload', saveFormState);
+            window.addEventListener('pagehide', saveFormState);
+            window.addEventListener('pagehide', saveScroll);
+            setupScrollPersistence();
         }
 
         if (document.readyState === 'loading') {

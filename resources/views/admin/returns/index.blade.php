@@ -56,7 +56,7 @@
                         <div>
                             <strong>{{ $return->return_number }}</strong>
                             <p class="text-muted" style="margin:2px 0 0;">
-                                Order {{ $return->order->order_number }} — {{ $return->user->name }}
+                                Order {{ $return->order->order_number }} — {{ $return->user->name ?? 'Deleted account' }}
                             </p>
                             <p style="margin:4px 0 0;font-size:0.9rem;color:#9ca3af;">
                                 {{ $return->created_at->format('M d, Y H:i') }} • 

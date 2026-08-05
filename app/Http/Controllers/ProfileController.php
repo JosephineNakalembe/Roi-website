@@ -107,8 +107,25 @@ class ProfileController extends Controller
         }
 
         DB::transaction(function () use ($user) {
-            // 1. Anonymize all orders — keep them for admin reports but remove user association
-            $user->orders()->update(['user_id' => null]);
+            // 1. Keep sales records (orders + returns) for admin reports,
+            //    but anonymize them so they no longer identify the person.
+            $user->orders()->update([
+                'user_id' => null,
+                'address_id' => null,
+                'payment_method_id' => null,
+                'shipping_name' => null,
+                'shipping_phone' => null,
+                'notes' => null,
+            ]);
+
+            $user->returns()->update([
+                'user_id' => null,
+                'notes' => null,
+                'refund_number' => null,
+                'refund_name' => null,
+                'pickup_address' => null,
+                'pickup_contact' => null,
+            ]);
 
             // 2. Delete personal data
             $user->addresses()->delete();

@@ -113,16 +113,25 @@
     </div>
 
     <script>
-        function toggleCategories() {
+        function setCategoriesExpanded(expanded) {
+            try { sessionStorage.setItem('shop_categories_expanded', expanded ? '1' : '0'); } catch(e) {}
+        }
+
+        function applyCategoriesState() {
             const extra = document.getElementById('extraCategories');
             const btn = document.getElementById('catToggle');
-            if (extra.style.display === 'flex') {
-                extra.style.display = 'none';
-                btn.textContent = '+{{ $otherCategories->count() }} more';
-            } else {
-                extra.style.display = 'flex';
-                btn.textContent = 'Show less';
-            }
+            if (!extra || !btn) return;
+            const expanded = sessionStorage.getItem('shop_categories_expanded') === '1';
+            extra.style.display = expanded ? 'flex' : 'none';
+            btn.textContent = expanded ? 'Show less' : '+{{ $otherCategories->count() }} more';
         }
+
+        function toggleCategories() {
+            const extra = document.getElementById('extraCategories');
+            setCategoriesExpanded(extra.style.display !== 'flex');
+            applyCategoriesState();
+        }
+
+        document.addEventListener('DOMContentLoaded', applyCategoriesState);
     </script>
 @endsection

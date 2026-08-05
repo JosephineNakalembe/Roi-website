@@ -11,7 +11,7 @@
         <div style="display:grid;gap:18px;">
             <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                 <strong>Customer</strong>
-                <p>{{ $order->user->name }} • {{ $order->user->email }}</p>
+                <p>@if($order->user){{ $order->user->name }} • {{ $order->user->email }}@else<span style="color:#9ca3af;">Deleted account</span>@endif</p>
             </div>
             <div style="padding:16px;background:#f9fafb;border-radius:14px;">
                 <strong>Shipping Details</strong>
