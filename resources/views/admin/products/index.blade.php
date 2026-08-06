@@ -86,6 +86,9 @@
                                 Uncategorized
                             @endif
                             • UGX{{ number_format($product->price, 2) }} • Stock {{ $product->stock }}
+                            @if($product->supplier)
+                                • <span style="color:#6b7280;">Supplier:</span> {{ $product->supplier }}
+                            @endif
                         </div>
                     </div>
                     <div style="display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;">
@@ -107,6 +110,8 @@
                 </div>
             @endforelse
         </div>
+
+        <div style="margin-top:20px;">{{ $products->withQueryString()->links() }}</div>
 
         <div id="loadingState" style="display:none;text-align:center;margin-top:20px;padding:20px;">
             <div style="display:inline-block;width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#1a1a2e;border-radius:50%;animation:spin 0.8s linear infinite;"></div>

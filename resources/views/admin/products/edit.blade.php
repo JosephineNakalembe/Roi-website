@@ -49,7 +49,10 @@
             
             <label>Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— for profit reports, not shown to customers</span></label>
             <input class="input" name="cost_price" type="number" step="0.01" value="{{ old('cost_price', $product->cost_price ?? '0.00') }}" placeholder="What you paid per unit">
-            
+
+            <label>Supplier <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— admin only, not shown to customers</span></label>
+            <input class="input" name="supplier" type="text" value="{{ old('supplier', $product->supplier) }}" placeholder="Who you bought this from">
+
             <label style="font-weight:700;">Color, Size, Quantity, Price & Images</label>
             <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
             <div id="colorQuantityContainer" style="display:grid;gap:10px;margin-bottom:10px;"></div>

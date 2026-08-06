@@ -21,6 +21,9 @@
                     Uncategorized
                 @endif
                 • UGX{{ number_format($product->price, 2) }} • Stock {{ $product->stock }}
+                @if($product->supplier)
+                    • <span style="color:#6b7280;">Supplier:</span> {{ $product->supplier }}
+                @endif
             </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;">

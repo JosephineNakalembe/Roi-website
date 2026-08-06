@@ -17,6 +17,7 @@ class Product extends Model
         'description',
         'price',
         'cost_price',
+        'supplier',
         'stock',
         'size_guide',
         'size_guide_type',
