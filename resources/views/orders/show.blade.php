@@ -9,11 +9,11 @@
     </div>
     <div class="card">
         <p class="text-muted">
-            Status: 
+            Status:
             @if($order->status === 'delivered')
-                <span style="color:#059669;font-weight:600;">Delivered</span>
+                <span style="color:#1a1a2e;font-weight:600;">Delivered</span>
             @elseif($order->status === 'shipped')
-                <span style="color:#2563eb;font-weight:600;">Shipped</span>
+                <span style="color:#1a1a2e;font-weight:600;">Shipped</span>
             @else
                 <span>{{ ucfirst($order->status) }}</span>
             @endif
@@ -37,25 +37,7 @@
                 @if($order->updates->isEmpty())
                     <p class="text-muted">No tracking updates yet. Check again later.</p>
                 @else
-                    <div style="display:grid;gap:12px;">
-                        @foreach($order->updates as $update)
-                            <div style="padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;">
-                                <strong>
-                                    @if($update->status === 'shipped')
-                                        <span style="color:#2563eb;">Shipped</span>
-                                    @elseif($update->status === 'delivered')
-                                        <span style="color:#059669;">Delivered</span>
-                                    @else
-                                        {{ ucfirst($update->status) }}
-                                    @endif
-                                </strong>
-                                <p class="text-muted" style="margin:4px 0 0;">{{ $update->created_at->format('F j, Y H:i') }}</p>
-                                @if($update->note)
-                                    <p style="margin:8px 0 0;">{{ $update->note }}</p>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+                    @include('orders.partials.tracking-timeline', ['order' => $order])
                 @endif
             </div>
 
@@ -100,7 +82,7 @@
                 <div style="display:flex;justify-content:flex-end;">
                     <form method="POST" action="{{ route('orders.confirm-received', $order) }}" onsubmit="return confirm('Have you received all items in this order?');">
                         @csrf
-                        <button class="btn" style="background:#059669;padding:12px 24px;font-size:1.1rem;">I Have Received My Items</button>
+                        <button class="btn" style="background:#1a1a2e;padding:12px 24px;font-size:1.1rem;">I Have Received My Items</button>
                     </form>
                 </div>
             @endif
@@ -109,11 +91,11 @@
                 @if($order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
                     <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
                         <a href="{{ route('returns.index') }}" class="btn btn-secondary" style="padding:12px 24px;font-size:1.1rem;">View My Returns</a>
-                        <a href="{{ route('orders.return.create', $order) }}" class="btn" style="background:#f97316;padding:12px 24px;font-size:1.1rem;">Request Return</a>
+                        <a href="{{ route('orders.return.create', $order) }}" class="btn" style="background:#1a1a2e;padding:12px 24px;font-size:1.1rem;">Request Return</a>
                     </div>
                 @else
-                    <div style="padding:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;margin-top:12px;">
-                        <p style="margin:0;color:#991b1b;font-size:1rem;">
+                    <div style="padding:12px;background:#f0ece6;border:1px solid #e5e7eb;border-radius:12px;margin-top:12px;">
+                        <p style="margin:0;color:#1a1a2e;font-size:1rem;">
                             ⏰ The <strong>7-day return period</strong> for this order has expired.
                         </p>
                     </div>

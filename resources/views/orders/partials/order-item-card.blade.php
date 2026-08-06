@@ -6,7 +6,7 @@
         : 'https://via.placeholder.com/80x80?text=No+Image';
     $productUrl = $item->product ? route('shop.show', $item->product->slug) : null;
 @endphp
-<div style="display:flex;gap:12px;padding:12px;border:1px solid {{ $item->cancelled_at ? '#fecaca' : '#e5e7eb' }};border-radius:12px;background:{{ $item->cancelled_at ? '#fef2f2' : '#fff' }};">
+<div style="display:flex;gap:12px;padding:12px;border:1px solid {{ $item->cancelled_at ? '#e5e7eb' : '#e5e7eb' }};border-radius:12px;background:{{ $item->cancelled_at ? '#f9fafb' : '#fff' }};">
     <div style="flex-shrink:0;width:80px;height:80px;border-radius:8px;overflow:hidden;background:#f3f4f6;">
         @if($productUrl)
             <a href="{{ $productUrl }}" target="_blank">
@@ -27,7 +27,7 @@
                     </a>
                 @else
                     <span style="font-weight:600;">{{ $item->product_name }} × {{ $item->quantity }}</span>
-                    <p style="margin:2px 0 0;font-size:0.9rem;color:#dc2626;font-weight:600;">Item no longer sold</p>
+                    <p style="margin:2px 0 0;font-size:0.9rem;color:#6b7280;font-weight:600;">Item no longer sold</p>
                 @endif
                 @if($colorDisplayName || $item->size)
                     <p style="font-size:0.95rem;color:#6b7280;margin-top:2px;">
@@ -36,12 +36,12 @@
                     </p>
                 @endif
                 @if($item->cancelled_at)
-                    <p style="margin:2px 0 0;font-size:0.9rem;color:#dc2626;font-weight:600;">
+                    <p style="margin:2px 0 0;font-size:0.9rem;color:#1a1a2e;font-weight:600;">
                         Cancelled — {{ $item->cancellation_reason }}
                     </p>
                 @endif
                 @if($item->product && $item->product->non_returnable && !$item->cancelled_at)
-                    <p style="margin:2px 0 0;font-size:0.9rem;color:#991b1b;font-weight:600;">
+                    <p style="margin:2px 0 0;font-size:0.9rem;color:#6b7280;font-weight:600;">
                         Non-returnable
                     </p>
                 @endif

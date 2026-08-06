@@ -51,54 +51,15 @@
                 @if($order->updates->isNotEmpty())
                     <div style="padding-top:16px;border-top:1px solid #e5e7eb;">
                         <h3>Tracking Timeline</h3>
-                        <div style="position:relative;padding-left:24px;margin-top:16px;">
-                            @foreach($order->updates as $i => $update)
-                                @php
-                                    $isFirst = $i === 0;
-                                    $isLast = $i === count($order->updates) - 1;
-                                    $upStatusColor = $update->status === 'delivered' ? '#059669' : ($update->status === 'shipped' ? '#2563eb' : '#d1d5db');
-                                @endphp
-                                <div style="position:relative;padding-bottom:{{ $isLast ? '0' : '20px'}};padding-left:16px;border-left:{{ $isLast ? '2px solid transparent' : '2px solid #e5e7eb'}};">
-                                    <div style="position:absolute;left:-8px;top:4px;width:14px;height:14px;border-radius:50%;background:{{ $upStatusColor }};border:2px solid #fff;box-shadow:0 0 0 2px {{ $upStatusColor }};"></div>
-                                    <div style="background:{{ $isFirst ? '#f0fdf4' : '#f9fafb'}};padding:12px;border-radius:12px;border:1px solid {{ $isFirst ? '#bbf7d0' : '#e5e7eb'}};">
-                                        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                                            <strong style="color:{{ $upStatusColor }};">
-                                                {{ $update->status === 'shipped' ? '🚚 Shipped' : ($update->status === 'delivered' ? '✅ Delivered' : ucfirst($update->status)) }}
-                                            </strong>
-                                            <span style="font-size:0.9rem;color:#9ca3af;">{{ $update->created_at->format('M d, H:i') }}</span>
-                                        </div>
-                                        @if($update->note)
-                                            <p style="margin:6px 0 0;font-size:1rem;color:#374151;">{{ $update->note }}</p>
-                                        @endif
-                                        <p style="margin:4px 0 0;font-size:0.85rem;color:#9ca3af;">by {{ $update->status === 'delivered' && str_contains($update->note ?? '', 'Buyer confirmed') ? 'Buyer' : 'Admin' }}</p>
-                                    </div>
-                                </div>
-                            @endforeach
-                            <!-- Initial Order Placed -->
-                            <div style="position:relative;padding-left:16px;">
-                                <div style="position:absolute;left:-8px;top:4px;width:14px;height:14px;border-radius:50%;background:#6b7280;border:2px solid #fff;box-shadow:0 0 0 2px #6b7280;"></div>
-                                <div style="background:#f9fafb;padding:12px;border-radius:12px;border:1px solid #e5e7eb;">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                                        <strong style="color:#6b7280;">📦 Order Placed</strong>
-                                        <span style="font-size:0.9rem;color:#9ca3af;">{{ $order->created_at->format('M d, H:i') }}</span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div style="margin-top:16px;">
+                            @include('orders.partials.tracking-timeline', ['order' => $order, 'showActor' => true])
                         </div>
                     </div>
                 @else
                     <div style="padding-top:16px;border-top:1px solid #e5e7eb;">
                         <h3>Tracking Timeline</h3>
-                        <div style="position:relative;padding-left:24px;margin-top:16px;">
-                            <div style="position:relative;padding-left:16px;">
-                                <div style="position:absolute;left:-8px;top:4px;width:14px;height:14px;border-radius:50%;background:#6b7280;border:2px solid #fff;box-shadow:0 0 0 2px #6b7280;"></div>
-                                <div style="background:#f9fafb;padding:12px;border-radius:12px;border:1px solid #e5e7eb;">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                                        <strong style="color:#6b7280;">📦 Order Placed</strong>
-                                        <span style="font-size:0.9rem;color:#9ca3af;">{{ $order->created_at->format('M d, H:i') }}</span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div style="margin-top:16px;">
+                            @include('orders.partials.tracking-timeline', ['order' => $order, 'showActor' => true])
                         </div>
                         <p style="color:#9ca3af;margin-top:12px;">No status updates yet. Add one above.</p>
                     </div>
@@ -135,7 +96,7 @@
                                 </a>
                             @else
                                 <span style="font-weight:600;">{{ $item->product_name }} × {{ $item->quantity }}</span>
-                                <p style="margin:2px 0 0;font-size:0.85rem;color:#dc2626;font-weight:600;">Item no longer sold</p>
+                                <p style="margin:2px 0 0;font-size:0.85rem;color:#6b7280;font-weight:600;">Item no longer sold</p>
                             @endif
                             @if($colorDisplayName || $item->size)
                                 <p style="font-size:0.9rem;color:#6b7280;margin:2px 0 0;">
@@ -144,7 +105,7 @@
                                 </p>
                             @endif
                             @if($item->cancelled_at)
-                                <p style="margin:2px 0 0;font-size:0.85rem;color:#dc2626;font-weight:600;">
+                                <p style="margin:2px 0 0;font-size:0.85rem;color:#1a1a2e;font-weight:600;">
                                     Cancelled — {{ $item->cancellation_reason }}
                                 </p>
                             @endif
@@ -154,7 +115,7 @@
                             @if(!$item->cancelled_at)
                                 <form method="POST" action="{{ route('admin.orders.items.cancel', [$order, $item]) }}" onsubmit="return confirm('Cancel this item as Out of Stock?');" style="margin-top:4px;">
                                     @csrf
-                                    <button type="submit" class="btn btn-secondary" style="padding:2px 8px;font-size:0.85rem;background:#dc2626;color:#fff;border:none;border-radius:6px;cursor:pointer;">Cancel Item</button>
+                                    <button type="submit" class="btn btn-secondary" style="padding:2px 8px;font-size:0.85rem;background:#6b7280;color:#fff;border:none;border-radius:6px;cursor:pointer;">Cancel Item</button>
                                 </form>
                             @endif
                         </div>

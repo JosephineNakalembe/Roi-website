@@ -94,7 +94,7 @@
                             $latestUpdate = $order->updates->first();
                             $canCancel = $order->status === 'pending' || $order->status === 'processing';
                         @endphp
-                        <div class="order-card" onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#fff;cursor:pointer;transition:box-shadow 0.15s;border-left:4px solid {{ $hasUnreviewedItems ? '#dc2626' : ($order->status === 'shipped' ? '#2563eb' : ($canCancel ? '#f97316' : '#d1d5db')) }};" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
+                        <div class="order-card" onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#fff;cursor:pointer;transition:box-shadow 0.15s;border-left:4px solid {{ $hasUnreviewedItems ? '#1a1a2e' : ($order->status === 'shipped' ? '#1a1a2e' : ($canCancel ? '#6b7280' : '#d1d5db')) }};" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
                                 <div>
                                     <strong>{{ $order->order_number }}</strong>
@@ -103,9 +103,9 @@
                                 <div style="text-align:right;">
                                     <p style="margin:0;">
                                         @if($order->status === 'delivered')
-                                            <span style="color:#059669;font-weight:600;">Delivered</span>
+                                            <span style="color:#1a1a2e;font-weight:600;">Delivered</span>
                                         @elseif($order->status === 'shipped')
-                                            <span style="color:#2563eb;font-weight:600;">Shipped</span>
+                                            <span style="color:#1a1a2e;font-weight:600;">Shipped</span>
                                         @else
                                             <span style="color:#6b7280;">{{ ucfirst($order->status) }}</span>
                                         @endif
@@ -116,13 +116,13 @@
 
                             <!-- Latest Update -->
                             @if($latestUpdate)
-                                <div style="margin-top:10px;padding:10px 14px;background:#f9fafb;border-radius:10px;border-left:3px solid {{ $order->status === 'delivered' ? '#059669' : ($order->status === 'shipped' ? '#2563eb' : '#d1d5db') }};">
+                                <div style="margin-top:10px;padding:10px 14px;background:#f9fafb;border-radius:10px;border-left:3px solid {{ $order->status === 'delivered' ? '#1a1a2e' : ($order->status === 'shipped' ? '#1a1a2e' : '#d1d5db') }};">
                                     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                                         <span style="font-size:0.95rem;font-weight:600;">
                                             @if($latestUpdate->status === 'shipped')
-                                                <span style="color:#2563eb;">Shipped</span>
+                                                <span style="color:#1a1a2e;">Shipped</span>
                                             @elseif($latestUpdate->status === 'delivered')
-                                                <span style="color:#059669;">Delivered</span>
+                                                <span style="color:#1a1a2e;">Delivered</span>
                                             @else
                                                 {{ ucfirst($latestUpdate->status) }}
                                             @endif
@@ -137,18 +137,18 @@
 
             <div class="button-container" style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
                 @if($hasUnreviewedItems)
-                    <span class="pending-review" style="font-size:0.75rem;color:#dc2626;white-space:nowrap;flex-shrink:0;">Items pending review</span>
+                    <span class="pending-review" style="font-size:0.75rem;color:#6b7280;white-space:nowrap;flex-shrink:0;">Items pending review</span>
                 @elseif($order->status === 'shipped')
-                    <span class="order-action-btn" style="font-size:0.75rem;color:#2563eb;white-space:nowrap;flex-shrink:0;padding:1px 5px;">Confirm Receipt</span>
+                    <span class="order-action-btn" style="font-size:0.75rem;color:#1a1a2e;white-space:nowrap;flex-shrink:0;padding:1px 5px;">Confirm Receipt</span>
                 @endif
                 @if($canCancel)
-                    <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn order-action-btn" style="background:#dc2626;padding:3px 8px;font-size:0.75rem;white-space:nowrap;">Cancel</button>
+                    <button onclick="event.stopPropagation();showCancelModal({{ $order->id }})" class="btn order-action-btn" style="background:#6b7280;padding:3px 8px;font-size:0.75rem;white-space:nowrap;">Cancel</button>
                 @endif
                 <button onclick="event.stopPropagation();openOrderModal({{ $order->id }})" class="btn order-action-btn" style="padding:3px 8px;font-size:0.75rem;white-space:nowrap;">Track</button>
                 @if($order->status === 'delivered' && $order->delivered_at && !$order->delivered_at->addDays(7)->isPast())
-                    <a href="{{ route('orders.return.create', $order) }}" class="btn order-action-btn" style="background:#f97316;padding:3px 8px;font-size:0.75rem;white-space:nowrap;">Return</a>
+                    <a href="{{ route('orders.return.create', $order) }}" class="btn order-action-btn" style="background:#1a1a2e;padding:3px 8px;font-size:0.75rem;white-space:nowrap;">Return</a>
                 @endif
-                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="btn order-action-btn" style="background:#2563eb;padding:3px 8px;font-size:0.75rem;white-space:nowrap;text-decoration:none;color:#fff !important;">View Details</a>
+                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="btn order-action-btn" style="background:#1a1a2e;padding:3px 8px;font-size:0.75rem;white-space:nowrap;text-decoration:none;color:#fff !important;">View Details</a>
             </div>
                         </div>
                     @endforeach
@@ -170,7 +170,7 @@
                                 </div>
                                 <div style="text-align:right;">
                                     <p style="margin:0;">
-                                        <span style="color:#059669;font-weight:600;">Delivered</span>
+                                        <span style="color:#1a1a2e;font-weight:600;">Delivered</span>
                                     </p>
                                     <p style="margin:2px 0 0;font-weight:700;color:#6b7280;">UGX{{ number_format($order->total, 2) }}</p>
                                 </div>
@@ -178,7 +178,7 @@
 
                             <div style="margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
                                 <span style="font-size:0.75rem;color:#6b7280;white-space:nowrap;flex-shrink:0;">✓ All items reviewed</span>
-                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="order-action-btn" style="font-size:0.75rem;white-space:nowrap;flex-shrink:0;text-decoration:none;color:#fff !important;background:#2563eb;padding:1px 5px;">View Details</a>
+                                <a href="{{ route('orders.show', $order) }}" onclick="event.stopPropagation();" class="order-action-btn" style="font-size:0.75rem;white-space:nowrap;flex-shrink:0;text-decoration:none;color:#fff !important;background:#1a1a2e;padding:1px 5px;">View Details</a>
                             </div>
                         </div>
                     @endforeach
@@ -186,32 +186,32 @@
             @endif
 
             @if($cancelledOrders->isNotEmpty())
-                <h2 style="margin-bottom:16px;color:#dc2626;">Cancelled Orders</h2>
+                <h2 style="margin-bottom:16px;color:#1a1a2e;">Cancelled Orders</h2>
                 <div style="display:grid;gap:16px;">
                     @foreach($cancelledOrders as $order)
                         @php
                             $latestUpdate = $order->updates->first();
                         @endphp
-                        <div class="order-card" onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#fef2f2;cursor:pointer;transition:box-shadow 0.15s;opacity:0.85;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)';this.style.opacity='1'" onmouseout="this.style.boxShadow='';this.style.opacity='0.85'">
+                        <div class="order-card" onclick="openOrderModal({{ $order->id }})" style="border:1px solid #e5e7eb;padding:16px;border-radius:14px;background:#f9fafb;cursor:pointer;transition:box-shadow 0.15s;opacity:0.85;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)';this.style.opacity='1'" onmouseout="this.style.boxShadow='';this.style.opacity='0.85'">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
                                 <div>
-                                    <strong style="color:#dc2626;">{{ $order->order_number }}</strong>
+                                    <strong style="color:#1a1a2e;">{{ $order->order_number }}</strong>
                                     <p class="text-muted" style="margin:2px 0 0;">{{ $order->placed_at->format('F j, Y') }}</p>
                                     @if($order->cancelled_at)
-                                        <p style="margin:2px 0 0;font-size:0.75rem;color:#991b1b;">Cancelled on {{ $order->cancelled_at->format('M d, Y') }}</p>
+                                        <p style="margin:2px 0 0;font-size:0.75rem;color:#6b7280;">Cancelled on {{ $order->cancelled_at->format('M d, Y') }}</p>
                                     @endif
                                 </div>
                                 <div style="text-align:right;">
                                     <p style="margin:0;">
-                                        <span style="color:#dc2626;font-weight:600;">Cancelled</span>
+                                        <span style="color:#1a1a2e;font-weight:600;">Cancelled</span>
                                     </p>
-                                    <p style="margin:2px 0 0;font-weight:700;color:#991b1b;">UGX{{ number_format($order->total, 2) }}</p>
+                                    <p style="margin:2px 0 0;font-weight:700;color:#6b7280;">UGX{{ number_format($order->total, 2) }}</p>
                                 </div>
                             </div>
 
                             @if($order->cancellation_reason)
-                                <div style="margin-top:8px;padding:8px 12px;background:#fee2e2;border-radius:8px;">
-                                    <p style="margin:0;font-size:0.8rem;color:#991b1b;"><strong>Reason:</strong> {{ $order->cancellation_reason }}</p>
+                                <div style="margin-top:8px;padding:8px 12px;background:#f0ece6;border-radius:8px;">
+                                    <p style="margin:0;font-size:0.8rem;color:#374151;"><strong>Reason:</strong> {{ $order->cancellation_reason }}</p>
                                 </div>
                             @endif
 
@@ -251,7 +251,7 @@
                     </div>
                     <div style="display:flex;gap:12px;justify-content:flex-end;">
                         <button type="button" onclick="hideCancelModal()" class="btn btn-secondary">Go Back</button>
-                        <button type="submit" class="btn" style="background:#dc2626;">Confirm Cancel</button>
+                        <button type="submit" class="btn" style="background:#1a1a2e;">Confirm Cancel</button>
                     </div>
                 </form>
             </div>
@@ -261,36 +261,49 @@
     <script>
         const ordersData = @json($orders->items());
 
+        const ttIcons = {
+            placed: '<svg style="width:17px;height:17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>',
+            pending: '<svg style="width:17px;height:17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            processing: '<svg style="width:17px;height:17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            shipped: '<svg style="width:17px;height:17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1h-1m5-1h3a1 1 0 001-1V9a1 1 0 00-.5-.865L16 6"/></svg>',
+            delivered: '<svg style="width:17px;height:17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            cancelled: '<svg style="width:17px;height:17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        };
+
         function openOrderModal(orderId) {
             const modal = document.getElementById('orderModal');
             const content = document.getElementById('orderModalContent');
             const order = ordersData.find(o => o.id === orderId);
 
             if (!order) {
-                content.innerHTML = '<p style="text-align:center;padding:30px;color:#dc2626;">Order not found.</p>';
+                content.innerHTML = '<p style="text-align:center;padding:30px;color:#6b7280;">Order not found.</p>';
                 modal.style.display = 'flex';
                 return;
             }
 
-            const statusColor = order.status === 'delivered' ? '#059669' : (order.status === 'shipped' ? '#2563eb' : '#6b7280');
+            const statusColor = order.status === 'delivered' ? '#1a1a2e' : (order.status === 'shipped' ? '#1a1a2e' : '#6b7280');
             const statusLabel = order.status === 'delivered' ? 'Delivered' : (order.status === 'shipped' ? 'Shipped' : order.status.charAt(0).toUpperCase() + order.status.slice(1));
 
             let updatesHtml = '';
             if (order.updates && order.updates.length > 0) {
                 const sortedUpdates = order.updates;
                 updatesHtml = `
-                    <div style="position:relative;padding-left:24px;">
+                    <div style="position:relative;">
                         ${sortedUpdates.map((update, i) => {
                             const isFirst = i === 0;
                             const isLast = i === sortedUpdates.length - 1;
-                            const upStatusColor = update.status === 'delivered' ? '#059669' : (update.status === 'shipped' ? '#2563eb' : '#d1d5db');
+                            const icon = ttIcons[update.status] || ttIcons.pending;
+                            const label = update.status === 'shipped' ? 'Shipped' : (update.status === 'delivered' ? 'Delivered' : (update.status === 'cancelled' ? 'Cancelled' : update.status.charAt(0).toUpperCase() + update.status.slice(1)));
                             return `
-                                <div style="position:relative;padding-bottom:${isLast ? '0' : '20px'};padding-left:16px;border-left:${isLast ? '2px solid transparent' : '2px solid #e5e7eb'};">
-                                    <div style="position:absolute;left:-8px;top:4px;width:14px;height:14px;border-radius:50%;background:${upStatusColor};border:2px solid #fff;box-shadow:0 0 0 2px ${upStatusColor};"></div>
-                                    <div style="background:${isFirst ? '#f0fdf4' : '#f9fafb'};padding:12px;border-radius:12px;border:1px solid ${isFirst ? '#bbf7d0' : '#e5e7eb'};">
+                                <div style="position:relative;display:flex;gap:14px;padding-bottom:${isLast ? '0' : '18px'};">
+                                    <div style="position:relative;flex-shrink:0;width:34px;height:34px;border-radius:50%;background:#1a1a2e;color:#fff;display:flex;align-items:center;justify-content:center;z-index:1;border:2px solid #fff;box-shadow:0 0 0 2px #e8e4df;">
+                                        ${icon}
+                                    </div>
+                                    ${!isLast ? '<div style="position:absolute;left:16px;top:34px;bottom:-4px;width:2px;background:#e8e4df;"></div>' : ''}
+                                    <div style="flex:1;min-width:0;background:${isFirst ? '#f5f3ef' : '#f9fafb'};padding:12px;border-radius:12px;border:1px solid ${isFirst ? '#1a1a2e' : '#e5e7eb'};">
                                         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                                            <strong style="color:${upStatusColor};">
-                                                ${update.status === 'shipped' ? '🚚 Shipped' : (update.status === 'delivered' ? '✅ Delivered' : update.status.charAt(0).toUpperCase() + update.status.slice(1))}
+                                            <strong style="color:#1a1a2e;">
+                                                ${label}
                                             </strong>
                                             <span style="font-size:0.9rem;color:#9ca3af;">${new Date(update.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
@@ -300,11 +313,13 @@
                             `;
                         }).join('')}
                         <!-- Initial Order Placed -->
-                        <div style="position:relative;padding-left:16px;">
-                            <div style="position:absolute;left:-8px;top:4px;width:14px;height:14px;border-radius:50%;background:#6b7280;border:2px solid #fff;box-shadow:0 0 0 2px #6b7280;"></div>
-                            <div style="background:#f9fafb;padding:12px;border-radius:12px;border:1px solid #e5e7eb;">
+                        <div style="position:relative;display:flex;gap:14px;">
+                            <div style="position:relative;flex-shrink:0;width:34px;height:34px;border-radius:50%;background:#f0ece6;color:#6c757d;display:flex;align-items:center;justify-content:center;z-index:1;border:2px solid #fff;box-shadow:0 0 0 2px #e8e4df;">
+                                ${ttIcons.placed}
+                            </div>
+                            <div style="flex:1;min-width:0;background:#f9fafb;padding:12px;border-radius:12px;border:1px solid #e5e7eb;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                                    <strong style="color:#6b7280;">📦 Order Placed</strong>
+                                    <strong style="color:#6b7280;">Order Placed</strong>
                                     <span style="font-size:0.9rem;color:#9ca3af;">${new Date(order.placed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             </div>
@@ -349,8 +364,8 @@
                 ${updatesHtml}
 
                 ${unreviewedItems > 0 ? `
-                    <div style="margin-top:16px;padding:12px;background:#fef2f2;border-radius:12px;border:1px solid #fecaca;">
-                        <p style="margin:0;font-size:0.95rem;color:#dc2626;">${unreviewedItems} item(s) pending your review.</p>
+                    <div style="margin-top:16px;padding:12px;background:#f0ece6;border-radius:12px;border:1px solid #e5e7eb;">
+                        <p style="margin:0;font-size:0.95rem;color:#1a1a2e;">${unreviewedItems} item(s) pending your review.</p>
                     </div>
                 ` : ''}
 

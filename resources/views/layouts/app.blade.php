@@ -61,11 +61,11 @@
         .nav-link:hover{background:#e8e4df;border-color:#c9a96e;}
         .product-image{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;}
         .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:0.8rem;font-weight:600;}
-        .badge-green{background:#e8f5e9;color:#2e7d32;}
-        .badge-blue{background:#e3f2fd;color:#1565c0;}
-        .badge-amber{background:#fff8e1;color:#f57f17;}
-        .badge-gray{background:#f0ece6;color:#495057;}
-        .badge-red{background:#fce4ec;color:#c62828;}
+        .badge-green{background:#f0ece6;color:#1a1a2e;}
+        .badge-blue{background:#f0ece6;color:#1a1a2e;}
+        .badge-amber{background:#f0ece6;color:#1a1a2e;}
+        .badge-gray{background:#e8e4df;color:#495057;}
+        .badge-red{background:#f0ece6;color:#1a1a2e;}
         .badge-gold{background:rgba(201,169,110,0.15);color:#8b6914;}
         table{width:100%;border-collapse:collapse;font-size:0.9rem;}
         th{padding:8px 12px;border-bottom:2px solid #e8e4df;text-align:left;font-weight:600;color:#495057;background:#faf8f5;}
@@ -81,16 +81,16 @@
         .stat-label{font-size:0.85rem;color:#6c757d;margin-top:2px;}
         .nav-badge{position:relative;display:inline-flex;align-items:center;}
         .nav-badge sup{position:absolute;top:-5px;right:-6px;min-width:16px;height:16px;border-radius:8px;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;box-shadow:0 2px 4px rgba(0,0,0,0.15);}
-        .nav-badge sup.badge-red{background:#dc2626;color:#fff;}
-        .nav-badge sup.badge-orange{background:#f97316;color:#fff;}
+        .nav-badge sup.badge-red{background:#1a1a2e;color:#fff;}
+        .nav-badge sup.badge-orange{background:#6b7280;color:#fff;}
         .unread-help-badge{position:fixed;bottom:20px;right:20px;z-index:999;animation:pulse 2s infinite;}
         #orderSummarySlider::-webkit-scrollbar {height: 5px;}
         #orderSummarySlider::-webkit-scrollbar-track {background: #f0ece6;border-radius: 6px;}
         #orderSummarySlider::-webkit-scrollbar-thumb {background: #c9a96e;border-radius: 6px;}
         #orderSummarySlider::-webkit-scrollbar-thumb:hover{background: #b8944f;}
-        .cart-float{position:fixed;bottom:50px;right:12px;z-index:999;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#2d2d44);color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(26,26,46,0.4);transition:all 0.2s;font-size:1.35rem;border:2px solid #c9a96e;}
-        .cart-float:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(201,169,110,0.4);}
-        .cart-float sup{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:9px;background:#dc2626;color:#fff;font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #fff;}
+        .cart-float{position:fixed;bottom:50px;right:12px;z-index:999;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#2d2d44);color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(26,26,46,0.4);transition:all 0.2s;font-size:1.35rem;border:2px solid #fff;}
+        .cart-float:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(26,26,46,0.4);}
+        .cart-float sup{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:9px;background:#1a1a2e;color:#fff;font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #fff;}
         @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(201,169,110,0.4);}70%{box-shadow:0 0 0 15px rgba(201,169,110,0);}100%{box-shadow:0 0 0 0 rgba(201,169,110,0);}}
         .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,26,46,0.4);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;}
         .modal-card{background:#fff;border-radius:14px;padding:24px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(26,26,46,0.15);border:1px solid #e8e4df;}
@@ -112,10 +112,22 @@
         .gold-accent{color:#c9a96e;}
         .gold-bar{height:3px;background:linear-gradient(90deg,#c9a96e,#1a1a2e);border-radius:2px;margin:8px 0;}
         .divider{border-top:1px solid #e8e4df;}
+        .notification-panel{position:fixed;top:58px;right:12px;z-index:200;width:340px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #e8e4df;border-radius:12px;box-shadow:0 10px 40px rgba(26,26,46,0.15);overflow:hidden;}
+        .notification-item{display:block;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid #f0ece6;transition:background 0.15s;}
+        .notification-item:hover{background:#f5f3ef;}
+        .notification-item.unread{background:#f0ece6;border-left:3px solid #1a1a2e;}
         @media (max-width:768px){.back-button{font-size:1.2rem;min-width:26px;min-height:26px;padding:2px 4px;}.header-title-row{gap:6px;}}
     </style>
 </head>
 <body>
+    @auth
+        @unless(auth()->user()->isAdmin())
+            @php
+                $unreadNotificationCount = auth()->user()->userNotifications()->whereNull('read_at')->count();
+                $recentNotifications = auth()->user()->userNotifications()->latest()->limit(8)->get();
+            @endphp
+        @endunless
+    @endauth
     <header class="mb-2 sticky top-0 z-50 px-3 py-2" style="background:rgba(245,243,239,0.95);backdrop-filter:blur(10px);border-bottom:1px solid #e8e4df;">
         @guest
             <div class="flex justify-between items-center">
@@ -137,7 +149,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                         @if($guestCartCount > 0)
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{{ $guestCartCount }}</span>
+                            <span class="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{{ $guestCartCount }}</span>
                         @endif
                     </a>
                     <a href="{{ route('login') }}" class="flex flex-col items-center text-gray-700 hover:text-gray-900" style="text-decoration:none;">
@@ -152,7 +164,7 @@
                         Cart
                         @php $guestCartCount = collect(session('guest_cart', []))->sum('quantity'); @endphp
                         @if($guestCartCount > 0)
-                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{{ $guestCartCount }}</span>
+                            <span class="absolute -top-2 -right-2 bg-gray-900 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{{ $guestCartCount }}</span>
                         @endif
                     </a>
                     <a class="btn" href="{{ route('login') }}">Login</a>
@@ -181,9 +193,17 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
                             @if($cartCount > 0)
-                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{{ $cartCount }}</span>
+                                <span class="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{{ $cartCount }}</span>
                             @endif
                         </a>
+                        <button data-notification-bell onclick="toggleNotifications(event)" class="flex flex-col items-center text-gray-700 hover:text-gray-900 bg-transparent border-none cursor-pointer p-0 relative">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            @if(($unreadNotificationCount ?? 0) > 0)
+                                <span class="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{{ $unreadNotificationCount }}</span>
+                            @endif
+                        </button>
                         <div class="relative">
                             <button onclick="toggleProfileDropdown(event)" class="flex flex-col items-center text-gray-700 hover:text-gray-900 bg-transparent border-none cursor-pointer p-0 z-10">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,14 +220,14 @@
                                 <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" style="text-decoration:none;">
                                     Orders
                                     @if($activeOrdersCount > 0)
-                                        <span class="ml-2 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $activeOrdersCount }}</span>
+                                        <span class="ml-2 bg-gray-900 text-white text-xs px-2 py-0.5 rounded-full">{{ $activeOrdersCount }}</span>
                                     @endif
                                 </a>
                                 <a href="{{ route('wishlist.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" style="text-decoration:none;">Wishlist</a>
                                 <a href="{{ route('customer-service.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" style="text-decoration:none;">
                                     Help
                                     @if($unreadMessagesCount > 0)
-                                        <span class="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $unreadMessagesCount }}</span>
+                                        <span class="ml-2 bg-gray-900 text-white text-xs px-2 py-0.5 rounded-full">{{ $unreadMessagesCount }}</span>
                                     @endif
                                 </a>
                                 <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" style="text-decoration:none;">Account</a>
@@ -265,8 +285,18 @@
                             </span>
                         </a>
                         <a class="nav-link" href="{{ route('dashboard') }}">Account</a>
+                        <button data-notification-bell onclick="toggleNotifications(event)" class="nav-link" style="background:none;border:none;cursor:pointer;position:relative;">
+                            <span class="nav-badge">
+                                <svg style="width:20px;height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                @if(($unreadNotificationCount ?? 0) > 0)
+                                    <sup class="badge-red">{{ $unreadNotificationCount }}</sup>
+                                @endif
+                            </span>
+                        </button>
                         @if($unreadMessagesCount > 0)
-                            <a href="{{ route('customer-service.index') }}" class="unread-help-badge btn" style="background:#dc2626;padding:10px 16px;border-radius:50px;font-weight:600;text-decoration:none;font-size:0.85rem;">
+                            <a href="{{ route('customer-service.index') }}" class="unread-help-badge btn" style="background:#1a1a2e;padding:10px 16px;border-radius:50px;font-weight:600;text-decoration:none;font-size:0.85rem;">
                                 🔔 {{ $unreadMessagesCount }} new message{{ $unreadMessagesCount > 1 ? 's' : '' }}
                             </a>
                         @endif
@@ -326,8 +356,18 @@
                             </span>
                         </a>
                         <a class="nav-link" href="{{ route('dashboard') }}">Account</a>
+                        <button data-notification-bell onclick="toggleNotifications(event)" class="nav-link" style="background:none;border:none;cursor:pointer;position:relative;">
+                            <span class="nav-badge">
+                                <svg style="width:20px;height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                @if(($unreadNotificationCount ?? 0) > 0)
+                                    <sup class="badge-red">{{ $unreadNotificationCount }}</sup>
+                                @endif
+                            </span>
+                        </button>
                         @if($unreadMessagesCount > 0)
-                            <a href="{{ route('customer-service.index') }}" class="unread-help-badge btn" style="background:#dc2626;padding:10px 16px;border-radius:50px;font-weight:600;text-decoration:none;font-size:0.85rem;">
+                            <a href="{{ route('customer-service.index') }}" class="unread-help-badge btn" style="background:#1a1a2e;padding:10px 16px;border-radius:50px;font-weight:600;text-decoration:none;font-size:0.85rem;">
                                 🔔 {{ $unreadMessagesCount }} new message{{ $unreadMessagesCount > 1 ? 's' : '' }}
                             </a>
                         @endif
@@ -358,6 +398,35 @@
                     <sup>{{ $floatCartCount }}</sup>
                 @endif
             </a>
+        @endunless
+    @endauth
+
+    <!-- Notifications Panel -->
+    @auth
+        @unless(auth()->user()->isAdmin())
+            <div id="notificationsDropdown" class="notification-panel hidden">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #e8e4df;">
+                    <strong>Notifications</strong>
+                    <form method="POST" action="{{ route('notifications.read-all') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-secondary" style="padding:4px 10px;font-size:0.8rem;">Mark all read</button>
+                    </form>
+                </div>
+                <div style="max-height:340px;overflow-y:auto;">
+                    @forelse($recentNotifications as $notification)
+                        <a href="{{ route('notifications.read', $notification) }}" class="notification-item {{ $notification->read_at ? '' : 'unread' }}">
+                            <strong style="font-size:0.9rem;display:block;">{{ $notification->title }}</strong>
+                            @if($notification->body)
+                                <span style="font-size:0.85rem;color:#6c757d;display:block;">{{ $notification->body }}</span>
+                            @endif
+                            <span style="font-size:0.75rem;color:#9ca3af;display:block;margin-top:2px;">{{ $notification->created_at->diffForHumans() }}</span>
+                        </a>
+                    @empty
+                        <p style="padding:20px 16px;color:#6c757d;text-align:center;margin:0;">No notifications yet.</p>
+                    @endforelse
+                </div>
+                <a href="{{ route('notifications.index') }}" style="display:block;text-align:center;padding:10px;font-weight:600;text-decoration:none;color:#1a1a2e;border-top:1px solid #e8e4df;">View all notifications</a>
+            </div>
         @endunless
     @endauth
 
@@ -602,6 +671,25 @@
             const button = event.target.closest('button[onclick^="toggleProfileDropdown"]');
             if (dropdown && !dropdown.contains(event.target) && !button) {
                 dropdown.classList.add('hidden');
+            }
+        });
+
+        function toggleNotifications(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            const panel = document.getElementById('notificationsDropdown');
+            if (panel) {
+                panel.classList.toggle('hidden');
+            }
+        }
+
+        // Close notifications panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('notificationsDropdown');
+            const bell = event.target.closest('[data-notification-bell]');
+            if (panel && !panel.contains(event.target) && !bell) {
+                panel.classList.add('hidden');
             }
         });
 

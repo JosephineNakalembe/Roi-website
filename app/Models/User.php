@@ -96,6 +96,16 @@ class User extends Authenticatable
         return $this->hasMany(CustomerMessage::class);
     }
 
+    public function userNotifications()
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->userNotifications()->whereNull('read_at');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin' || $this->email === 'josephinenakalembe33@gmail.com';
