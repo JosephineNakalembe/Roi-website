@@ -175,6 +175,17 @@ class ProductController extends Controller
                     $globalImageIndex++;
                 }
             }
+            if ($request->hasFile("color_image_$i")) {
+                $path = $request->file("color_image_$i")->store('products', 'r2');
+                $product->images()->create([
+                    'path' => $path,
+                    'media_type' => 'image',
+                    'color' => $colorValue,
+                    'is_color_thumb' => true,
+                    'is_primary' => false,
+                    'order' => 998,
+                ]);
+            }
         }
 
 
@@ -318,6 +329,23 @@ class ProductController extends Controller
                     ]);
                     $orderCounter++;
                 }
+            }
+            if ($request->hasFile("color_image_$i")) {
+                foreach ($product->images()->where('is_color_thumb', true)->where('color', $colorValue)->get() as $oldThumb) {
+                    if (Storage::disk('r2')->exists($oldThumb->path)) {
+                        Storage::disk('r2')->delete($oldThumb->path);
+                    }
+                    $oldThumb->delete();
+                }
+                $path = $request->file("color_image_$i")->store('products', 'r2');
+                $product->images()->create([
+                    'path' => $path,
+                    'media_type' => 'image',
+                    'color' => $colorValue,
+                    'is_color_thumb' => true,
+                    'is_primary' => false,
+                    'order' => 998,
+                ]);
             }
         }
 

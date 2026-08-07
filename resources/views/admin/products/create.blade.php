@@ -10,7 +10,7 @@
     <div class="card" style="max-width:700px;margin:0 auto;">
         <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data" style="display:grid;gap:12px;">
             @csrf
-                        <label>Product ID <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— Auto-generated</span></label>
+                        <label>Product ID</label>
             <input class="input" name="product_id_display" id="productIdDisplay" value="ER0000036" readonly style="background:#f3f4f6;cursor:not-allowed;">
             <input type="hidden" name="product_id" id="productIdHidden" value="ER0000036">
             
@@ -25,7 +25,7 @@
                 @endforeach
             </select>
             
-            <label>Additional Categories <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— a product can belong to multiple categories</span></label>
+            <label>Additional Categories</label>
             <div id="additionalCategories" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
                 @foreach($categories as $category)
                     <label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:1rem;">
@@ -40,23 +40,20 @@
             <label>Description</label>
             <textarea class="input" name="description" rows="4">{{ old('description') }}</textarea>
             <label>Base Price (UGX)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Used as a fallback when a color has no specific price.</p>
             <input class="input" name="price" type="number" step="0.01" value="{{ old('price', '0.00') }}" required>
             
-            <label>Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— for profit reports, not shown to customers</span></label>
+            <label>Cost Price (UGX)</label>
             <input class="input" name="cost_price" type="number" step="0.01" value="{{ old('cost_price', '0.00') }}" placeholder="What you paid per unit">
 
             <label>Supplier <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— admin only, not shown to customers</span></label>
             <input class="input" name="supplier" type="text" value="{{ old('supplier') }}" placeholder="Who you bought this from">
 
             <label style="font-weight:700;">Color, Size, Quantity, Price & Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. If the product has color options, add a picture of each color so buyers see that picture instead of a color square. If there are no options (e.g. it only comes in one color), just type the color name — the picture is optional. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
             <div id="colorQuantityContainer" style="display:grid;gap:10px;margin-bottom:10px;"></div>
             <button type="button" class="btn btn-secondary" onclick="addColorQuantityRow()">+ Add Color</button>
 
             
             <label style="font-weight:700;margin-top:12px;">Size Guide (Optional)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Build a custom size chart — add columns (e.g. sizes) and rows (e.g. measurements) as needed. Only filled fields will be displayed on the product page.</p>
 
             <div id="sizeGuideBuilder" style="overflow-x:auto;">
                 <table style="width:100%;border-collapse:collapse;font-size:1rem;">
@@ -80,12 +77,10 @@
             </label>
             
             <label style="font-weight:700;">Product Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Upload multiple images. Drag to reorder, click × to remove.</p>
             <input type="file" name="images[]" id="imageInput" multiple accept="image/*" onchange="previewImages(event)">
             <div id="imagePreview" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:12px;margin-top:12px;"></div>
 
             <label style="font-weight:700;margin-top:12px;">Product Video (Optional)</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Upload a video (MP4, MOV, max 50MB)</p>
             <input type="file" name="video" id="videoInput" accept="video/*" onchange="previewVideo(event)">
             <div id="videoPreview" style="margin-top:12px;"></div>
             
@@ -223,28 +218,47 @@
 
             row.innerHTML = `
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;" title="Add a picture of this exact color">
-                        <span id="colorThumb_${index}" style="width:44px;height:44px;border:1px dashed #cbd5e1;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#6b7280;line-height:1.1;text-align:center;overflow:hidden;">Add<br>Picture</span>
-                        <input type="file" name="color_images_${index}[]" multiple accept="image/*" onchange="previewColorImages(event, ${index})" style="display:none;">
+                    <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;flex-shrink:0;">
+                        <span id="colorThumb_${index}" style="width:44px;height:44px;border:1px dashed #cbd5e1;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:0.62rem;color:#6b7280;line-height:1.15;text-align:center;overflow:hidden;">Color<br>Image</span>
+                        <input type="file" name="color_image_${index}" accept="image/*" onchange="previewColorImage(event, ${index})" style="display:none;">
                     </label>
-                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" style="flex:1;padding:6px;font-size:1rem;min-width:120px;">
-                    <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" style="padding:6px;font-size:1rem;width:130px;">
+                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name" style="flex:1;padding:6px;font-size:1rem;min-width:120px;">
+                    <input type="text" class="input" name="size_${index}" placeholder="Size (S, M, L, XL, 42)" style="padding:6px;font-size:1rem;width:130px;">
                     <input type="number" class="input" name="quantity_${index}" placeholder="Qty" min="1" style="padding:6px;font-size:1rem;width:80px;">
                     <button type="button" class="btn btn-secondary" onclick="this.closest('.color-row').remove(); updateColors();" style="padding:4px 8px;font-size:0.95rem;">Remove</button>
                 </div>
-                <div id="colorImagePreview_${index}" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));gap:8px;"></div>
                 <div style="display:grid;grid-template-columns:1fr;gap:6px;">
-                    <label style="font-size:0.95rem;font-weight:600;">Price for this color (UGX) <span class="text-muted" style="font-weight:400;font-size:0.9rem;">— leave blank to use base price</span></label>
-                    <input type="number" class="input" name="price_${index}" placeholder="Leave blank to use base price" step="0.01" min="0" style="padding:6px;font-size:1rem;">
+                    <label style="font-size:0.95rem;font-weight:600;">Product Images for this color</label>
+                    <input type="file" name="color_images_${index}[]" multiple accept="image/*" onchange="previewColorImages(event, ${index})">
+                    <div id="colorImagePreview_${index}" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));gap:8px;"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr;gap:6px;">
+                    <label style="font-size:0.95rem;font-weight:600;">Price for this color (UGX)</label>
+                    <input type="number" class="input" name="price_${index}" placeholder="Uses base price if blank" step="0.01" min="0" style="padding:6px;font-size:1rem;">
                 </div>
             `;
             container.appendChild(row);
         }
 
+        function previewColorImage(event, index) {
+            const thumb = document.getElementById('colorThumb_' + index);
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    thumb.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
+                    thumb.style.border = '1px solid #d1d5db';
+                };
+                reader.readAsDataURL(file);
+            } else if (thumb) {
+                thumb.innerHTML = 'Color<br>Image';
+                thumb.style.border = '1px dashed #cbd5e1';
+            }
+        }
+
         function previewColorImages(event, index) {
             const previewContainer = document.getElementById('colorImagePreview_' + index);
             previewContainer.innerHTML = '';
-            const thumb = document.getElementById('colorThumb_' + index);
             const files = event.target.files;
             if (files.length > 0) {
                 Array.from(files).forEach((file) => {
@@ -261,17 +275,6 @@
                     };
                     reader.readAsDataURL(file);
                 });
-                if (thumb) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        thumb.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
-                        thumb.style.border = '1px solid #d1d5db';
-                    };
-                    reader.readAsDataURL(files[0]);
-                }
-            } else if (thumb) {
-                thumb.innerHTML = 'Add<br>Picture';
-                thumb.style.border = '1px dashed #cbd5e1';
             }
         }
 

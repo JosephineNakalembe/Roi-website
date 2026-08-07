@@ -6,8 +6,16 @@
 
 @section('content')
     @php
-        // Build the media list with sorting by order
-        $allMedia = $product->images->sortBy('order')->values();
+        // Build the media list with sorting by order (color thumbnail pictures are excluded from the slideshow)
+        $allMedia = $product->images->where('is_color_thumb', '!=', true)->sortBy('order')->values();
+
+        // Small color-button picture for each color (separate from the color's product images)
+        $colorThumbMap = [];
+        foreach ($product->images as $media) {
+            if ($media->is_color_thumb && $media->color) {
+                $colorThumbMap[$media->color] = media_url($media->path);
+            }
+        }
 
         // Group images by color (only images, not videos)
         $colorImageMap = [];
@@ -177,8 +185,8 @@
                                                     $colorParts = explode(':', $color);
                                                     $colorHexCode = (isset($colorParts[0]) && preg_match('/^#[0-9a-fA-F]{6}$/', $colorParts[0])) ? $colorParts[0] : null;
                                                     $colorName = $colorParts[1] ?? $color;
-                                                    // Show a small photo of the exact color when the admin uploaded one
-                                                    $colorThumb = $colorImageMap[$color][0]['path'] ?? null;
+                                                    // Show the admin's color picture, else the first color image, else a hex/name chip
+                                                    $colorThumb = $colorThumbMap[$color] ?? ($colorImageMap[$color][0]['path'] ?? null);
                                                 @endphp
                                                 <button type="button"
                                                     class="color-pill"
