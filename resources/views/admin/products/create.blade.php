@@ -50,7 +50,7 @@
             <input class="input" name="supplier" type="text" value="{{ old('supplier') }}" placeholder="Who you bought this from">
 
             <label style="font-weight:700;">Color, Size, Quantity, Price & Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. If the product has color options, pick the color and upload a photo of that color so buyers see a picture instead of a swatch. If there are no options (e.g. it only comes in one color), just type the color name — the color picker and photo are optional. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. If the product has color options, add a picture of each color so buyers see that picture instead of a color square. If there are no options (e.g. it only comes in one color), just type the color name — the picture is optional. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
             <div id="colorQuantityContainer" style="display:grid;gap:10px;margin-bottom:10px;"></div>
             <button type="button" class="btn btn-secondary" onclick="addColorQuantityRow()">+ Add Color</button>
 
@@ -222,24 +222,20 @@
             row.classList.add('color-row');
 
             row.innerHTML = `
-                <div style="display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px;align-items:center;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <input type="color" name="color_${index}" value="#000000" data-touched="false" style="width:50px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:0;flex-shrink:0;" title="Optional — only needed when the product has color options to pick from">
-                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" style="flex:1;padding:6px;font-size:1rem;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;" title="Add a picture of this exact color">
+                        <span id="colorThumb_${index}" style="width:44px;height:44px;border:1px dashed #cbd5e1;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#6b7280;line-height:1.1;text-align:center;overflow:hidden;">Add<br>Picture</span>
+                        <input type="file" name="color_images_${index}[]" multiple accept="image/*" onchange="previewColorImages(event, ${index})" style="display:none;">
+                    </label>
+                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" style="flex:1;padding:6px;font-size:1rem;min-width:120px;">
+                    <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" style="padding:6px;font-size:1rem;width:130px;">
+                    <input type="number" class="input" name="quantity_${index}" placeholder="Qty" min="1" style="padding:6px;font-size:1rem;width:80px;">
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.color-row').remove(); updateColors();" style="padding:4px 8px;font-size:0.95rem;">Remove</button>
                 </div>
-
-                    <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" style="padding:6px;font-size:1rem;">
-                    <input type="number" class="input" name="quantity_${index}" placeholder="Qty" min="1" style="padding:6px;font-size:1rem;">
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('div[style*=border]').remove(); updateColors();" style="padding:4px 8px;font-size:0.95rem;">Remove</button>
-                </div>
+                <div id="colorImagePreview_${index}" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));gap:8px;"></div>
                 <div style="display:grid;grid-template-columns:1fr;gap:6px;">
-                    <label style="font-size:0.95rem;font-weight:600;">Price for this color (UGX)</label>
+                    <label style="font-size:0.95rem;font-weight:600;">Price for this color (UGX) <span class="text-muted" style="font-weight:400;font-size:0.9rem;">— leave blank to use base price</span></label>
                     <input type="number" class="input" name="price_${index}" placeholder="Leave blank to use base price" step="0.01" min="0" style="padding:6px;font-size:1rem;">
-                </div>
-                <div style="display:grid;grid-template-columns:1fr;gap:6px;">
-                    <label style="font-size:0.95rem;font-weight:600;">Images for this color (optional)</label>
-                    <input type="file" name="color_images_${index}[]" multiple accept="image/*" onchange="previewColorImages(event, ${index})" style="font-size:0.95rem;">
-                    <div id="colorImagePreview_${index}" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));gap:8px;margin-top:4px;"></div>
                 </div>
             `;
             container.appendChild(row);
@@ -248,6 +244,7 @@
         function previewColorImages(event, index) {
             const previewContainer = document.getElementById('colorImagePreview_' + index);
             previewContainer.innerHTML = '';
+            const thumb = document.getElementById('colorThumb_' + index);
             const files = event.target.files;
             if (files.length > 0) {
                 Array.from(files).forEach((file) => {
@@ -264,24 +261,28 @@
                     };
                     reader.readAsDataURL(file);
                 });
+                if (thumb) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        thumb.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
+                        thumb.style.border = '1px solid #d1d5db';
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            } else if (thumb) {
+                thumb.innerHTML = 'Add<br>Picture';
+                thumb.style.border = '1px dashed #cbd5e1';
             }
         }
 
         function updateColors() {
            const container = document.getElementById('colorQuantityContainer');
-           const colors = [];
            const colorNames = [];
 
            container.querySelectorAll('.color-row').forEach(row => {
-               const colorInput = row.querySelector('input[type="color"][name^="color_"]');
                const nameInput = row.querySelector('input[name^="color_name_"]');
-               const touched = colorInput && colorInput.dataset.touched === 'true';
                const name = nameInput && nameInput.value.trim();
-               if (touched && name) {
-                   colorNames.push(colorInput.value + ':' + name);
-               } else if (name) {
-                   colorNames.push(name);
-               }
+               if (name) colorNames.push(name);
           });
 
            document.getElementById('colorsHidden').value = JSON.stringify(colorNames);
@@ -290,9 +291,6 @@
 
         document.addEventListener('input', function(e) {
             if (e.target.name.startsWith('color_')) {
-                if (e.target.type === 'color') {
-                    e.target.dataset.touched = 'true';
-                }
                 updateColors();
             }
         });
