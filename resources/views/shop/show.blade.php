@@ -175,17 +175,25 @@
                                                 @php
                                                     // Parse color to get hex code and name
                                                     $colorParts = explode(':', $color);
-                                                    $hexCode = $colorParts[0] ?? '#000000';
+                                                    $colorHexCode = (isset($colorParts[0]) && preg_match('/^#[0-9a-fA-F]{6}$/', $colorParts[0])) ? $colorParts[0] : null;
                                                     $colorName = $colorParts[1] ?? $color;
+                                                    // Show a small photo of the exact color when the admin uploaded one
+                                                    $colorThumb = $colorImageMap[$color][0]['path'] ?? null;
                                                 @endphp
                                                 <button type="button"
                                                     class="color-pill"
                                                     data-color="{{ $color }}"
-                                                    data-hex="{{ $hexCode }}"
+                                                    data-hex="{{ $colorHexCode }}"
                                                     onclick="selectColor('{{ addslashes($color) }}')"
                                                     style="cursor:pointer;border:none;background:transparent;padding:0;min-width:40px;height:40px;transition:all 0.15s;display:flex;align-items:center;justify-content:center;"
                                                     title="{{ $colorName }}">
-                                                    <span style="width:32px;height:32px;background:{{ $hexCode }};border-radius:6px;display:block;"></span>
+                                                    @if($colorThumb)
+                                                        <span style="width:32px;height:32px;border-radius:6px;overflow:hidden;display:block;border:1px solid #d1d5db;"><img src="{{ $colorThumb }}" alt="{{ $colorName }}" style="width:100%;height:100%;object-fit:cover;display:block;"></span>
+                                                    @elseif($colorHexCode)
+                                                        <span style="width:32px;height:32px;background:{{ $colorHexCode }};border-radius:6px;display:block;border:1px solid #d1d5db;"></span>
+                                                    @else
+                                                        <span style="width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:#f1f3f5;border:1px solid #d1d5db;font-size:0.58rem;line-height:1.1;text-align:center;padding:2px;color:#374151;">{{ $colorName }}</span>
+                                                    @endif
                                                 </button>
                                             @endforeach
                                         </div>

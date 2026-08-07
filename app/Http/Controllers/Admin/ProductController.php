@@ -91,14 +91,13 @@ class ProductController extends Controller
         $collectedColors = [];
         $colorPrices = [];
         for ($i = 0; $i < 100; $i++) {
-            $color = $request->input("color_$i");
-            $colorName = $request->input("color_name_$i");
-            $size = $request->input("size_$i");
+            $colorHex = trim((string) $request->input("color_$i"));
+            $colorName = trim((string) $request->input("color_name_$i"));
+            $size = trim((string) $request->input("size_$i"));
             $quantity = $request->input("quantity_$i");
             $colorPrice = $request->input("price_$i");
-            if ($color && $quantity) {
-                $color = trim($color);
-                $colorValue = $colorName ? "$color:" . trim($colorName) : $color;
+            if (($colorHex || $colorName) && $quantity) {
+                $colorValue = $colorHex && $colorName ? "$colorHex:$colorName" : ($colorHex ?: $colorName);
                 $key = $size ? "$colorValue ($size)" : $colorValue;
                 $colorStock[$key] = (int)$quantity;
                 $totalStock += (int)$quantity;
@@ -157,13 +156,12 @@ class ProductController extends Controller
 
         // Handle per-color images
         for ($i = 0; $i < 100; $i++) {
-            $color = $request->input("color_$i");
-            $colorName = $request->input("color_name_$i");
-            if (!$color) {
+            $colorHex = trim((string) $request->input("color_$i"));
+            $colorName = trim((string) $request->input("color_name_$i"));
+            if (!$colorHex && !$colorName) {
                 continue;
             }
-            $color = trim($color);
-            $colorValue = $colorName ? "$color:" . trim($colorName) : $color;
+            $colorValue = $colorHex && $colorName ? "$colorHex:$colorName" : ($colorHex ?: $colorName);
             if ($request->hasFile("color_images_$i")) {
                 foreach ($request->file("color_images_$i") as $image) {
                     $path = $image->store('products', 'r2');
@@ -238,14 +236,13 @@ class ProductController extends Controller
         $collectedColors = [];
         $colorPrices = [];
         for ($i = 0; $i < 100; $i++) {
-            $color = $request->input("color_$i");
-            $colorName = $request->input("color_name_$i");
-            $size = $request->input("size_$i");
+            $colorHex = trim((string) $request->input("color_$i"));
+            $colorName = trim((string) $request->input("color_name_$i"));
+            $size = trim((string) $request->input("size_$i"));
             $quantity = $request->input("quantity_$i");
             $colorPrice = $request->input("price_$i");
-            if ($color && $quantity) {
-                $color = trim($color);
-                $colorValue = $colorName ? "$color:" . trim($colorName) : $color;
+            if (($colorHex || $colorName) && $quantity) {
+                $colorValue = $colorHex && $colorName ? "$colorHex:$colorName" : ($colorHex ?: $colorName);
                 $key = $size ? "$colorValue ($size)" : $colorValue;
                 $colorStock[$key] = (int)$quantity;
                 $totalStock += (int)$quantity;
@@ -303,13 +300,12 @@ class ProductController extends Controller
 
         // Handle per-color images
         for ($i = 0; $i < 100; $i++) {
-            $color = $request->input("color_$i");
-            $colorName = $request->input("color_name_$i");
-            if (!$color) {
+            $colorHex = trim((string) $request->input("color_$i"));
+            $colorName = trim((string) $request->input("color_name_$i"));
+            if (!$colorHex && !$colorName) {
                 continue;
             }
-            $color = trim($color);
-            $colorValue = $colorName ? "$color:" . trim($colorName) : $color;
+            $colorValue = $colorHex && $colorName ? "$colorHex:$colorName" : ($colorHex ?: $colorName);
             if ($request->hasFile("color_images_$i")) {
                 foreach ($request->file("color_images_$i") as $image) {
                     $path = $image->store('products', 'r2');

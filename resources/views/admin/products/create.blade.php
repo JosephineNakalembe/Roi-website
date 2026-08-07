@@ -50,7 +50,7 @@
             <input class="input" name="supplier" type="text" value="{{ old('supplier') }}" placeholder="Who you bought this from">
 
             <label style="font-weight:700;">Color, Size, Quantity, Price & Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. If the product has color options, pick the color and upload a photo of that color so buyers see a picture instead of a swatch. If there are no options (e.g. it only comes in one color), just type the color name — the color picker and photo are optional. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
             <div id="colorQuantityContainer" style="display:grid;gap:10px;margin-bottom:10px;"></div>
             <button type="button" class="btn btn-secondary" onclick="addColorQuantityRow()">+ Add Color</button>
 
@@ -224,8 +224,8 @@
             row.innerHTML = `
                 <div style="display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px;align-items:center;">
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <input type="color" name="color_${index}" value="#000000" style="width:50px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:0;flex-shrink:0;">
-                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" style="flex:1;padding:6px;font-size:1rem;flex:1;">
+                    <input type="color" name="color_${index}" value="#000000" data-touched="false" style="width:50px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:0;flex-shrink:0;" title="Optional — only needed when the product has color options to pick from">
+                    <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" style="flex:1;padding:6px;font-size:1rem;">
                 </div>
 
                     <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" style="padding:6px;font-size:1rem;">
@@ -271,22 +271,28 @@
            const container = document.getElementById('colorQuantityContainer');
            const colors = [];
            const colorNames = [];
-    
+
            container.querySelectorAll('.color-row').forEach(row => {
-           const colorInput = row.querySelector('input[type="color"]');
-           const nameInput = row.querySelector('input[name^="color_name_"]');
-           if (colorInput && nameInput && nameInput.value.trim()) {
-            colors.push(colorInput.value);
-            colorNames.push(colorInput.value + ':' + nameInput.value.trim());
-           }
+               const colorInput = row.querySelector('input[type="color"][name^="color_"]');
+               const nameInput = row.querySelector('input[name^="color_name_"]');
+               const touched = colorInput && colorInput.dataset.touched === 'true';
+               const name = nameInput && nameInput.value.trim();
+               if (touched && name) {
+                   colorNames.push(colorInput.value + ':' + name);
+               } else if (name) {
+                   colorNames.push(name);
+               }
           });
-    
+
            document.getElementById('colorsHidden').value = JSON.stringify(colorNames);
         }
 
 
         document.addEventListener('input', function(e) {
             if (e.target.name.startsWith('color_')) {
+                if (e.target.type === 'color') {
+                    e.target.dataset.touched = 'true';
+                }
                 updateColors();
             }
         });

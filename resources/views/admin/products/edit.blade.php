@@ -54,7 +54,7 @@
             <input class="input" name="supplier" type="text" value="{{ old('supplier', $product->supplier) }}" placeholder="Who you bought this from">
 
             <label style="font-weight:700;">Color, Size, Quantity, Price & Images</label>
-            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
+            <p class="text-muted" style="margin:-8px 0 8px 0;font-size:1rem;">Each color can have its own price and its own set of images. If the product has color options, pick the color and upload a photo of that color so buyers see a picture instead of a swatch. If there are no options (e.g. it only comes in one color), just type the color name — the color picker and photo are optional. Type the size manually (e.g., S, M, L, XL, 42, etc.)</p>
             <div id="colorQuantityContainer" style="display:grid;gap:10px;margin-bottom:10px;"></div>
             <button type="button" class="btn btn-secondary" onclick="addColorQuantityRow()">+ Add Color</button>
 
@@ -170,13 +170,13 @@
             row.style.background = '#fafafa';
             row.classList.add('color-row');
 
-            // Parse existing color which may be "#hex:Name" or plain text
-            let hexCode = '#000000';
-            let colorName = color;
+            // Parse existing color which may be "#hex:Name", plain hex, or a plain text name
+            let hexCode = '';
+            let colorName = color || '';
             if (color && color.includes(':')) {
                 const parts = color.split(':');
-                hexCode = parts[0];
-                colorName = parts[1] || '';
+                hexCode = /^#[0-9a-fA-F]{6}$/.test(parts[0]) ? parts[0] : '';
+                colorName = hexCode ? (parts[1] || '') : color;
             } else if (color && /^#[0-9a-fA-F]{6}$/.test(color)) {
                 hexCode = color;
                 colorName = '';
@@ -196,7 +196,7 @@
             row.innerHTML = `
                 <div style="display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px;align-items:center;">
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <input type="color" name="color_${index}" value="${hexCode}" style="width:50px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:0;flex-shrink:0;">
+                    <input type="color" name="color_${index}" value="${hexCode}" data-touched="${hexCode ? 'true' : 'false'}" style="width:50px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:0;flex-shrink:0;" title="Optional — only needed when the product has color options to pick from">
                     <input type="text" class="input" name="color_name_${index}" placeholder="Color name (e.g., Navy Blue)" value="${colorName}" style="flex:1;padding:6px;font-size:1rem;">
                 </div>
                     <input type="text" class="input" name="size_${index}" placeholder="Size (e.g., S, M, L, XL, 42)" value="${size}" style="padding:6px;font-size:1rem;">
@@ -245,11 +245,15 @@
             const container = document.getElementById('colorQuantityContainer');
             const colorNames = [];
             container.querySelectorAll('.color-row').forEach(row => {
-                const colorInput = row.querySelector('input[type="color"]');
+                const colorInput = row.querySelector('input[type="color"][name^="color_"]');
                 const nameInput = row.querySelector('input[name^="color_name_"]');
-                if (colorInput && nameInput && nameInput.value.trim()) {
-                    colorNames.push(colorInput.value + ':' + nameInput.value.trim());
-                } else if (colorInput && colorInput.value) {
+                const touched = colorInput && colorInput.dataset.touched === 'true';
+                const name = nameInput && nameInput.value.trim();
+                if (touched && name) {
+                    colorNames.push(colorInput.value + ':' + name);
+                } else if (name) {
+                    colorNames.push(name);
+                } else if (touched && colorInput.value) {
                     colorNames.push(colorInput.value);
                 }
             });
@@ -276,6 +280,9 @@
         // Add event listeners to color inputs
         document.addEventListener('input', function(e) {
             if (e.target.name.startsWith('color_')) {
+                if (e.target.type === 'color') {
+                    e.target.dataset.touched = 'true';
+                }
                 updateColors();
             }
         });
