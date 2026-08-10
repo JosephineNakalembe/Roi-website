@@ -21,6 +21,7 @@ class Order extends Model
         'shipping',
         'total',
         'status',
+        'is_new',
         'notes',
         'placed_at',
         'delivered_at',
@@ -35,6 +36,11 @@ class Order extends Model
         'placed_at' => 'datetime',
         'delivered_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'is_new' => 'boolean',
+    ];
+
+    protected $attributes = [
+        'is_new' => true,
     ];
 
     protected static function booted()

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CustomerMessage;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\SystemError;
 use App\Models\User;
 
 class DashboardController extends Controller
@@ -21,7 +22,9 @@ class DashboardController extends Controller
         $users = User::count();
         $messages = CustomerMessage::count();
         $openMessages = CustomerMessage::where('status', 'open')->count();
+        $systemErrors = SystemError::latest()->limit(10)->get();
+        $newOrdersCount = Order::where('is_new', true)->count();
 
-        return view('admin.dashboard', compact('orders', 'pending', 'shipped', 'delivered', 'products', 'outOfStock', 'users', 'messages', 'openMessages'));
+        return view('admin.dashboard', compact('orders', 'pending', 'shipped', 'delivered', 'products', 'outOfStock', 'users', 'messages', 'openMessages', 'systemErrors', 'newOrdersCount'));
     }
 }

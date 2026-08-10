@@ -133,29 +133,7 @@
                 </div>
                 <div>
                     <h1 style="font-size:0.975rem;">{{ $product->name }}</h1>
-                    <p class="text-muted">{{ $product->category?->name ?? 'Uncategorized' }}</p>
                     <p id="productPrice" style="font-size:1.2rem;font-weight:700;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
-                    @if($product->description)
-                        <div style="margin-top:4px;">
-                            <button type="button" onclick="toggleDescription()" id="descToggle" style="background:none;border:none;cursor:pointer;font-size:0.975rem;font-weight:600;color:#333;padding:0;display:flex;align-items:center;gap:6px;">
-                                <span>Description</span>
-                                <span id="descArrow" style="transition:transform 0.2s;">&#9660;</span>
-                            </button>
-                            <div id="descContent" style="display:none;margin-top:8px;font-size:0.975rem;line-height:1.6;">
-                                {!! nl2br(e($product->description)) !!}
-                                @if($product->product_id)
-                                    <p style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                                        <span>Product ID:</span>
-                                        <code id="productIdText" style="background:#f1f3f5;padding:2px 6px;border-radius:4px;font-size:0.9rem;font-weight:600;">{{ $product->product_id }}</code>
-                                        <button type="button" onclick="copyProductId()" title="Copy Product ID" style="border:none;background:none;cursor:pointer;padding:2px;color:#1a1a2e;display:inline-flex;align-items:center;">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                        </button>
-                                        <span id="productIdCopied" style="display:none;color:#16a34a;font-size:0.85rem;">Copied!</span>
-                                    </p>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
 
                     @if($product->non_returnable)
                         <p style="color:#991b1b;font-weight:600;margin-top:4px;font-size:0.975rem;">
@@ -238,6 +216,40 @@
                                 <button class="btn btn-secondary" type="submit">{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}</button>
                             </form>
                         @endif
+
+                    <!-- Product Details Section -->
+                    @if($product->description || $product->category?->name || $product->product_id)
+                        <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e9ecef;">
+                            <button type="button" onclick="toggleDescription()" id="descToggle" style="background:none;border:none;cursor:pointer;font-size:0.975rem;font-weight:600;color:#333;padding:0;display:flex;align-items:center;gap:6px;">
+                                <span>Product Details</span>
+                                <span id="descArrow" style="transition:transform 0.2s;transform:rotate(180deg);">&#9660;</span>
+                            </button>
+                            <div id="descContent" style="margin-top:8px;font-size:0.975rem;line-height:1.6;">
+                                @if($product->description)
+                                    <div style="margin-bottom:8px;">{!! nl2br(e($product->description)) !!}</div>
+                                @endif
+                                @if($product->category?->name || $product->product_id)
+                                    <p style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                        @if($product->category?->name)
+                                            <span>Category:</span>
+                                            <code style="background:#f1f3f5;padding:2px 6px;border-radius:4px;font-size:0.9rem;font-weight:600;">{{ $product->category->name }}</code>
+                                        @endif
+                                        @if($product->category?->name && $product->product_id)
+                                            <span style="margin:0 4px;">•</span>
+                                        @endif
+                                        @if($product->product_id)
+                                            <span>Product ID:</span>
+                                            <code id="productIdText" style="background:#f1f3f5;padding:2px 6px;border-radius:4px;font-size:0.9rem;font-weight:600;">{{ $product->product_id }}</code>
+                                            <button type="button" onclick="copyProductId()" title="Copy Product ID" style="border:none;background:none;cursor:pointer;padding:2px;color:#1a1a2e;display:inline-flex;align-items:center;">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                            </button>
+                                            <span id="productIdCopied" style="display:none;color:#16a34a;font-size:0.85rem;">Copied!</span>
+                                        @endif
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Reviews Section -->
                     <div style="margin-top:24px;padding-top:20px;border-top:1px solid #e9ecef;">
@@ -620,7 +632,7 @@
         function toggleDescription() {
             const content = document.getElementById('descContent');
             const arrow = document.getElementById('descArrow');
-            const isOpen = content.style.display === 'block';
+            const isOpen = content.style.display !== 'none';
             content.style.display = isOpen ? 'none' : 'block';
             arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         }

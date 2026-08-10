@@ -73,7 +73,7 @@ class OrderController extends Controller
             $updates['delivered_at'] = now();
         }
 
-        $order->update($updates);
+        $order->update($updates + ['is_new' => false]);
 
         OrderUpdate::create([
             'order_id' => $order->id,
@@ -112,6 +112,8 @@ class OrderController extends Controller
             'cancelled_at' => now(),
             'cancellation_reason' => 'Out of stock',
         ]);
+
+        $order->update(['is_new' => false]);
 
         // Add a timeline entry for the cancellation
         $order->updates()->create([

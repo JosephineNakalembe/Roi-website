@@ -1,10 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="sticky-header">
+        <div class="sticky-header">
         <div class="header-content">
             @include('partials.back-button', ['fallback' => route('admin.dashboard')])
-            <h1 class="mb-0">Admin Dashboard</h1>
+            <h1 class="mb-0">
+                Admin Dashboard
+                @if(($newOrdersCount ?? 0) > 0)
+                    <span class="nav-badge"><sup class="badge-red" title="New orders received">{{ $newOrdersCount }}</sup></span>
+                @endif
+            </h1>
         </div>
     </div>
     <div class="card">
@@ -32,5 +37,30 @@
             <a class="btn" href="{{ route('admin.returns.index') }}" style="background:#f97316;">View Returns</a>
             <a class="btn btn-secondary" href="{{ route('admin.delivery-areas.index') }}">Delivery Areas</a>
         </div>
+
+        @if($systemErrors->isNotEmpty())
+            <div style="margin-top:28px;border-top:1px solid #e8e4df;padding-top:20px;">
+                <h2 style="margin:0 0 12px;font-size:1.05rem;">Recent System Errors</h2>
+                <div style="display:grid;gap:8px;">
+                    @foreach($systemErrors as $error)
+                        <div style="background:#fff;border:1px solid #e8e4df;border-left:3px solid #dc2626;border-radius:8px;padding:10px 12px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <strong style="font-size:0.9rem;">{{ $error->exception }}</strong>
+                                <span style="font-size:0.8rem;color:#9ca3af;">{{ $error->created_at->diffForHumans() }}</span>
+                            </div>
+                            @if($error->message)
+                                <p style="margin:4px 0 0;font-size:0.85rem;color:#4b5563;">{{ $error->message }}</p>
+                            @endif
+                            @if($error->url)
+                                <p style="margin:4px 0 0;font-size:0.8rem;color:#6b7280;word-break:break-all;">{{ $error->url }}</p>
+                            @endif
+                            @if($error->file)
+                                <p style="margin:4px 0 0;font-size:0.78rem;color:#9ca3af;">{{ $error->file }}@if($error->line):{{ $error->line }}@endif</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
 @endsection

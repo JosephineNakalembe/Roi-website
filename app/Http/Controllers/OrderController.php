@@ -186,6 +186,7 @@ class OrderController extends Controller
             'status' => 'cancelled',
             'cancelled_at' => now(),
             'cancellation_reason' => $data['reason'],
+            'is_new' => false,
         ]);
 
         // Create an order update for tracking

@@ -143,3 +143,4 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::patch('delivery-areas/{deliveryArea}', [AdminDeliveryAreaController::class, 'update'])->name('admin.delivery-areas.update');
     Route::delete('delivery-areas/{deliveryArea}', [AdminDeliveryAreaController::class, 'destroy'])->name('admin.delivery-areas.destroy');
 });
+
