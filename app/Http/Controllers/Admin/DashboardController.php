@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerMessage;
 use App\Models\Order;
+use App\Models\OrderReturn;
 use App\Models\Product;
 use App\Models\SystemError;
 use App\Models\User;
@@ -24,7 +25,8 @@ class DashboardController extends Controller
         $openMessages = CustomerMessage::where('status', 'open')->count();
         $systemErrors = SystemError::latest()->limit(10)->get();
         $newOrdersCount = Order::where('is_new', true)->count();
+        $pendingReturnsCount = OrderReturn::where('status', 'pending')->count();
 
-        return view('admin.dashboard', compact('orders', 'pending', 'shipped', 'delivered', 'products', 'outOfStock', 'users', 'messages', 'openMessages', 'systemErrors', 'newOrdersCount'));
+        return view('admin.dashboard', compact('orders', 'pending', 'shipped', 'delivered', 'products', 'outOfStock', 'users', 'messages', 'openMessages', 'systemErrors', 'newOrdersCount', 'pendingReturnsCount'));
     }
 }

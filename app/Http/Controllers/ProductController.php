@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\RecommendationService;
@@ -60,6 +61,20 @@ class ProductController extends Controller
             $products = $recommendations->orderProducts($query->get(), $userId, $guestId, Auth::user()?->gender);
         }
 
+        $cartQuantities = [];
+        if ($userId) {
+            CartItem::where('user_id', $userId)
+                ->whereIn('product_id', $products->pluck('id'))
+                ->get(['product_id', 'quantity'])
+                ->each(function ($item) use (&$cartQuantities) {
+                    $cartQuantities[$item->product_id] = ($cartQuantities[$item->product_id] ?? 0) + $item->quantity;
+                });
+        } else {
+            foreach (session('guest_cart', []) as $cartItem) {
+                $cartQuantities[$cartItem['product_id']] = ($cartQuantities[$cartItem['product_id']] ?? 0) + $cartItem['quantity'];
+            }
+        }
+
         $categories = Category::orderBy('name')->get();
 
         $frequentCategorySlugs = Cache::get('frequent_categories', []);
@@ -77,7 +92,7 @@ class ProductController extends Controller
                 ->get();
         }
 
-        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories', 'searchCorrection'));
+        return view('shop.index', compact('products', 'categories', 'search', 'categorySlug', 'suggestedCategories', 'searchCorrection', 'cartQuantities'));
     }
 
     public function show($slug, Request $request, RecommendationService $recommendations)

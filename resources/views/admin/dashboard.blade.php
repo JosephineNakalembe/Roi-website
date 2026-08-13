@@ -34,7 +34,11 @@
             <a class="btn" href="{{ route('admin.users.index') }}">Manage Users</a>
             <a class="btn btn-secondary" href="{{ route('admin.support.index') }}">View Messages</a>
             <a class="btn" href="{{ route('admin.reports.index') }}">View Reports</a>
-            <a class="btn" href="{{ route('admin.returns.index') }}" style="background:#f97316;">View Returns</a>
+            <a class="btn" href="{{ route('admin.returns.index') }}" style="background:#f97316;">View Returns
+                @if(($pendingReturnsCount ?? 0) > 0)
+                    <span class="nav-badge"><sup class="badge-red" title="Unprocessed returns">{{ $pendingReturnsCount }}</sup></span>
+                @endif
+            </a>
             <a class="btn btn-secondary" href="{{ route('admin.delivery-areas.index') }}">Delivery Areas</a>
         </div>
 
