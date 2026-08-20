@@ -211,10 +211,14 @@
                                     <button class="btn" type="submit">Add to Cart</button>
                                 </div>
                             </form>
-                            <form method="POST" action="{{ route('wishlist.toggle', $product) }}" style="margin-top:12px;">
-                                @csrf
-                                <button class="btn btn-secondary" type="submit">{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}</button>
-                            </form>
+                            @auth
+                                <form method="POST" action="{{ route('wishlist.toggle', $product) }}" style="margin-top:12px;">
+                                    @csrf
+                                    <button class="btn btn-secondary" type="submit">{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}</button>
+                                </form>
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-secondary" style="margin-top:12px;text-decoration:none;">Login to add to Wishlist</a>
+                            @endauth
                         @endif
 
                     <!-- Product Details Section -->
