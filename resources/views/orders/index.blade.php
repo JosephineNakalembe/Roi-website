@@ -305,7 +305,7 @@
                                             <strong style="color:#1a1a2e;">
                                                 ${label}
                                             </strong>
-                                            <span style="font-size:0.9rem;color:#9ca3af;">${new Date(update.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                            <span style="font-size:0.9rem;color:#9ca3af;">${new Date(update.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi' })}</span>
                                         </div>
                                         ${update.note ? `<p style="margin:6px 0 0;font-size:1rem;color:#374151;">${update.note}</p>` : ''}
                                     </div>
@@ -320,7 +320,7 @@
                             <div style="flex:1;min-width:0;background:#f9fafb;padding:12px;border-radius:12px;border:1px solid #e5e7eb;">
                                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                                     <strong style="color:#6b7280;">Order Placed</strong>
-                                    <span style="font-size:0.9rem;color:#9ca3af;">${new Date(order.placed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                    <span style="font-size:0.9rem;color:#9ca3af;">${new Date(order.placed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi' })}</span>
                                 </div>
                             </div>
                         </div>
@@ -340,7 +340,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
                     <div>
                         <h2 style="margin:0;">${order.order_number}</h2>
-                        <p style="margin:4px 0 0;color:#6b7280;">${new Date(order.placed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                        <p style="margin:4px 0 0;color:#6b7280;">${new Date(order.placed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'Africa/Nairobi' })}</p>
                     </div>
                     <button onclick="closeOrderModal()" style="background:none;border:none;font-size:1.6rem;cursor:pointer;color:#6b7280;">&times;</button>
                 </div>
