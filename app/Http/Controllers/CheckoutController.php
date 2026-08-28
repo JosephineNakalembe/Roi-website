@@ -7,6 +7,7 @@ use App\Models\Address;
 use App\Models\DeliveryArea;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -55,6 +56,11 @@ class CheckoutController extends Controller
             'address_line' => ['required', 'string', 'max:500'],
             'save_default' => ['nullable', 'boolean'],
             'notes' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'shipping_name.required' => 'Please fill in your full name.',
+            'shipping_phone.required' => 'Please fill in your phone number.',
+            'delivery_area.required' => 'Please select your delivery area.',
+            'address_line.required' => 'Please fill in your address line.',
         ]);
 
         // Validate delivery area
@@ -106,7 +112,10 @@ class CheckoutController extends Controller
                     'label' => 'Default',
                     'line1' => $data['address_line'],
                     'city' => $data['delivery_area'],
+                    'postal_code' => 'N/A',
+                    'state' => null,
                     'country' => 'Uganda',
+                    'phone' => $data['shipping_phone'],
                 ]
             );
         }
@@ -168,10 +177,14 @@ class CheckoutController extends Controller
         // Clear the cart from database
         $user->cartItems()->delete();
 
-        // Send order confirmation email
+        // Send order confirmation email to customer and notify admins of new order
         try {
             $order->load('user', 'items');
             Mail::to($user->email)->send(new OrderConfirmedMail($order));
+
+            foreach (User::admins() as $admin) {
+                Mail::to($admin->email)->send(new OrderConfirmedMail($order));
+            }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send order confirmation email: ' . $e->getMessage());
         }

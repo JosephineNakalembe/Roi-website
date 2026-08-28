@@ -1,20 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        @media (max-width: 640px) {
+            .admin-dash-stats { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .admin-dash-actions { display: grid !important; grid-template-columns: 1fr; flex-direction: column !important; gap: 8px !important; }
+            .admin-dash-actions .btn { width: 100% !important; justify-content: center; }
+        }
+    </style>
         <div class="sticky-header">
         <div class="header-content">
             @include('partials.back-button', ['fallback' => route('admin.dashboard')])
             <h1 class="mb-0">
                 Admin Dashboard
-                @if(($newOrdersCount ?? 0) > 0)
-                    <span class="nav-badge"><sup class="badge-red" title="New orders received">{{ $newOrdersCount }}</sup></span>
-                @endif
             </h1>
         </div>
     </div>
     <div class="card">
         <p class="text-muted" style="margin-bottom:18px;">Overview of your store</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;" class="admin-dash-stats">
             <div class="stat-card"><div class="stat-value">{{ $orders }}</div><div class="stat-label">Total Orders</div></div>
             <div class="stat-card"><div class="stat-value">{{ $pending }}</div><div class="stat-label">Pending</div></div>
             <div class="stat-card"><div class="stat-value">{{ $shipped }}</div><div class="stat-label">Shipped</div></div>
@@ -25,7 +29,7 @@
             <div class="stat-card"><div class="stat-value">{{ $messages }}</div><div class="stat-label">Messages</div></div>
             <div class="stat-card"><div class="stat-value">{{ $openMessages }}</div><div class="stat-label">Open Messages</div></div>
         </div>
-        <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:10px;">
+        <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:10px;" class="admin-dash-actions">
             <a class="btn" href="{{ route('admin.products.index') }}">Manage Products</a>
             <a class="btn" href="{{ route('admin.products.out-of-stock') }}" style="background:#dc2626;color:#fff;">Out of Stock</a>
             <a class="btn btn-secondary" href="{{ route('admin.categories.index') }}">Manage Categories</a>

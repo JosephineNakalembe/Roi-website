@@ -219,9 +219,15 @@
 
                     <label>Full Name</label>
                     <input class="input" name="shipping_name" value="{{ old('shipping_name', Auth::user()->name) }}" required placeholder="Enter your full name" style="margin-bottom:12px;">
+                    @error('shipping_name')
+                        <p style="color:#dc2626;font-size:0.9rem;font-weight:600;margin:-8px 0 10px;">{{ $message }}</p>
+                    @enderror
 
                     <label>Phone Number</label>
                     <input class="input" name="shipping_phone" value="{{ old('shipping_phone', Auth::user()->phone) }}" required placeholder="e.g. 0772123456" style="margin-bottom:12px;">
+                    @error('shipping_phone')
+                        <p style="color:#dc2626;font-size:0.9rem;font-weight:600;margin:-8px 0 10px;">{{ $message }}</p>
+                    @enderror
 
                     <div style="position:relative;margin-bottom:12px;">
                         <label for="deliveryAreaInput">Delivery Area</label>
@@ -230,10 +236,16 @@
                         <div id="deliveryAreaDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #d1d5db;border-radius:10px;max-height:220px;overflow-y:auto;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
                         </div>
                         <p id="deliveryAreaError" style="display:none;color:#dc2626;font-size:0.95rem;font-weight:600;margin-top:4px;">Area Out of Delivery Scope</p>
+                        @error('delivery_area')
+                            <p style="color:#dc2626;font-size:0.9rem;font-weight:600;margin-top:4px;">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <label>Address Line</label>
                     <input class="input" name="address_line" value="{{ old('address_line') }}" required placeholder="e.g. Plot 7, Lumumba Avenue" style="margin-bottom:12px;">
+                    @error('address_line')
+                        <p style="color:#dc2626;font-size:0.9rem;font-weight:600;margin:-8px 0 10px;">{{ $message }}</p>
+                    @enderror
 
                     <div style="margin-bottom:16px;">
                         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 0;">

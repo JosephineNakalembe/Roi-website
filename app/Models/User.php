@@ -110,4 +110,12 @@ class User extends Authenticatable
     {
         return $this->role === 'admin' || $this->email === 'josephinenakalembe33@gmail.com';
     }
+
+    public static function admins()
+    {
+        return static::where(function ($q) {
+            $q->where('role', 'admin')
+                ->orWhere('email', 'josephinenakalembe33@gmail.com');
+        })->get();
+    }
 }
