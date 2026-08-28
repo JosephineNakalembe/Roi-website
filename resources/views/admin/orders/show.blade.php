@@ -2,9 +2,14 @@
 
 @section('content')
     <div class="sticky-header">
-        <div class="header-content">
-            @include('partials.back-button', ['fallback' => route('admin.orders.index')])
-            <h1 class="mb-0">Order {{ $order->order_number }}</h1>
+        <div class="header-content header-content-between">
+            <div class="header-title-row">
+                @include('partials.back-button', ['fallback' => route('admin.orders.index')])
+                <h1 class="mb-0">Order {{ $order->order_number }}</h1>
+            </div>
+            <button type="button" class="btn" style="background:#dc2626;color:#fff;" onclick="document.getElementById('deleteOrderModal').style.display='flex';">
+                Delete Order
+            </button>
         </div>
     </div>
     <div class="card">
@@ -124,4 +129,28 @@
             </div>
         </div>
     </div>
+
+    <!-- Delete Order Confirmation Modal -->
+    <div id="deleteOrderModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,26,46,0.4);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:1000;">
+        <div style="background:#fff;border-radius:14px;padding:24px;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(26,26,46,0.15);border:1px solid #e8e4df;margin:auto;">
+            <h3 style="margin:0 0 8px;font-size:1.2rem;color:#1a1a2e;">Delete Order {{ $order->order_number }}</h3>
+            <p style="margin:0 0 20px;font-size:1rem;color:#6c757d;line-height:1.5;">
+                Are you sure you want to permanently delete this order from the records? Its sales will also be removed from the reports. This action cannot be undone.
+            </p>
+            <div style="display:flex;gap:12px;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('deleteOrderModal').style.display='none';">Cancel</button>
+                <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" style="margin:0;" onsubmit="return confirm('Confirm: permanently delete this order and remove its sales from reports?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn" style="background:#dc2626;color:#fff;">Delete Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('deleteOrderModal').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+    </script>
 @endsection

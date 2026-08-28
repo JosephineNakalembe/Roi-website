@@ -124,4 +124,13 @@ class OrderController extends Controller
 
         return back()->with('success', "Item \"{$item->product_name}\" has been cancelled (Out of stock).");
     }
+
+    public function destroy(Order $order)
+    {
+        $number = $order->order_number;
+        $order->delete();
+
+        return redirect()->route('admin.orders.index')
+            ->with('success', "Order {$number} has been deleted from records. Its sales have been removed from the reports.");
+    }
 }
