@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Mail\OrderConfirmedMail;
+use App\Mail\OrderPlacedAdminNotification;
 use App\Models\Address;
 use App\Models\DeliveryArea;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -177,14 +177,13 @@ class CheckoutController extends Controller
         // Clear the cart from database
         $user->cartItems()->delete();
 
-        // Send order confirmation email to customer and notify admins of new order
+        // Send order confirmation email to customer and notify the admin of the new order
         try {
             $order->load('user', 'items');
             Mail::to($user->email)->send(new OrderConfirmedMail($order));
 
-            foreach (User::admins() as $admin) {
-                Mail::to($admin->email)->send(new OrderConfirmedMail($order));
-            }
+            Mail::to(config('mail.admin_notification_address', 'elroyresins@gmail.com'))
+                ->send(new OrderPlacedAdminNotification($order));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send order confirmation email: ' . $e->getMessage());
         }
