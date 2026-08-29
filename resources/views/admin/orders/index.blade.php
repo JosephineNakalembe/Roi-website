@@ -4,11 +4,7 @@
     <div class="sticky-header">
         <div class="header-content">
             @include('partials.back-button', ['fallback' => route('admin.dashboard')])
-            <h1 class="mb-0">Orders Management
-                @if($newOrdersCount > 0)
-                    <span class="nav-badge"><sup style="background:#dc2626;color:#fff;" title="New orders received">{{ $newOrdersCount }}</sup></span>
-                @endif
-            </h1>
+            <h1 class="mb-0">Orders Management</h1>
         </div>
     </div>
     <div class="card">

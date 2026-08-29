@@ -33,7 +33,14 @@
             <a class="btn" href="{{ route('admin.products.index') }}">Manage Products</a>
             <a class="btn" href="{{ route('admin.products.out-of-stock') }}" style="background:#dc2626;color:#fff;">Out of Stock</a>
             <a class="btn btn-secondary" href="{{ route('admin.categories.index') }}">Manage Categories</a>
-            <a class="btn" href="{{ route('admin.orders.index') }}">Manage Orders</a>
+            <a class="btn" href="{{ route('admin.orders.index') }}">
+                <span class="nav-badge">
+                    Manage Orders
+                    @if(($newOrdersCount ?? 0) > 0)
+                        <sup style="background:#dc2626;color:#fff;" title="New orders received">{{ $newOrdersCount }}</sup>
+                    @endif
+                </span>
+            </a>
             <a class="btn btn-secondary" href="{{ route('admin.expenditures.index') }}">Expenditures</a>
             <a class="btn" href="{{ route('admin.users.index') }}">Manage Users</a>
             <a class="btn btn-secondary" href="{{ route('admin.support.index') }}">View Messages</a>
