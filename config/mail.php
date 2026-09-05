@@ -115,6 +115,6 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
-    'admin_notification_address' => env('ADMIN_NOTIFICATION_ADDRESS', 'elroyresins@gmail.com'),
+    'admin_notification_address' => env('ADMIN_NOTIFICATION_ADDRESS', 'josephinenakalembe33@gmail.com'),
 
 ];
