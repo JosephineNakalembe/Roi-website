@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ReturnRequestedAdminNotification;
 use App\Mail\ReturnRequestedMail;
 use App\Models\DeliveryArea;
 use App\Models\Order;
 use App\Models\OrderReturn;
 use App\Models\OrderReturnUpdate;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -165,14 +165,13 @@ class OrderReturnController extends Controller
             'note' => 'Return request submitted. Awaiting admin review. You will be notified once your request is processed.',
         ]);
 
-        // Send return requested email to customer and notify admins
+        // Send return requested email to customer and notify the admin of the new return request
         try {
             $order->load('user');
             Mail::to($order->user->email)->send(new ReturnRequestedMail($return));
 
-            foreach (User::admins() as $admin) {
-                Mail::to($admin->email)->send(new ReturnRequestedMail($return));
-            }
+            Mail::to(config('mail.admin_notification_address'))
+                ->send(new ReturnRequestedAdminNotification($return));
         } catch (\Exception $e) {
             Log::error('Failed to send return request email: ' . $e->getMessage());
         }

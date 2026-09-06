@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TicketOpenedAdminNotification;
 use App\Models\CustomerMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class CustomerServiceController extends Controller
 {
@@ -27,11 +30,20 @@ class CustomerServiceController extends Controller
             'message' => ['required', 'string', 'max:1000'],
         ]);
 
-        Auth::user()->customerMessages()->create(array_merge($data, [
+        $message = Auth::user()->customerMessages()->create(array_merge($data, [
             'status' => 'open',
             'replies' => [],
             'seen_by_user' => true,
         ]));
+
+        // Notify the admin that a new support ticket has been opened
+        try {
+            $message->load('user');
+            Mail::to(config('mail.admin_notification_address'))
+                ->send(new TicketOpenedAdminNotification($message));
+        } catch (\Exception $e) {
+            Log::error('Failed to send ticket opened admin notification: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Your ticket has been opened. The admin will reply soon.');
     }

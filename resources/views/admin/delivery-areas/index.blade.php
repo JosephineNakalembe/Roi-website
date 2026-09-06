@@ -65,6 +65,9 @@
         <!-- Filter -->
         <form method="GET" action="{{ route('admin.delivery-areas.index') }}" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb;">
             <div>
+                <input type="text" name="search" value="{{ request('search') }}" class="input" placeholder="Search place or city..." style="min-width:220px;">
+            </div>
+            <div>
                 <select name="city" class="input">
                     <option value="">All Cities</option>
                     @foreach($cities as $city)
@@ -74,7 +77,7 @@
             </div>
             <div style="display:flex;gap:8px;">
                 <button class="btn btn-secondary" type="submit">Filter</button>
-                @if(request('city'))
+                @if(request('city') || request('search'))
                     <a href="{{ route('admin.delivery-areas.index') }}" class="btn btn-secondary">Clear</a>
                 @endif
             </div>
@@ -110,7 +113,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" style="text-align:center;padding:40px;color:#9ca3af;">No delivery areas added yet.</td>
+                            <td colspan="4" style="text-align:center;padding:40px;color:#9ca3af;">@if(request('search') || request('city'))No delivery areas match your search.@elseNo delivery areas added yet.@endif</td>
                         </tr>
                     @endforelse
                 </tbody>

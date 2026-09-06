@@ -20,7 +20,7 @@
                 Hello <strong>{{ $ticket->user->name }}</strong>,
                 </p>
                 <p style="margin: 0 0 16px; color: #374151; font-size: 17px; line-height: 1.6;">
-                    The admin has responded to your support ticket. Here is the full conversation history:
+                    There is a new update on your support ticket. Here is the conversation:
                 </p>
 
                 <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
@@ -54,16 +54,6 @@
                                 </div>
                             @endif
                         @endforeach
-                    @endif
-
-                    <!-- Latest Admin Reply (the one just sent) - it will be the last admin reply in the list -->
-                    @php
-                        $latestAdminReply = collect($allReplies)->where('sender', 'admin')->last();
-                    @endphp
-                    @if($latestAdminReply)
-                        <div style="text-align: left; padding: 12px; background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; margin-top: 8px;">
-                            <p style="margin: 0; font-size: 14px; color: #92400e; font-weight: 600;">⬆ Latest Reply</p>
-                        </div>
                     @endif
                 </div>
 

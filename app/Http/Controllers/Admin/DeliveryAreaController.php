@@ -16,6 +16,13 @@ class DeliveryAreaController extends Controller
             $query->where('city', $city);
         }
 
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%");
+            });
+        }
+
         $deliveryAreas = $query->latest()->paginate(20);
         $cities = DeliveryArea::distinct()->pluck('city');
 
