@@ -46,7 +46,9 @@
             <label>Base Price (UGX)</label>
             <input class="input" name="price" type="number" step="0.01" value="{{ old('price', $product->price) }}" required>
 
-            @php($discountChecked = old('add_discount') !== null || ($product->discount_price !== null && $product->discount_price !== ''))
+            @php
+                $discountChecked = old('add_discount') ? true : ($product->discount_price !== null && $product->discount_price !== '');
+            @endphp
             <label style="display:flex;align-items:center;gap:8px;font-weight:500;">
                 <input type="checkbox" name="add_discount" id="addDiscountToggle" value="1" {{ $discountChecked ? 'checked' : '' }}>
                 Add discount
