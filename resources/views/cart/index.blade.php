@@ -204,7 +204,11 @@
                             <div class="card">
                                 <img src="{{ optional($product->primaryImage)->path ? media_url($product->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $product->name }}" class="product-image">
                                 <h3>{{ $product->name }}</h3>
-                                <p class="text-muted">UGX{{ number_format($product->price, 0) }}</p>
+                                @if($product->hasDiscount())
+                                    <p class="text-muted" style="margin:0;"><span style="text-decoration:line-through;">UGX{{ number_format($product->price, 0) }}</span> <strong style="color:#dc2626;">UGX{{ number_format($product->discount_price, 0) }}</strong></p>
+                                @else
+                                    <p class="text-muted">UGX{{ number_format($product->price, 0) }}</p>
+                                @endif
                                 <a class="btn btn-secondary" href="{{ route('shop.show', $product->slug) }}">View</a>
                             </div>
                         @endforeach

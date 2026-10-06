@@ -135,12 +135,48 @@ class Product extends Model
     }
 
     /**
+     * Whether this product has a valid sale/discount price.
+     * A discount is valid only when it is set, greater than zero
+     * and strictly lower than the base price.
+     */
+    public function hasDiscount(): bool
+    {
+        if ($this->discount_price === null || $this->discount_price === '') {
+            return false;
+        }
+
+        $discount = (float) $this->discount_price;
+        $base = (float) $this->price;
+
+        return $discount > 0 && $discount < $base;
+    }
+
+    /**
+     * Original (non-discounted) price for a specific color,
+     * falling back to the base price. Used for strikethrough display.
+     */
+    public function originalPriceForColor(?string $color = null): float
+    {
+        if ($color && is_array($this->color_prices) && isset($this->color_prices[$color]) && $this->color_prices[$color] !== null && $this->color_prices[$color] !== '') {
+            return (float) $this->color_prices[$color];
+        }
+
+        return (float) $this->price;
+    }
+
+    /**
      * Get the price for a specific color, falling back to the base price.
+     * When the product has a valid discount and the color does not define
+     * its own explicit price, the discount price is charged instead.
      */
     public function priceForColor(?string $color = null): float
     {
         if ($color && is_array($this->color_prices) && isset($this->color_prices[$color]) && $this->color_prices[$color] !== null && $this->color_prices[$color] !== '') {
             return (float) $this->color_prices[$color];
+        }
+
+        if ($this->hasDiscount()) {
+            return (float) $this->discount_price;
         }
 
         return (float) $this->price;

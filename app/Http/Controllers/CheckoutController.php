@@ -30,7 +30,7 @@ class CheckoutController extends Controller
                 'quantity' => $cartItem->quantity,
                 'color' => $cartItem->color,
                 'size' => $cartItem->size,
-                'total' => $product->price * $cartItem->quantity,
+                'total' => $product->priceForColor($cartItem->color) * $cartItem->quantity,
             ] : null;
         })->filter();
 
@@ -120,7 +120,7 @@ class CheckoutController extends Controller
             );
         }
 
-        $subtotal = $items->sum(fn ($item) => $item['product']->price * $item['quantity']);
+        $subtotal = $items->sum(fn ($item) => $item['product']->priceForColor($item['color'] ?? null) * $item['quantity']);
         $total = $subtotal + $shipping;
 
         $order = Order::create([
@@ -141,12 +141,13 @@ class CheckoutController extends Controller
             $quantity = $item['quantity'];
             $color = $item['color'] ?? null;
             $size = $item['size'] ?? null;
+            $unitPrice = $product->priceForColor($color);
             $order->items()->create([
                 'product_id' => $product->id,
                 'product_name' => $product->name,
-                'unit_price' => $product->price,
+                'unit_price' => $unitPrice,
                 'quantity' => $quantity,
-                'total_price' => $product->price * $quantity,
+                'total_price' => $unitPrice * $quantity,
                 'color' => $color,
                 'size' => $size,
             ]);

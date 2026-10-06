@@ -133,7 +133,12 @@
                 </div>
                 <div>
                     <h1 style="font-size:0.975rem;">{{ $product->name }}</h1>
-                    <p id="productPrice" style="font-size:1.2rem;font-weight:700;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
+                    @if($product->hasDiscount())
+                        <p style="font-size:0.95rem;color:#9ca3af;margin:4px 0 0;"><span style="text-decoration:line-through;">UGX{{ number_format($product->originalPriceForColor($defaultColor), 0) }}</span> <span style="background:#dc2626;color:#fff;font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:999px;">-{{ round((1 - (float) $product->discount_price / max(1, (float) $product->originalPriceForColor($defaultColor))) * 100) }}%</span></p>
+                        <p id="productPrice" data-discount="{{ (float) $product->discount_price }}" style="font-size:1.2rem;font-weight:700;color:#dc2626;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
+                    @else
+                        <p id="productPrice" style="font-size:1.2rem;font-weight:700;">UGX{{ number_format($product->priceForColor($defaultColor), 0) }}</p>
+                    @endif
 
                     @if($product->non_returnable)
                         <p style="color:#991b1b;font-weight:600;margin-top:4px;font-size:0.975rem;">
@@ -299,7 +304,11 @@
                                 <img src="{{ optional($sProduct->primaryImage)->path ? media_url($sProduct->primaryImage->path) : 'https://via.placeholder.com/400x400' }}" alt="{{ $sProduct->name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" loading="lazy">
                                 <div style="padding:12px 14px 14px;">
                                     <h3 style="font-size:0.975rem;font-weight:600;margin-bottom:2px;">{{ $sProduct->name }}</h3>
-                                    <p style="font-weight:700;font-size:1.2rem;">UGX{{ number_format($sProduct->price, 0) }}</p>
+                                    @if($sProduct->hasDiscount())
+                                        <p style="font-weight:700;font-size:1.2rem;margin:0;"><span style="text-decoration:line-through;color:#9ca3af;font-weight:400;font-size:0.9rem;">UGX{{ number_format($sProduct->price, 0) }}</span> <span style="color:#dc2626;">UGX{{ number_format($sProduct->discount_price, 0) }}</span></p>
+                                    @else
+                                        <p style="font-weight:700;font-size:1.2rem;">UGX{{ number_format($sProduct->price, 0) }}</p>
+                                    @endif
                                 </div>
                             </a>
                         @endforeach
@@ -545,6 +554,8 @@
         const colorStock = @json($product->color_stock ?? []);
         const allSizes = @json($product->sizes ?? []);
         const basePrice = {{ (float) $product->price }};
+        const hasDiscount = {{ $product->hasDiscount() ? 'true' : 'false' }};
+        const discountPrice = {{ (float) ($product->discount_price ?? 0) }};
         let selectedColor = @json($defaultColor);
         let selectedSize = '';
 
@@ -763,10 +774,11 @@
                 }
             });
 
-            // Update price
+            // Update price (color-specific price wins; otherwise discounted price when set)
             const priceEl = document.getElementById('productPrice');
             if (priceEl) {
-                const price = (colorPrices[color] != null && colorPrices[color] !== '') ? parseFloat(colorPrices[color]) : basePrice;
+                const hasColorPrice = colorPrices[color] != null && colorPrices[color] !== '';
+                const price = hasColorPrice ? parseFloat(colorPrices[color]) : (hasDiscount ? discountPrice : basePrice);
                 priceEl.textContent = formatPrice(price);
             }
 

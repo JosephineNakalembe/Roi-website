@@ -8,7 +8,11 @@
         </div>
         <div style="padding:8px 10px 10px;">
             <h2 style="font-size:1rem;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $product->name }}</h2>
-            <p style="font-weight:700;font-size:1.05rem;">UGX{{ number_format($product->price, 0) }}</p>
+            @if($product->hasDiscount())
+                <p style="font-weight:700;font-size:1.05rem;margin:0;"><span style="text-decoration:line-through;color:#9ca3af;font-weight:400;font-size:0.85rem;">UGX{{ number_format($product->price, 0) }}</span> <span style="color:#dc2626;">UGX{{ number_format($product->discount_price, 0) }}</span></p>
+            @else
+                <p style="font-weight:700;font-size:1.05rem;">UGX{{ number_format($product->price, 0) }}</p>
+            @endif
         </div>
     </a>
 @endforeach
