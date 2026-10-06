@@ -152,6 +152,8 @@ class CheckoutController extends Controller
             ]);
             // Decrement flat stock
             $product->decrement('stock', $quantity);
+            // Sold units leave stock — sold items are counted as purchased on debit
+            \App\Models\StockBatch::consume($product, $quantity);
             // Decrement variant stock in color_stock
             if ($product->color_stock) {
                 $colorStock = $product->color_stock;

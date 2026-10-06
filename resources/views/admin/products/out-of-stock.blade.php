@@ -58,7 +58,12 @@
                             @else
                                 Uncategorized
                             @endif
-                            • UGX{{ number_format($product->price, 2) }}
+                            • @if($product->discount_price !== null && (float) $product->discount_price > 0 && (float) $product->discount_price < (float) $product->price)
+                                <span style="text-decoration:line-through;color:#9ca3af;">UGX{{ number_format($product->price, 2) }}</span>
+                                <span style="font-size:1.45rem;font-weight:800;color:#dc2626;">UGX{{ number_format($product->discount_price, 2) }}</span>
+                            @else
+                                UGX{{ number_format($product->price, 2) }}
+                            @endif
                             @if($product->supplier)
                                 • <span style="color:#6b7280;">Supplier:</span> {{ $product->supplier }}
                             @endif
@@ -146,6 +151,13 @@
                 <div>
                     <label>Quantity to add <span style="color:#dc2626;">*</span></label>
                     <input type="number" class="input" name="quantity" min="1" value="1" required style="padding:10px;font-size:1.1rem;">
+                </div>
+                <div>
+                    <label>Purchase type <span style="color:#dc2626;">*</span></label>
+                    <select name="payment_type" class="input" required style="padding:10px;font-size:1.05rem;">
+                        <option value="debit">Debit — already paid the supplier</option>
+                        <option value="credit">Credit — still owe the supplier (on demand)</option>
+                    </select>
                 </div>
                 <div>
                     <label>New Cost Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.9rem;">— optional</span></label>

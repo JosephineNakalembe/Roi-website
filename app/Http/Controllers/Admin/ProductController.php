@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\StockBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,7 +15,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('categories', 'category', 'primaryImage');
+        $query = Product::with('categories', 'category', 'primaryImage', 'stockBatches');
 
         // Search by name or product_id
         if ($search = $request->input('search')) {
@@ -62,8 +63,10 @@ class ProductController extends Controller
             'categories.*' => ['exists:categories,id'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_price' => ['nullable', 'numeric', 'min:0', 'lt:price'],
             'cost_price' => ['nullable', 'numeric', 'min:0'],
             'supplier' => ['nullable', 'string', 'max:255'],
+            'payment_type' => ['nullable', 'string', 'in:credit,debit'],
             'stock' => ['required', 'integer', 'min:0'],
             'size_guide' => ['nullable', 'string'],
             'size_guide_type' => ['nullable', 'string', 'in:clothing,shoes,table'],
@@ -74,6 +77,11 @@ class ProductController extends Controller
             'images.*' => ['nullable', 'image', 'max:5120'],
             'video' => ['nullable', 'mimes:mp4,mov,avi,wmv', 'max:51200'],
         ]);
+
+        // Only keep the discount when "Add discount" is checked on the form
+        $data['discount_price'] = $request->boolean('add_discount')
+            ? ($data['discount_price'] ?? null)
+            : null;
 
         // Auto-generate product_id
         $data['product_id'] = $this->generateNextProductId();
@@ -129,6 +137,18 @@ class ProductController extends Controller
         }
 
         $product = Product::create(array_merge($data, ['is_active' => $request->boolean('is_active'), 'non_returnable' => $request->boolean('non_returnable')]));
+
+        // Record the initial stock as a batch so reports can show whether it
+        // was acquired on credit (owe the supplier) or debit (already paid).
+        if ((int) $product->stock > 0) {
+            StockBatch::record(
+                $product,
+                (int) $product->stock,
+                $data['payment_type'] ?? StockBatch::TYPE_DEBIT,
+                (float) ($product->cost_price ?? 0)
+            );
+        }
+        unset($data['payment_type']);
 
         // Attach selected categories (many-to-many)
         $categoryIds = $request->input('categories', []);
@@ -220,6 +240,7 @@ class ProductController extends Controller
             'categories.*' => ['exists:categories,id'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_price' => ['nullable', 'numeric', 'min:0', 'lt:price'],
             'cost_price' => ['nullable', 'numeric', 'min:0'],
             'supplier' => ['nullable', 'string', 'max:255'],
             'stock' => ['required', 'integer', 'min:0'],
@@ -232,6 +253,11 @@ class ProductController extends Controller
             'images.*' => ['nullable', 'image', 'max:5120'],
             'video' => ['nullable', 'mimes:mp4,mov,avi,wmv', 'max:51200'],
         ]);
+
+        // Clear the discount when "Add discount" is unchecked on the edit form
+        $data['discount_price'] = $request->boolean('add_discount')
+            ? ($data['discount_price'] ?? null)
+            : null;
 
         // Keep existing product_id (don't change on update)
         $data['product_id'] = $product->product_id;
@@ -285,6 +311,11 @@ class ProductController extends Controller
         }
 
         $product->update(array_merge($data, ['is_active' => $request->boolean('is_active'), 'non_returnable' => $request->boolean('non_returnable')]));
+
+        // Keep the stock ledger in sync with any stock changes made on this form.
+        // Newly added units are recorded with the purchase type chosen above.
+        StockBatch::reconcile($product, $data['payment_type'] ?? StockBatch::TYPE_DEBIT);
+        unset($data['payment_type']);
 
         // Sync categories (many-to-many)
         $categoryIds = $request->input('categories', []);
@@ -371,6 +402,7 @@ class ProductController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
             'cost_price' => ['nullable', 'numeric', 'min:0'],
             'price' => ['nullable', 'numeric', 'min:0'],
+            'payment_type' => ['required', 'string', 'in:credit,debit'],
         ]);
 
         $updates = [];
@@ -386,13 +418,40 @@ class ProductController extends Controller
 
         $product->update($updates);
 
-        $msg = "Added {$data['quantity']} units to stock.";
+        // Record this restock as a batch (credit = still owe the supplier,
+        // debit = already paid) so reports can split the stock worth.
+        StockBatch::record(
+            $product,
+            $data['quantity'],
+            $data['payment_type'],
+            (float) ($product->fresh()->cost_price ?? 0)
+        );
+
+        $msg = "Added {$data['quantity']} units to stock";
+        $msg .= $data['payment_type'] === StockBatch::TYPE_CREDIT ? " on credit" : " (paid / debit)";
         if ($request->filled('price')) {
-            $msg .= " New price: UGX " . number_format($data['price'], 2);
+            $msg .= ". New price: UGX " . number_format($data['price'], 2);
+        } else {
+            $msg .= ".";
         }
         $msg .= " New stock: {$product->fresh()->stock}";
 
         return back()->with('success', $msg);
+    }
+
+    /**
+     * Re-mark a product's unsold stock as bought on credit or on debit.
+     */
+    public function updateStockType(Request $request, Product $product)
+    {
+        $data = $request->validate([
+            'payment_type' => ['required', 'string', 'in:credit,debit'],
+        ]);
+
+        StockBatch::setType($product, $data['payment_type']);
+
+        $label = $data['payment_type'] === StockBatch::TYPE_CREDIT ? 'on credit' : 'on debit';
+        return back()->with('success', "Stock for \"{$product->name}\" is now recorded as bought {$label}.");
     }
 
     public function nextId()
@@ -404,7 +463,7 @@ class ProductController extends Controller
 
     public function outOfStock(Request $request)
     {
-        $query = Product::with('categories', 'category', 'primaryImage')->where('stock', '<=', 0);
+        $query = Product::with('categories', 'category', 'primaryImage', 'stockBatches')->where('stock', '<=', 0);
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {

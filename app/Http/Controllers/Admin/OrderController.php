@@ -113,6 +113,12 @@ class OrderController extends Controller
             'cancellation_reason' => 'Out of stock',
         ]);
 
+        // Remove the cancelled item's value from the order's subtotal and total so
+        // it is no longer counted as a sale and is excluded from sales reports.
+        $order->subtotal = max(0, (float) $order->subtotal - (float) $item->total_price);
+        $order->total = max(0, (float) $order->total - (float) $item->total_price);
+        $order->save();
+
         $order->update(['is_new' => false]);
 
         // Add a timeline entry for the cancellation

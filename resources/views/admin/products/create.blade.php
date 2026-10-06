@@ -41,12 +41,42 @@
             <textarea class="input" name="description" rows="4">{{ old('description') }}</textarea>
             <label>Base Price (UGX)</label>
             <input class="input" name="price" type="number" step="0.01" value="{{ old('price', '0.00') }}" required>
-            
+
+            <label style="display:flex;align-items:center;gap:8px;font-weight:500;">
+                <input type="checkbox" name="add_discount" id="addDiscountToggle" value="1" {{ old('add_discount') ? 'checked' : '' }}>
+                Add discount
+            </label>
+            <div id="discountPriceWrap" style="display:none;">
+                <label>Discount Price (UGX) <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— must be lower than the base price</span></label>
+                <input class="input" name="discount_price" id="discountPriceInput" type="number" step="0.01" min="0" value="{{ old('discount_price') }}" placeholder="e.g. 45000">
+                @error('discount_price')
+                    <p style="color:#ef4444;font-size:0.95rem;margin:6px 0 0 0;">{{ $message }}</p>
+                @enderror
+            </div>
+            <script>
+                (function () {
+                    var toggle = document.getElementById('addDiscountToggle');
+                    var wrap = document.getElementById('discountPriceWrap');
+                    function syncDiscount() {
+                        wrap.style.display = toggle.checked ? 'block' : 'none';
+                        document.getElementById('discountPriceInput').disabled = !toggle.checked;
+                    }
+                    toggle.addEventListener('change', syncDiscount);
+                    syncDiscount();
+                })();
+            </script>
+
             <label>Cost Price (UGX)</label>
             <input class="input" name="cost_price" type="number" step="0.01" value="{{ old('cost_price', '0.00') }}" placeholder="What you paid per unit">
 
             <label>Supplier <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— admin only, not shown to customers</span></label>
             <input class="input" name="supplier" type="text" value="{{ old('supplier') }}" placeholder="Who you bought this from">
+
+            <label>Purchase type for initial stock <span class="text-muted" style="font-weight:400;font-size:0.95rem;">— shown in reports as credit or debit</span></label>
+            <select class="input" name="payment_type">
+                <option value="debit" {{ old('payment_type') === 'debit' ? 'selected' : '' }}>Debit — already paid the supplier</option>
+                <option value="credit" {{ old('payment_type') === 'credit' ? 'selected' : '' }}>Credit — still owe the supplier</option>
+            </select>
 
             <label style="font-weight:700;">Color, Size, Quantity, Price & Images</label>
             <div id="colorQuantityContainer" style="display:grid;gap:10px;margin-bottom:10px;"></div>

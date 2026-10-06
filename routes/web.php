@@ -120,6 +120,7 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::get('products/next-id', [AdminProductController::class, 'nextId'])->name('admin.products.next-id');
     Route::get('products/out-of-stock', [AdminProductController::class, 'outOfStock'])->name('admin.products.out-of-stock');
     Route::post('products/{product}/add-stock', [AdminProductController::class, 'addStock'])->name('admin.products.add-stock');
+    Route::patch('products/{product}/stock-type', [AdminProductController::class, 'updateStockType'])->name('admin.products.stock-type');
     Route::delete('products/media/{media}', [AdminProductController::class, 'destroyMedia'])->name('admin.products.destroy-media');
     Route::resource('products', AdminProductController::class)->names('admin.products')->except(['show']);
     Route::get('orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
@@ -133,6 +134,7 @@ Route::prefix('admin')->middleware(['auth', AdminMiddleware::class])->group(func
     Route::get('support/{message}', [AdminCustomerServiceController::class, 'show'])->name('admin.support.show');
     Route::patch('support/{message}', [AdminCustomerServiceController::class, 'update'])->name('admin.support.update');
     Route::get('reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
+    Route::get('reports/export/{type}', [AdminReportController::class, 'export'])->name('admin.reports.export');
     Route::get('returns', [AdminReturnController::class, 'index'])->name('admin.returns.index');
     Route::get('returns/{orderReturn}', [AdminReturnController::class, 'show'])->name('admin.returns.show');
     Route::patch('returns/{orderReturn}', [AdminReturnController::class, 'update'])->name('admin.returns.update');

@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -20,6 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (Throwable $e, Request $request) {
+            // Validation failures are client errors (redirect back with errors /
+            // 422 JSON), never server errors — let Laravel's default handling
+            // respond so form errors actually reach the session.
+            if ($e instanceof ValidationException) {
+                return null;
+            }
+
             $status = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
 
             if ($status >= 500) {

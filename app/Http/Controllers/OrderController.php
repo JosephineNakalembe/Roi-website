@@ -168,6 +168,9 @@ class OrderController extends Controller
             if ($item->product) {
                 $product = $item->product;
                 $product->increment('stock', $item->quantity);
+                // Return the cancelled units to their original stock batches
+                // so they keep their credit/debit purchase type.
+                \App\Models\StockBatch::restore($product, $item->quantity);
                 // Restore variant stock
                 if ($product->color_stock) {
                     $colorStock = $product->color_stock;
