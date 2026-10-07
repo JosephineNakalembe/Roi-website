@@ -11,6 +11,7 @@ class DeliveryArea extends Model
 
     protected $fillable = [
         'city',
+        'division',
         'name',
         'fee',
     ];

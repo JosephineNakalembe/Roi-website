@@ -229,9 +229,22 @@
                         <p style="color:#dc2626;font-size:0.9rem;font-weight:600;margin:-8px 0 10px;">{{ $message }}</p>
                     @enderror
 
+                    <div style="margin-bottom:12px;">
+                        <label for="deliveryDivisionSelect">Division (City Division)</label>
+                        <select id="deliveryDivisionSelect" name="delivery_division" class="input" style="width:100%;">
+                            <option value="">Select division...</option>
+                            @foreach(($deliveryDivisions ?? []) as $division => $areas)
+                                <option value="{{ $division }}" {{ old('delivery_division') == $division ? 'selected' : '' }}>{{ $division }} Division ({{ count($areas) }} areas)</option>
+                            @endforeach
+                        </select>
+                        @error('delivery_division')
+                            <p style="color:#dc2626;font-size:0.9rem;font-weight:600;margin-top:4px;">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <div style="position:relative;margin-bottom:12px;">
                         <label for="deliveryAreaInput">Delivery Area</label>
-                        <input type="text" id="deliveryAreaInput" class="input" placeholder="Type delivery area..." autocomplete="off" value="{{ old('delivery_area') }}">
+                        <input type="text" id="deliveryAreaInput" class="input" placeholder="Select a division first, then type your area..." autocomplete="off" value="{{ old('delivery_area') }}">
                         <input type="hidden" name="delivery_area" id="deliveryAreaHidden" value="{{ old('delivery_area') }}">
                         <div id="deliveryAreaDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #d1d5db;border-radius:10px;max-height:220px;overflow-y:auto;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
                         </div>
@@ -279,7 +292,9 @@
 
     <script>
         const deliveryAreas = @json($deliveryAreas);
+        const deliveryDivisions = @json($deliveryDivisions ?? []);
         const subtotal = {{ $subtotal }};
+        const deliveryDivisionSelect = document.getElementById('deliveryDivisionSelect');
         const deliveryAreaInput = document.getElementById('deliveryAreaInput');
         const deliveryAreaHidden = document.getElementById('deliveryAreaHidden');
         const deliveryAreaDropdown = document.getElementById('deliveryAreaDropdown');
@@ -287,7 +302,24 @@
         const shippingDisplay = document.getElementById('shippingDisplay');
         const totalDisplay = document.getElementById('totalDisplay');
 
+        // Areas the buyer may pick, restricted to the chosen division.
+        function allowedAreas() {
+            const division = deliveryDivisionSelect ? deliveryDivisionSelect.value : '';
+            if (division && deliveryDivisions[division]) {
+                return deliveryDivisions[division];
+            }
+            return Object.keys(deliveryAreas);
+        }
+
         function updateShippingAndTotal(area) {
+            const division = deliveryDivisionSelect ? deliveryDivisionSelect.value : '';
+            if (division && deliveryDivisions[division] && !deliveryDivisions[division].includes(area)) {
+                deliveryAreaError.textContent = 'That area is not in ' + division + ' division. Please choose an area from the list.';
+                deliveryAreaError.style.display = 'block';
+                deliveryAreaInput.style.borderColor = '#dc2626';
+                deliveryAreaHidden.value = '';
+                return;
+            }
             const price = deliveryAreas[area];
             if (price) {
                 shippingDisplay.textContent = 'UGX' + price.toLocaleString('en-US');
@@ -299,13 +331,24 @@
         }
 
         function showDropdown(filterText) {
-            const lowerFilter = filterText.toLowerCase();
-            const entries = Object.entries(deliveryAreas);
-            const filtered = lowerFilter ? entries.filter(([area]) => area.toLowerCase().includes(lowerFilter)) : entries;
+            const division = deliveryDivisionSelect ? deliveryDivisionSelect.value : '';
+            const names = allowedAreas();
+            const lowerFilter = (filterText || '').toLowerCase();
+            const filtered = names
+                .filter((area) => !lowerFilter || area.toLowerCase().includes(lowerFilter))
+                .map((area) => [area, deliveryAreas[area]]);
+
+            if (!division) {
+                deliveryAreaDropdown.style.display = 'none';
+                deliveryAreaError.textContent = 'Please select your division first, then choose an area from that division.';
+                deliveryAreaError.style.display = 'block';
+                return;
+            }
 
             if (filtered.length === 0) {
                 deliveryAreaDropdown.style.display = 'none';
-                if (filterText.length > 0 && !deliveryAreaHidden.value) {
+                if ((filterText || '').length > 0 && !deliveryAreaHidden.value) {
+                    deliveryAreaError.textContent = 'No area in ' + division + ' division matches that. Pick one from the list.';
                     deliveryAreaError.style.display = 'block';
                     deliveryAreaInput.style.borderColor = '#dc2626';
                 }
@@ -319,7 +362,7 @@
             deliveryAreaDropdown.innerHTML = filtered.map(([area, price]) =>
                 `<div style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;background:#fff;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'" onclick="selectArea('${area.replace(/'/g, "\\'")}')">
                     <span>${area}</span>
-                    <span style="color:#6b7280;font-size:0.95rem;">UGX${price.toLocaleString('en-US')}</span>
+                    <span style="color:#6b7280;font-size:0.95rem;">UGX${Number(price || 0).toLocaleString('en-US')}</span>
                 </div>`
             ).join('');
         }
@@ -331,6 +374,22 @@
             deliveryAreaError.style.display = 'none';
             deliveryAreaInput.style.borderColor = '#d1d5db';
             updateShippingAndTotal(area);
+        }
+
+        if (deliveryDivisionSelect) {
+            deliveryDivisionSelect.addEventListener('change', function() {
+                // Division changed → area must be re-picked from the new division.
+                deliveryAreaInput.value = '';
+                deliveryAreaHidden.value = '';
+                deliveryAreaDropdown.style.display = 'none';
+                deliveryAreaError.style.display = 'none';
+                deliveryAreaInput.style.borderColor = '#d1d5db';
+                shippingDisplay.textContent = '—';
+                totalDisplay.textContent = 'UGX' + Math.round(subtotal).toLocaleString('en-US');
+                if (this.value) {
+                    showDropdown('');
+                }
+            });
         }
 
         deliveryAreaInput.addEventListener('input', function() {
@@ -345,9 +404,10 @@
         });
 
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('#deliveryAreaInput') && !e.target.closest('#deliveryAreaDropdown') && !e.target.closest('#toggleSwitch')) {
+            if (!e.target.closest('#deliveryAreaInput') && !e.target.closest('#deliveryAreaDropdown') && !e.target.closest('#toggleSwitch') && !e.target.closest('#deliveryDivisionSelect')) {
                 deliveryAreaDropdown.style.display = 'none';
                 if (deliveryAreaInput.value && !deliveryAreaHidden.value) {
+                    deliveryAreaError.textContent = 'Please pick an area from the list — only areas in your division can be selected.';
                     deliveryAreaError.style.display = 'block';
                     deliveryAreaInput.style.borderColor = '#dc2626';
                 }

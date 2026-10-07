@@ -16,23 +16,30 @@ class DeliveryAreaController extends Controller
             $query->where('city', $city);
         }
 
+        if ($division = $request->input('division')) {
+            $query->where('division', $division);
+        }
+
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('city', 'like', "%{$search}%");
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('division', 'like', "%{$search}%");
             });
         }
 
         $deliveryAreas = $query->latest()->paginate(20);
         $cities = DeliveryArea::distinct()->pluck('city');
+        $divisions = DeliveryArea::whereNotNull('division')->distinct()->orderBy('division')->pluck('division');
 
-        return view('admin.delivery-areas.index', compact('deliveryAreas', 'cities'));
+        return view('admin.delivery-areas.index', compact('deliveryAreas', 'cities', 'divisions'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'city' => ['required', 'string', 'max:100'],
+            'division' => ['nullable', 'string', 'max:100'],
             'name' => ['required', 'string', 'max:255'],
             'fee' => ['required', 'numeric', 'min:0'],
         ]);
@@ -46,6 +53,7 @@ class DeliveryAreaController extends Controller
     {
         $data = $request->validate([
             'city' => ['required', 'string', 'max:100'],
+            'division' => ['nullable', 'string', 'max:100'],
             'name' => ['required', 'string', 'max:255'],
             'fee' => ['required', 'numeric', 'min:0'],
         ]);

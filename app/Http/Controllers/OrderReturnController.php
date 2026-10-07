@@ -57,6 +57,13 @@ class OrderReturnController extends Controller
 
         $order->load('items.product');
         $deliveryAreas = self::deliveryAreas();
+        $deliveryDivisions = \App\Models\DeliveryArea::select('division', 'name')
+            ->orderBy('division')
+            ->orderBy('name')
+            ->get()
+            ->groupBy(fn ($row) => $row->division ?: 'Other')
+            ->map(fn ($rows) => $rows->pluck('name')->values()->all())
+            ->toArray();
         $reasons = [
             'Wrong items received',
             'Item Arrived Damaged',
@@ -68,7 +75,7 @@ class OrderReturnController extends Controller
             'Color/style different from picture',
         ];
         
-        return view('returns.create', compact('order', 'deliveryAreas', 'reasons'));
+        return view('returns.create', compact('order', 'deliveryAreas', 'deliveryDivisions', 'reasons'));
     }
 
     public function store(Request $request, Order $order)
@@ -95,14 +102,20 @@ class OrderReturnController extends Controller
             'refund_name' => ['required', 'string', 'max:255'],
             'pickup_address' => ['required', 'string', 'max:500'],
             'pickup_contact' => ['required', 'string', 'max:20'],
+            'pickup_division' => ['nullable', 'string', 'max:100'],
             'pickup_area' => ['required', 'string'],
             'images' => ['nullable', 'array', 'max:5'],
             'images.*' => ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
 
-        $deliveryAreas = self::deliveryAreas();
-        if (!isset($deliveryAreas[$data['pickup_area']])) {
+        $pickupRow = \App\Models\DeliveryArea::where('name', $data['pickup_area'])->first();
+        if (! $pickupRow) {
             return back()->withErrors(['pickup_area' => 'Invalid pickup area selected.'])->withInput();
+        }
+
+        // The pickup area must belong to the chosen division.
+        if (!empty($data['pickup_division']) && $pickupRow->division && $data['pickup_division'] !== $pickupRow->division) {
+            return back()->withErrors(['pickup_area' => 'That area is not in the selected division. Please choose an area from ' . $data['pickup_division'] . ' division.'])->withInput();
         }
 
         // Verify selected items belong to this order
@@ -135,7 +148,7 @@ class OrderReturnController extends Controller
         $nextId = $lastReturn ? $lastReturn->id + 1 : 1;
         $returnNumber = 'RET' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
-        $pickupFee = $deliveryAreas[$data['pickup_area']];
+        $pickupFee = $pickupRow->fee;
 
         $return = OrderReturn::create([
             'return_number' => $returnNumber,

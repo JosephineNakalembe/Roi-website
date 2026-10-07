@@ -126,12 +126,19 @@
 
                     <div style="display:grid;gap:12px;">
                         <div>
-                            <label>Pickup Area / Delivery Zone <span style="color:#dc2626;">*</span></label>
-                            <select class="input" name="pickup_area" required>
-                                <option value="">Select your area...</option>
-                                @foreach($deliveryAreas as $area => $fee)
-                                    <option value="{{ $area }}" {{ old('pickup_area') === $area ? 'selected' : '' }}>{{ $area }} — UGX{{ number_format($fee, 0) }}</option>
+                            <label>Pickup Division <span style="color:#dc2626;">*</span></label>
+                            <select class="input" name="pickup_division" id="pickupDivisionSelect" required>
+                                <option value="">Select your division...</option>
+                                @foreach(($deliveryDivisions ?? []) as $division => $areas)
+                                    <option value="{{ $division }}" {{ old('pickup_division') === $division ? 'selected' : '' }}>{{ $division }} Division</option>
                                 @endforeach
+                            </select>
+                            @error('pickup_division')<p style="color:#dc2626;font-size:0.95rem;">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label>Pickup Area / Delivery Zone <span style="color:#dc2626;">*</span></label>
+                            <select class="input" name="pickup_area" id="pickupAreaSelect" required>
+                                <option value="">Select division first...</option>
                             </select>
                             @error('pickup_area')<p style="color:#dc2626;font-size:0.95rem;">{{ $message }}</p>@enderror
                         </div>
@@ -155,4 +162,44 @@
             </div>
         </form>
     </div>
+
+    <script>
+        // Division → areas cascade: buyer can only pick areas from their division.
+        const pickupDivisions = @json($deliveryDivisions ?? []);
+        const pickupFees = @json($deliveryAreas ?? []);
+        const pickupDivisionSelect = document.getElementById('pickupDivisionSelect');
+        const pickupAreaSelect = document.getElementById('pickupAreaSelect');
+        const oldPickupArea = @json(old('pickup_area'));
+
+        function fillPickupAreas(division, selected) {
+            pickupAreaSelect.innerHTML = '';
+            const areas = (division && pickupDivisions[division]) ? pickupDivisions[division] : [];
+            if (areas.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = division ? 'No areas in this division yet' : 'Select division first...';
+                pickupAreaSelect.appendChild(opt);
+                return;
+            }
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select your area in ' + division + '...';
+            pickupAreaSelect.appendChild(placeholder);
+            areas.forEach(function(area) {
+                const opt = document.createElement('option');
+                opt.value = area;
+                const fee = pickupFees[area];
+                opt.textContent = fee != null ? area + ' — UGX' + Number(fee).toLocaleString('en-US') : area;
+                if (selected && selected === area) opt.selected = true;
+                pickupAreaSelect.appendChild(opt);
+            });
+        }
+
+        if (pickupDivisionSelect) {
+            pickupDivisionSelect.addEventListener('change', function() {
+                fillPickupAreas(this.value, null);
+            });
+            fillPickupAreas(pickupDivisionSelect.value, oldPickupArea);
+        }
+    </script>
 @endsection

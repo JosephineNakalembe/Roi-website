@@ -48,6 +48,15 @@
                         </datalist>
                     </div>
                     <div>
+                        <label style="font-size:0.95rem;font-weight:600;">Division</label>
+                        <input type="text" name="division" class="input" list="divisionList" placeholder="e.g. Central, Kawempe, Makindye, Nakawa, Rubaga" style="width:100%;">
+                        <datalist id="divisionList">
+                            @foreach(($divisions ?? collect()) as $division)
+                                <option value="{{ $division }}">
+                            @endforeach
+                        </datalist>
+                    </div>
+                    <div>
                         <label style="font-size:0.95rem;font-weight:600;">Place Name <span style="color:#dc2626;">*</span></label>
                         <input type="text" name="name" class="input" placeholder="e.g. Ntinda" required style="width:100%;">
                     </div>
@@ -75,9 +84,17 @@
                     @endforeach
                 </select>
             </div>
+            <div>
+                <select name="division" class="input">
+                    <option value="">All Divisions</option>
+                    @foreach(($divisions ?? collect()) as $division)
+                        <option value="{{ $division }}" {{ request('division') == $division ? 'selected' : '' }}>{{ $division }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div style="display:flex;gap:8px;">
                 <button class="btn btn-secondary" type="submit">Filter</button>
-                @if(request('city') || request('search'))
+                @if(request('city') || request('division') || request('search'))
                     <a href="{{ route('admin.delivery-areas.index') }}" class="btn btn-secondary">Clear</a>
                 @endif
             </div>
@@ -89,6 +106,7 @@
                 <thead>
                     <tr style="border-bottom:2px solid #e5e7eb;text-align:left;">
                         <th style="padding:12px 16px;font-weight:600;">City</th>
+                        <th style="padding:12px 16px;font-weight:600;">Division</th>
                         <th style="padding:12px 16px;font-weight:600;">Place</th>
                         <th style="padding:12px 16px;font-weight:600;text-align:right;">Shipping Cost</th>
                         <th style="padding:12px 16px;"></th>
@@ -100,10 +118,17 @@
                             <td style="padding:12px 16px;">
                                 <span style="background:#f3f4f6;padding:2px 8px;border-radius:4px;font-size:0.85rem;">{{ $area->city }}</span>
                             </td>
+                            <td style="padding:12px 16px;">
+                                @if($area->division)
+                                    <span style="background:#e0e7ff;padding:2px 8px;border-radius:4px;font-size:0.85rem;">{{ $area->division }}</span>
+                                @else
+                                    <span style="color:#9ca3af;font-size:0.85rem;">—</span>
+                                @endif
+                            </td>
                             <td style="padding:12px 16px;font-weight:600;">{{ $area->name }}</td>
                             <td style="padding:12px 16px;text-align:right;font-weight:600;">UGX{{ number_format($area->fee, 0) }}</td>
                             <td style="padding:12px 16px;white-space:nowrap;">
-                                <button type="button" onclick="editArea({{ $area->id }}, '{{ addslashes($area->city) }}', '{{ addslashes($area->name) }}', {{ $area->fee }})" style="background:none;border:none;color:#2563eb;cursor:pointer;font-size:0.9rem;margin-right:8px;">Edit</button>
+                                <button type="button" onclick="editArea({{ $area->id }}, '{{ addslashes($area->city) }}', '{{ addslashes($area->division ?? '') }}', '{{ addslashes($area->name) }}', {{ $area->fee }})" style="background:none;border:none;color:#2563eb;cursor:pointer;font-size:0.9rem;margin-right:8px;">Edit</button>
                                 <form method="POST" action="{{ route('admin.delivery-areas.destroy', $area) }}" onsubmit="return confirm('Delete this delivery area?');" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
@@ -113,7 +138,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" style="text-align:center;padding:40px;color:#9ca3af;">@if(request('search') || request('city'))No delivery areas match your search.@elseNo delivery areas added yet.@endif</td>
+                            <td colspan="5" style="text-align:center;padding:40px;color:#9ca3af;">@if(request('search') || request('city') || request('division'))No delivery areas match your search.@elseNo delivery areas added yet.@endif</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -139,6 +164,10 @@
                     <input type="text" name="city" id="editCity" class="input" required style="width:100%;">
                 </div>
                 <div>
+                    <label style="font-size:0.95rem;font-weight:600;">Division</label>
+                    <input type="text" name="division" id="editDivision" class="input" list="divisionList" placeholder="e.g. Central" style="width:100%;">
+                </div>
+                <div>
                     <label style="font-size:0.95rem;font-weight:600;">Place Name <span style="color:#dc2626;">*</span></label>
                     <input type="text" name="name" id="editName" class="input" required style="width:100%;">
                 </div>
@@ -155,8 +184,9 @@
     </div>
 
     <script>
-        function editArea(id, city, name, fee) {
+        function editArea(id, city, division, name, fee) {
             document.getElementById('editCity').value = city;
+            document.getElementById('editDivision').value = division;
             document.getElementById('editName').value = name;
             document.getElementById('editFee').value = fee;
             document.getElementById('editForm').action = '{{ url('admin/delivery-areas') }}/' + id;

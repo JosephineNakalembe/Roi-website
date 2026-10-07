@@ -41,8 +41,16 @@ class CheckoutController extends Controller
         $addresses = $user->addresses()->orderByDesc('is_default')->get();
         $subtotal = $items->sum('total');
         $deliveryAreas = DeliveryArea::pluck('fee', 'name')->toArray();
+        // Division => [area names] for the buyer-side cascading dropdowns.
+        $deliveryDivisions = DeliveryArea::select('division', 'name')
+            ->orderBy('division')
+            ->orderBy('name')
+            ->get()
+            ->groupBy(fn ($row) => $row->division ?: 'Other')
+            ->map(fn ($rows) => $rows->pluck('name')->values()->all())
+            ->toArray();
 
-        return view('checkout.show', compact('items', 'subtotal', 'addresses', 'deliveryAreas'));
+        return view('checkout.show', compact('items', 'subtotal', 'addresses', 'deliveryAreas', 'deliveryDivisions'));
     }
 
     public function process(Request $request)
@@ -52,6 +60,7 @@ class CheckoutController extends Controller
         $data = $request->validate([
             'shipping_name' => ['required', 'string', 'max:255'],
             'shipping_phone' => ['required', 'string', 'max:20'],
+            'delivery_division' => ['nullable', 'string', 'max:100'],
             'delivery_area' => ['required', 'string'],
             'address_line' => ['required', 'string', 'max:500'],
             'save_default' => ['nullable', 'boolean'],
@@ -59,17 +68,23 @@ class CheckoutController extends Controller
         ], [
             'shipping_name.required' => 'Please fill in your full name.',
             'shipping_phone.required' => 'Please fill in your phone number.',
+            'delivery_division.required' => 'Please select your division.',
             'delivery_area.required' => 'Please select your delivery area.',
             'address_line.required' => 'Please fill in your address line.',
         ]);
 
         // Validate delivery area
-        $deliveryAreas = DeliveryArea::pluck('fee', 'name')->toArray();
-        if (!isset($deliveryAreas[$data['delivery_area']])) {
+        $areaRow = DeliveryArea::where('name', $data['delivery_area'])->first();
+        if (! $areaRow) {
             return back()->withErrors(['delivery_area' => 'Area Out of Delivery Scope'])->withInput();
         }
 
-        $shipping = $deliveryAreas[$data['delivery_area']];
+        // If a division was chosen, the area must belong to it.
+        if (!empty($data['delivery_division']) && $areaRow->division && $data['delivery_division'] !== $areaRow->division) {
+            return back()->withErrors(['delivery_area' => 'That area is not in the selected division. Please choose an area from ' . $data['delivery_division'] . ' division.'])->withInput();
+        }
+
+        $shipping = $areaRow->fee;
 
         $cartItems = $user->cartItems()->with('product')->get();
 
